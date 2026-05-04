@@ -1,8 +1,13 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
+import { getRoleDashboardPath } from "@/lib/auth/session";
 import { LoginForm } from "./login-form";
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const dashboard = await getRoleDashboardPath();
+  if (dashboard) redirect(dashboard);
+
   return (
     <div className="flex min-h-full flex-1 flex-col items-center justify-center px-4 py-10">
       <Suspense

@@ -2,7 +2,7 @@ import type { UserRole } from "@/lib/types/roles";
 
 const ROLE_HOME: Record<UserRole, string> = {
   artist: "/artist",
-  dj: "/dj",
+  dj: "/dj/dashboard",
   admin: "/admin",
 };
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { describeLoginFailure } from "@/lib/auth/supabase-auth-error";
 import { dashboardPathForRole, safeAppPath } from "@/lib/auth/paths";
 import type { UserRole } from "@/lib/types/roles";
 import { isUserRole } from "@/lib/types/roles";
@@ -18,12 +19,12 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [message, setMessage] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ text: string; variant: "error" | "info" } | null>(null);
   const [pending, setPending] = useState(false);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
-    setMessage(null);
+    setFeedback(null);
     setPending(true);
     const supabase = createClient();
     const origin = window.location.origin;
@@ -39,12 +40,13 @@ export function LoginForm() {
       });
       setPending(false);
       if (error) {
-        setMessage(error.message);
+        setFeedback({ text: describeLoginFailure(error), variant: "error" });
         return;
       }
-      setMessage(
-        "If email confirmation is enabled for your project, check your inbox to finish signup. Then sign in below.",
-      );
+      setFeedback({
+        text: "If email confirmation is enabled for your project, check your inbox to finish signup. Then sign in below.",
+        variant: "info",
+      });
       setMode("signin");
       return;
     }
@@ -55,7 +57,7 @@ export function LoginForm() {
     });
     if (error) {
       setPending(false);
-      setMessage(error.message);
+      setFeedback({ text: describeLoginFailure(error), variant: "error" });
       return;
     }
 
@@ -162,8 +164,17 @@ export function LoginForm() {
           />
         </label>
 
-        {message ? (
-          <p className="text-sm text-zinc-700 dark:text-zinc-300">{message}</p>
+        {feedback ? (
+          <p
+            className={
+              feedback.variant === "error"
+                ? "rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200"
+                : "text-sm text-zinc-700 dark:text-zinc-300"
+            }
+            role={feedback.variant === "error" ? "alert" : "status"}
+          >
+            {feedback.text}
+          </p>
         ) : null}
 
         <button

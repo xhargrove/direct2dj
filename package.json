@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "db:start": "supabase start",
+    "db:reset": "supabase db reset",
+    "db:push": "supabase db push",
+    "db:link": "supabase link"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.2",
@@ -18,6 +23,7 @@
     "stripe": "^22.1.0"
   },
   "devDependencies": {
+    "supabase": "^2.98.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Direct 2 DJ
 
-## Getting Started
+Promo pool web app for **independent artists** (upload DJ packs, analytics, featured placements) and **DJs** (vetting-gated catalog, downloads, ratings, play reports). **Admins** moderate tracks and DJs.
 
-First, run the development server:
+Stack: **Next.js 16** (App Router), **Supabase** (Postgres + Auth + Storage + RLS), **Stripe** (featured checkout).
+
+## Quick start
 
 ```bash
+npm install
+cp .env.example .env.local
+# Fill NEXT_PUBLIC_SUPABASE_* , Stripe keys if testing billing, SUPABASE_SERVICE_ROLE_KEY for webhooks/notifications
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Purpose |
+|--------|---------|
+| `npm run dev` | Dev server |
+| `npm run build` | Production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript |
+| `npm run db:start` / `db:reset` / `db:push` | Supabase CLI |
 
-## Learn More
+## Documentation
 
-To learn more about Next.js, take a look at the following resources:
+| Doc | Contents |
+|-----|----------|
+| [ENVIRONMENT.md](./ENVIRONMENT.md) | Env vars and secrets |
+| [DATABASE_SCHEMA.md](./DATABASE_SCHEMA.md) | Tables and relationships |
+| [RLS_POLICIES.md](./RLS_POLICIES.md) | Row Level Security overview |
+| [MVP_TEST_PLAN.md](./MVP_TEST_PLAN.md) | Manual QA matrix |
+| [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) | Production launch steps |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Architecture (high level)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Auth**: Supabase Auth; `profiles.role` is `artist` \| `dj` \| `admin`.
+- **Route protection**: Route groups under `app/artist`, `app/dj`, `app/admin` use `requireRoles()`; `/dj/*` middleware additionally restricts non-approved DJs to apply/status/settings.
+- **Data access**: Browser uses anon key + RLS; server actions use user-scoped Supabase client; Stripe webhook + bulk notifications use **service role** only in trusted server code.
+- **Storage**: Private `promos` bucket; artists upload under `{user_id}/…`; DJs read via policies tied to visible `track_files`.
 
-## Deploy on Vercel
+## Security notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Never expose `SUPABASE_SERVICE_ROLE_KEY` or `STRIPE_SECRET_KEY` to the client.
+- Configure Stripe webhook signing secret for `/api/webhooks/stripe`.
+- Optional: `CRON_SECRET` for `/api/cron/notifications`, `DJ_MONITOR_PRO_WEBHOOK_SECRET` for integrations.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+Private / All rights reserved unless stated otherwise.
