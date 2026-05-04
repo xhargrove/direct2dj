@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { unstable_noStore as noStore } from "next/cache";
 import { TrackEditor } from "@/components/artist/track-editor";
 import { createClient } from "@/lib/supabase/server";
 import type { Track, TrackFile } from "@/lib/types/database";
@@ -7,6 +8,7 @@ import type { Track, TrackFile } from "@/lib/types/database";
 type Props = { params: Promise<{ id: string }> };
 
 export default async function EditTrackPage({ params }: Props) {
+  noStore();
   const { id } = await params;
   const supabase = await createClient();
 

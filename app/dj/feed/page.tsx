@@ -4,6 +4,7 @@ import { DjFeedFilters } from "@/components/dj/feed-filters";
 import { DjTrackCard } from "@/components/dj/track-card";
 import { signCoverPaths } from "@/lib/dj/cover-sign";
 import type { DjCatalogFeedRow } from "@/lib/dj/catalog-feed";
+import { pickRecentArtistSpotlight } from "@/lib/dj/recent-artist-spotlight";
 import { createClient } from "@/lib/supabase/server";
 
 function firstTrack(tRaw: unknown) {
@@ -101,6 +102,25 @@ async function FeedList({
 
   const excludeIds = featuredList.map((f) => f.track_id).filter(Boolean);
 
+  const { data: newestPool } = await supabase.rpc("dj_catalog_feed", {
+    p_search: q.trim() || null,
+    p_genre: genre.trim() || null,
+    p_bpm_min: bpmMin !== null && Number.isFinite(bpmMin) ? bpmMin : null,
+    p_bpm_max: bpmMax !== null && Number.isFinite(bpmMax) ? bpmMax : null,
+    p_explicit: explicit === "clean" || explicit === "explicit" ? explicit : null,
+    p_sort: "newest",
+    p_exclude_ids: excludeIds.length ? excludeIds : [],
+    p_limit: 48,
+    p_offset: 0,
+  });
+
+  const spotlightRows =
+    page === 1 ? pickRecentArtistSpotlight((newestPool ?? []) as DjCatalogFeedRow[], 8) : [];
+  const spotlightTrackIds = spotlightRows.map((r) => r.track_id).filter(Boolean);
+
+  const catalogExcludeIds =
+    page === 1 && spotlightTrackIds.length > 0 ? [...excludeIds, ...spotlightTrackIds] : excludeIds;
+
   const { data: feedRows, error: feedErr } = await supabase.rpc("dj_catalog_feed", {
     p_search: q.trim() || null,
     p_genre: genre.trim() || null,
@@ -108,7 +128,7 @@ async function FeedList({
     p_bpm_max: bpmMax !== null && Number.isFinite(bpmMax) ? bpmMax : null,
     p_explicit: explicit === "clean" || explicit === "explicit" ? explicit : null,
     p_sort: sort || "newest",
-    p_exclude_ids: excludeIds.length ? excludeIds : [],
+    p_exclude_ids: catalogExcludeIds.length ? catalogExcludeIds : [],
     p_limit: limit,
     p_offset: offset,
   });
@@ -127,6 +147,9 @@ async function FeedList({
   }
 
   const coverPaths: string[] = [];
+  for (const r of spotlightRows) {
+    if (r.cover_storage_path) coverPaths.push(r.cover_storage_path);
+  }
   for (const r of feed) {
     if (r.cover_storage_path) coverPaths.push(r.cover_storage_path);
   }
@@ -172,6 +195,36 @@ async function FeedList({
         </p>
       ) : null}
 
+      {!feedErr && spotlightRows.length > 0 ? (
+        <section className="flex flex-col gap-3">
+          <div>
+            <h2 className="text-lg font-semibold">Recently published artists</h2>
+            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+              Newest approved promo per artist (matches your filters). Updated as artists submit packs.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2">
+            {spotlightRows.map((r) => (
+              <DjTrackCard
+                key={`spotlight-${r.track_id}`}
+                id={r.track_id}
+                title={r.title}
+                artistLine={
+                  r.credit_artist_name
+                    ? `${r.credit_artist_name} · ${r.artist_display_name}`
+                    : r.artist_display_name
+                }
+                genre={r.genre}
+                bpm={r.bpm != null ? Number(r.bpm) : null}
+                explicitLabel={r.explicit_rating === "explicit" ? "Explicit" : "Clean"}
+                coverUrl={r.cover_storage_path ? coverMap.get(r.cover_storage_path) ?? null : null}
+                footer={<span className="text-zinc-500">Latest from this artist</span>}
+              />
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       {!feedErr && featuredCards.length > 0 ? (
         <section className="flex flex-col gap-3">
           <h2 className="text-lg font-semibold">Featured</h2>
@@ -194,7 +247,7 @@ async function FeedList({
       ) : null}
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">New releases & catalog</h2>
+        <h2 className="text-lg font-semibold">Browse catalog</h2>
         {feed.length === 0 ? (
           <p className="text-sm text-zinc-500">
             {q.trim() || genre.trim() || bpmMin != null || bpmMax != null || explicit
@@ -249,26 +302,30 @@ async function FeedList({
   );
 }
 
-export default async function DjFeedPage({
+async function DjFeedFiltersWithGenres() {
+  const supabase = await createClient();
+  const genreRows = await supabase.from("tracks").select("genre");
+  const genreOptions = [...new Set((genreRows.data ?? []).map((r) => r.genre).filter(Boolean))].sort() as string[];
+  return <DjFeedFilters genreOptions={genreOptions} />;
+}
+
+export default function DjFeedPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const supabase = await createClient();
-  const genreRows = await supabase.from("tracks").select("genre");
-  const genreOptions = [...new Set((genreRows.data ?? []).map((r) => r.genre).filter(Boolean))].sort() as string[];
-
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Discover</h1>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          Approved catalog tracks only. Featured placements respect schedule and visibility rules.
+          See who just uploaded, then browse the full approved catalog. Featured slots follow schedule and visibility
+          rules.
         </p>
       </div>
 
       <Suspense fallback={<div className="h-24 animate-pulse rounded-lg bg-zinc-100 dark:bg-zinc-900" />}>
-        <DjFeedFilters genreOptions={genreOptions} />
+        <DjFeedFiltersWithGenres />
       </Suspense>
 
       <Suspense fallback={<p className="text-sm text-zinc-500">Loading catalog…</p>}>

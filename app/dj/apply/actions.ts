@@ -39,6 +39,7 @@ export async function submitDjApplication(
   const instagram = clean(formData.get("instagram"));
   const mixcloud_soundcloud_url = clean(formData.get("mixcloud_soundcloud_url"));
   const club_radio_affiliation = clean(formData.get("club_radio_affiliation"));
+  const crew_organization_name = clean(formData.get("crew_organization_name"));
   const primary_genres = clean(formData.get("primary_genres"));
   const avg_crowd_size = clean(formData.get("avg_crowd_size"));
 
@@ -58,6 +59,9 @@ export async function submitDjApplication(
   if (phone.length < 7) return { error: "Phone number is required." };
   if (!primary_genres || primary_genres.length < 2) return { error: "Primary genres are required." };
   if (!avg_crowd_size) return { error: "Average crowd size is required." };
+  if (crew_organization_name.length > 0 && crew_organization_name.length < 2) {
+    return { error: "Crew / organization name must be at least 2 characters, or leave it blank." };
+  }
 
   const payload = {
     dj_id: ctx.djId,
@@ -69,6 +73,7 @@ export async function submitDjApplication(
     instagram: instagram || null,
     mixcloud_soundcloud_url: mixcloud_soundcloud_url || null,
     club_radio_affiliation: club_radio_affiliation || null,
+    crew_organization_name: crew_organization_name || null,
     years_djing,
     primary_genres,
     avg_crowd_size,
@@ -82,6 +87,11 @@ export async function submitDjApplication(
 
   if (error) return { error: error.message };
 
+  const { error: orgErr } = await ctx.supabase.rpc("dj_set_organization_membership", {
+    p_display_name: crew_organization_name,
+  });
+  if (orgErr) return { error: orgErr.message };
+
   if (djRow.vetting_status === "rejected") {
     await ctx.supabase
       .from("djs")
@@ -92,5 +102,6 @@ export async function submitDjApplication(
   revalidatePath("/dj/application-status");
   revalidatePath("/dj/apply");
   revalidatePath("/admin/dj-applications");
+  revalidatePath("/admin/dj-organizations");
   redirect("/dj/application-status?submitted=1");
 }

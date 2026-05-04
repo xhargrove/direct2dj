@@ -33,11 +33,33 @@ export default async function DjApplicationStatusPage({ searchParams }: Props) {
 
   const { data: dj } = await supabase
     .from("djs")
-    .select("vetting_status, dj_tier, display_name")
+    .select("id, vetting_status, dj_tier, display_name")
     .eq("profile_id", user.id)
     .maybeSingle();
 
   if (!dj) redirect("/login");
+
+  const { data: orgMembership } = await supabase
+    .from("dj_organization_members")
+    .select(
+      `
+      dj_organizations (
+        display_name,
+        moderation_status,
+        formed_at
+      )
+    `,
+    )
+    .eq("dj_id", dj.id)
+    .maybeSingle();
+
+  const orgRel = orgMembership?.dj_organizations;
+  const org =
+    orgRel && !Array.isArray(orgRel)
+      ? orgRel
+      : Array.isArray(orgRel) && orgRel[0]
+        ? orgRel[0]
+        : null;
 
   const tierLabel = djTierLabel(dj.dj_tier);
 
@@ -67,6 +89,26 @@ export default async function DjApplicationStatusPage({ searchParams }: Props) {
           <dt className="text-zinc-500">Display name</dt>
           <dd className="text-right">{dj.display_name}</dd>
         </div>
+        {org ? (
+          <>
+            <div className="flex justify-between gap-4">
+              <dt className="text-zinc-500">Crew / organization</dt>
+              <dd className="text-right">{org.display_name}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-zinc-500">Organization approval</dt>
+              <dd className="text-right capitalize">{org.moderation_status}</dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt className="text-zinc-500">Group formed</dt>
+              <dd className="text-right text-xs text-zinc-600 dark:text-zinc-400">
+                {org.formed_at
+                  ? `Yes (${new Date(org.formed_at).toLocaleDateString()})`
+                  : "Not yet (needs 2+ DJs on this name)"}
+              </dd>
+            </div>
+          </>
+        ) : null}
       </dl>
 
       <div className="flex flex-col gap-3 text-sm">

@@ -19,6 +19,7 @@ type AppSnippet = {
   state: string;
   email: string;
   phone: string;
+  crew_organization_name: string | null;
   updated_at: string;
   years_djing: number | null;
   primary_genres: string | null;
@@ -84,6 +85,10 @@ export function DjVettingRow({
           <div>
             <dt className="text-zinc-500">Phone</dt>
             <dd>{app.phone}</dd>
+          </div>
+          <div className="sm:col-span-2">
+            <dt className="text-zinc-500">Crew / organization</dt>
+            <dd>{app.crew_organization_name?.trim() ? app.crew_organization_name : "—"}</dd>
           </div>
           <div className="sm:col-span-2">
             <dt className="text-zinc-500">Genres</dt>

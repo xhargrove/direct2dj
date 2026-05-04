@@ -11,6 +11,8 @@ function revalidateFeaturedSurfaces() {
   revalidatePath("/artist/billing");
   revalidatePath("/artist/analytics");
   revalidatePath("/artist/promote");
+  revalidatePath("/artist/tracks");
+  revalidatePath("/artist/tracks/new");
   revalidatePath("/admin/featured");
   revalidatePath("/admin/dashboard");
 }

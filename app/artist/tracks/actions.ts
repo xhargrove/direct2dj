@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { createSubmissionCheckoutSession } from "@/lib/billing/create-submission-checkout-session";
+import { finalizeSubmissionCheckout } from "@/lib/billing/finalize-submission-checkout";
 import { createClient } from "@/lib/supabase/server";
 import { notifyRatedTrackUpdated } from "@/lib/notifications/events";
 import { validateMetadataForSubmit, validatePackSlotsPresent } from "@/lib/tracks/submit-validation";
@@ -86,6 +88,14 @@ export async function createDraftTrack() {
   }
   revalidatePath("/artist/tracks");
   return { id: data };
+}
+
+export async function startSubmissionCheckout(pricingPlanId: string) {
+  return createSubmissionCheckoutSession({ pricingPlanId });
+}
+
+export async function finalizeSubmissionFromStripeSession(sessionId: string) {
+  return finalizeSubmissionCheckout(sessionId);
 }
 
 export type TrackMetadataPayload = {

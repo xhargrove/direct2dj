@@ -49,6 +49,7 @@ export default async function ArtistPromoteTrackPage({ params }: Props) {
     .from("pricing_plans")
     .select("id, label, duration_days, price_cents, currency")
     .eq("active", true)
+    .eq("plan_kind", "featured")
     .order("sort_order", { ascending: true });
 
   const planList = (plans ?? []) as PlanRow[];

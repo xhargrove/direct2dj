@@ -1,13 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { packSlotToTrackFileKind } from "@/lib/tracks/file-kind";
 import {
+  ADDITIONAL_PACK_SLOTS,
+  ESSENTIAL_AUDIO_SLOTS,
   OPTIONAL_PACK_SLOTS,
   PACK_SLOT_LABELS,
-  REQUIRED_PACK_SLOTS,
+  REQUIRED_COVER_SLOT,
   type PackSlot,
 } from "@/lib/tracks/pack-slots";
 import { assertMimeForSlot, safeStorageFileName } from "@/lib/tracks/upload-rules";
@@ -27,19 +29,24 @@ export function DjPackUploader({
   onUploaded?: () => void;
 }) {
   const router = useRouter();
+  const [files, setFiles] = useState<TrackFile[]>(initialFiles);
   const [slotPhase, setSlotPhase] = useState<Partial<Record<PackSlot, SlotState>>>({});
   const [slotPct, setSlotPct] = useState<Partial<Record<PackSlot, number>>>({});
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    setFiles(initialFiles);
+  }, [initialFiles]);
+
   const bySlot = useMemo(() => {
     const m = new Map<PackSlot, TrackFile>();
-    for (const f of initialFiles) {
+    for (const f of files) {
       if (f.pack_slot) {
         m.set(f.pack_slot as PackSlot, f);
       }
     }
     return m;
-  }, [initialFiles]);
+  }, [files]);
 
   const uploadSlot = useCallback(
     async (slot: PackSlot, file: File) => {
@@ -86,20 +93,31 @@ export function DjPackUploader({
       setSlotPct((s) => ({ ...s, [slot]: 72 }));
 
       const kind = packSlotToTrackFileKind(slot);
-      const { error: insErr } = await supabase.from("track_files").insert({
-        track_id: trackId,
-        pack_slot: slot,
-        storage_path: path,
-        mime_type: file.type,
-        byte_size: file.size,
-        kind,
-        sort_order: 0,
-      });
+      const { data: inserted, error: insErr } = await supabase
+        .from("track_files")
+        .insert({
+          track_id: trackId,
+          pack_slot: slot,
+          storage_path: path,
+          mime_type: file.type,
+          byte_size: file.size,
+          kind,
+          sort_order: 0,
+        })
+        .select("*")
+        .single();
 
       if (insErr) {
         setSlotPhase((s) => ({ ...s, [slot]: "error" }));
         setError(insErr.message);
         return;
+      }
+
+      if (inserted) {
+        setFiles((prev) => {
+          const rest = prev.filter((f) => f.pack_slot !== slot);
+          return [...rest, inserted as TrackFile];
+        });
       }
 
       setSlotPct((s) => ({ ...s, [slot]: 100 }));
@@ -134,15 +152,18 @@ export function DjPackUploader({
     return null;
   }
 
+  const coverMet = Boolean(bySlot.get(REQUIRED_COVER_SLOT));
+  const essentialMet = ESSENTIAL_AUDIO_SLOTS.some((s) => Boolean(bySlot.get(s)));
+  const submissionPackMet = coverMet && essentialMet;
+
   return (
     <div className="space-y-6">
       <div>
         <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-          Required DJ pack files
+          Cover artwork (required)
         </h3>
         <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
-          Upload every required file before submitting for admin review. Allowed: images (JPEG, PNG,
-          WebP) for artwork; MP3, WAV, FLAC, M4A, AAC for audio.
+          JPEG, PNG, or WebP. Required before you can submit for admin review.
         </p>
       </div>
 
@@ -153,7 +174,51 @@ export function DjPackUploader({
       ) : null}
 
       <ul className="space-y-4">
-        {REQUIRED_PACK_SLOTS.map((slot) => (
+        <li className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <span className="text-sm font-medium text-red-600 dark:text-red-400">*</span>{" "}
+              <span className="text-sm font-medium">{PACK_SLOT_LABELS.cover_art}</span>
+              {bySlot.get(REQUIRED_COVER_SLOT) ? (
+                <p className="mt-1 truncate text-xs text-zinc-500">
+                  {bySlot.get(REQUIRED_COVER_SLOT)?.storage_path.split("/").pop()}
+                </p>
+              ) : (
+                <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">Missing</p>
+              )}
+            </div>
+            <label className="shrink-0">
+              <span className="sr-only">Upload cover artwork</span>
+              <input
+                type="file"
+                disabled={readOnly || slotPhase[REQUIRED_COVER_SLOT] === "uploading"}
+                accept="image/jpeg,image/png,image/webp"
+                className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium dark:file:bg-zinc-800"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) void uploadSlot(REQUIRED_COVER_SLOT, f);
+                }}
+              />
+            </label>
+          </div>
+          {slotProgress(REQUIRED_COVER_SLOT)}
+        </li>
+      </ul>
+
+      <div>
+        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          Main audio (required — at least one)
+        </h3>
+        <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+          Upload <strong>radio edit</strong> and/or <strong>dirty / full version</strong>. You must
+          include at least one of these two before submitting for review (both are welcome).
+          Allowed: MP3, WAV, FLAC, M4A, AAC.
+        </p>
+      </div>
+
+      <ul className="space-y-4">
+        {ESSENTIAL_AUDIO_SLOTS.map((slot) => (
           <li
             key={slot}
             className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
@@ -167,7 +232,11 @@ export function DjPackUploader({
                     {bySlot.get(slot)?.storage_path.split("/").pop()}
                   </p>
                 ) : (
-                  <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">Missing</p>
+                  <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+                    {!essentialMet
+                      ? "Missing — need at least one radio or dirty track"
+                      : "Not uploaded (optional if the other main file is set)"}
+                  </p>
                 )}
               </div>
               <label className="shrink-0">
@@ -175,7 +244,7 @@ export function DjPackUploader({
                 <input
                   type="file"
                   disabled={readOnly || slotPhase[slot] === "uploading"}
-                  accept={slot === "cover_art" ? "image/jpeg,image/png,image/webp" : "audio/*"}
+                  accept="audio/*"
                   className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium dark:file:bg-zinc-800"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
@@ -189,6 +258,51 @@ export function DjPackUploader({
           </li>
         ))}
       </ul>
+
+      <div>
+        <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          Additional pack files (optional)
+        </h3>
+        <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+          Instrumental and acapella are optional for submission.
+        </p>
+        <ul className="mt-3 space-y-4">
+          {ADDITIONAL_PACK_SLOTS.map((slot) => (
+            <li
+              key={slot}
+              className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800"
+            >
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <span className="text-sm font-medium">{PACK_SLOT_LABELS[slot]}</span>
+                  {bySlot.get(slot) ? (
+                    <p className="mt-1 truncate text-xs text-zinc-500">
+                      {bySlot.get(slot)?.storage_path.split("/").pop()}
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-xs text-zinc-500">Not uploaded</p>
+                  )}
+                </div>
+                <label className="shrink-0">
+                  <span className="sr-only">Upload {PACK_SLOT_LABELS[slot]}</span>
+                  <input
+                    type="file"
+                    disabled={readOnly || slotPhase[slot] === "uploading"}
+                    accept="audio/*"
+                    className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium dark:file:bg-zinc-800"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      e.target.value = "";
+                      if (f) void uploadSlot(slot, f);
+                    }}
+                  />
+                </label>
+              </div>
+              {slotProgress(slot)}
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <div>
         <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
@@ -232,10 +346,16 @@ export function DjPackUploader({
       </div>
 
       <p className="text-xs text-zinc-500">
-        Required slots:{" "}
-        {REQUIRED_PACK_SLOTS.every((s) => bySlot.get(s))
-          ? "All required files attached."
-          : "Complete all required uploads before submitting."}
+        {submissionPackMet
+          ? "Cover + main audio requirements met — ready to submit when metadata is complete."
+          : [
+              !coverMet ? "Upload cover artwork." : null,
+              !essentialMet
+                ? "Upload at least one of radio edit or dirty / full version."
+                : null,
+            ]
+              .filter(Boolean)
+              .join(" ") || null}
       </p>
     </div>
   );

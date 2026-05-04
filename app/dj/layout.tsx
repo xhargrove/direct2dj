@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const promoNav = [
   { href: "/dj/dashboard", label: "Dashboard" },
+  { href: "/dj/profile", label: "Profile" },
   { href: "/dj/feed", label: "Feed" },
   { href: "/dj/downloads", label: "Downloads" },
   { href: "/dj/play-reports", label: "Play reports" },
@@ -35,6 +36,7 @@ export default async function DjLayout({
     if (status !== "approved") {
       const gated: { href: string; label: string }[] = [
         { href: "/dj/application-status", label: "Status" },
+        { href: "/dj/profile", label: "Profile" },
         { href: "/dj/settings", label: "Privacy" },
       ];
       if (status !== "suspended") {

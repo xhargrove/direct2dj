@@ -13,6 +13,7 @@ type Row = {
     state: string;
     email: string;
     phone: string;
+    crew_organization_name: string | null;
     updated_at: string;
     years_djing: number | null;
     primary_genres: string | null;
@@ -36,6 +37,7 @@ export default async function AdminDjApplicationsPage() {
         state,
         email,
         phone,
+        crew_organization_name,
         updated_at,
         years_djing,
         primary_genres

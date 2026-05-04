@@ -45,7 +45,7 @@ begin
 
   return query
   select
-    (public.date_trunc('day', dl.created_at))::date as bucket_date,
+    (date_trunc('day', dl.created_at))::date as bucket_date,
     count(*)::bigint
   from public.downloads dl
   inner join public.tracks t on t.id = dl.track_id
@@ -288,7 +288,7 @@ begin
 
   return query
   select
-    (public.date_trunc('day', dl.created_at))::date,
+    (date_trunc('day', dl.created_at))::date,
     count(*)::bigint
   from public.downloads dl
   where dl.track_id = p_track_id

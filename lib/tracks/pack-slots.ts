@@ -12,14 +12,18 @@ export const PACK_SLOTS = [
 
 export type PackSlot = (typeof PACK_SLOTS)[number];
 
-export const REQUIRED_PACK_SLOTS: PackSlot[] = [
-  "cover_art",
-  "radio_edit",
-  "dirty_full",
-  "instrumental",
-  "acapella",
-];
+/** Cover image — required for every submission. */
+export const REQUIRED_COVER_SLOT: PackSlot = "cover_art";
 
+/**
+ * Submit rule: at least one of these two must be present (upload both, or either).
+ */
+export const ESSENTIAL_AUDIO_SLOTS: PackSlot[] = ["radio_edit", "dirty_full"];
+
+/** Optional stems (not required to submit). */
+export const ADDITIONAL_PACK_SLOTS: PackSlot[] = ["instrumental", "acapella"];
+
+/** Extra optional edits. */
 export const OPTIONAL_PACK_SLOTS: PackSlot[] = ["intro_edit", "short_edit"];
 
 export const PACK_SLOT_LABELS: Record<PackSlot, string> = {

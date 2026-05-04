@@ -25,6 +25,26 @@ export function describeLoginFailure(error: {
     return `${raw} Reset the password in Supabase → Authentication → Users, or use Sign up with a new account.`;
   }
 
+  if (
+    lower.includes("network") ||
+    lower.includes("failed to fetch") ||
+    lower.includes("load failed") ||
+    lower.includes("networkerror") ||
+    code === "network_error"
+  ) {
+    const devHint =
+      typeof process !== "undefined" && process.env.NODE_ENV === "development"
+        ? " In dev, open /api/dev/supabase-auth to verify URL + anon key (same Supabase project)."
+        : "";
+    return [
+      "Could not reach Supabase (network). Check your connection and VPN.",
+      "Confirm NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY match Project Settings → API.",
+      devHint,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
+
   if (error.status === 401 || lower.includes("401")) {
     const devHint =
       typeof process !== "undefined" && process.env.NODE_ENV === "development"

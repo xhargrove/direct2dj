@@ -67,12 +67,25 @@ export type DjApplication = {
   instagram: string | null;
   mixcloud_soundcloud_url: string | null;
   club_radio_affiliation: string | null;
+  crew_organization_name: string | null;
   years_djing: number;
   primary_genres: string;
   avg_crowd_size: string;
   plays_clubs: boolean;
   plays_radio: boolean;
   breaks_new_records: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DjOrganization = {
+  id: string;
+  name_key: string;
+  display_name: string;
+  moderation_status: ApprovalStatus;
+  formed_at: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
   created_at: string;
   updated_at: string;
 };

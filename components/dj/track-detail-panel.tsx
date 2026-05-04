@@ -9,6 +9,7 @@ import {
   type DjRatingInput,
   type PackDownloadFile,
 } from "@/app/dj/actions";
+import { triggerPackDownloads } from "@/lib/dj/trigger-pack-downloads";
 import type { CrowdReaction } from "@/lib/types/database";
 
 function boolToSelect(v: boolean | null): "" | "yes" | "no" {
@@ -165,8 +166,8 @@ export function TrackDetailPanel({
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-semibold">DJ pack</h2>
         <p className="text-xs text-zinc-500">
-          Creates a downloads record with your DJ ID, timestamp, and a snapshot of pack files, then opens signed
-          links (session required — not public).
+          Logs this download to your account, then saves each pack file to your device. If your browser blocks multiple
+          downloads, use the links below.
         </p>
         <button
           type="button"
@@ -181,32 +182,37 @@ export function TrackDetailPanel({
                 setPackErr(r.error);
                 return;
               }
-              if ("files" in r && r.files) {
+              if ("files" in r && r.files?.length) {
                 setPackFiles(r.files);
-                setPackSuccessMsg("Pack ready — use the links below.");
+                setPackSuccessMsg("Saving files…");
+                await triggerPackDownloads(r.files);
+                setPackSuccessMsg(`${r.files.length} file${r.files.length === 1 ? "" : "s"} — check your downloads folder.`);
               }
             })
           }
         >
-          Download DJ pack
+          {pending ? "Preparing…" : "Download DJ pack"}
         </button>
         {packErr ? <p className="text-sm text-red-600">{packErr}</p> : null}
         {packSuccessMsg && !packErr ? (
           <p className="text-sm text-emerald-700 dark:text-emerald-400">{packSuccessMsg}</p>
         ) : null}
         {packFiles && packFiles.length > 0 ? (
-          <ul className="flex flex-col gap-2 text-sm">
-            {packFiles.map((f, i) => (
-              <li key={`${f.filename}-${i}`}>
-                <a href={f.signedUrl} className="font-medium underline underline-offset-4" download={f.filename}>
-                  {f.filename}
-                </a>
-                {f.pack_slot ? (
-                  <span className="ml-2 text-xs text-zinc-500">({f.pack_slot})</span>
-                ) : null}
-              </li>
-            ))}
-          </ul>
+          <div className="flex flex-col gap-2">
+            <p className="text-xs text-zinc-500">Didn&apos;t save automatically? Open each link:</p>
+            <ul className="flex flex-col gap-2 text-sm">
+              {packFiles.map((f, i) => (
+                <li key={`${f.filename}-${i}`}>
+                  <a href={f.signedUrl} className="font-medium underline underline-offset-4" download={f.filename}>
+                    {f.filename}
+                  </a>
+                  {f.pack_slot ? (
+                    <span className="ml-2 text-xs text-zinc-500">({f.pack_slot})</span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </div>
         ) : null}
       </section>
 

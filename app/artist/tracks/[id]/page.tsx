@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { unstable_noStore as noStore } from "next/cache";
+import { DeleteTrackButton } from "@/components/artist/delete-track-button";
 import { TrackStatusBadges } from "@/components/artist/track-status";
 import { createClient } from "@/lib/supabase/server";
 import type { Track, TrackFile } from "@/lib/types/database";
@@ -7,6 +9,7 @@ import type { Track, TrackFile } from "@/lib/types/database";
 type Props = { params: Promise<{ id: string }> };
 
 export default async function ArtistTrackDetailPage({ params }: Props) {
+  noStore();
   const { id } = await params;
   const supabase = await createClient();
 
@@ -119,12 +122,19 @@ export default async function ArtistTrackDetailPage({ params }: Props) {
       </div>
 
       {t.moderation_status !== "approved" ? (
-        <Link
-          href={`/artist/tracks/${id}/edit`}
-          className="inline-flex min-h-11 items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
-        >
-          Edit pack
-        </Link>
+        <div className="flex flex-wrap items-center gap-4">
+          <Link
+            href={`/artist/tracks/${id}/edit`}
+            className="inline-flex min-h-11 items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
+          >
+            Edit pack
+          </Link>
+          <DeleteTrackButton
+            trackId={id}
+            trackTitle={t.title || "Untitled"}
+            canDelete
+          />
+        </div>
       ) : null}
     </div>
   );

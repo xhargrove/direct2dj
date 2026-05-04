@@ -1,5 +1,5 @@
 import type { PackSlot } from "@/lib/tracks/pack-slots";
-import { REQUIRED_PACK_SLOTS } from "@/lib/tracks/pack-slots";
+import { ESSENTIAL_AUDIO_SLOTS, REQUIRED_COVER_SLOT } from "@/lib/tracks/pack-slots";
 
 export type TrackMetadataInput = {
   title: string;
@@ -23,20 +23,22 @@ export function validateMetadataForSubmit(meta: TrackMetadataInput): string | nu
   if (meta.bpm == null || Number.isNaN(meta.bpm) || meta.bpm <= 0 || meta.bpm > 999) {
     return "BPM must be between 1 and 999.";
   }
-  if (!meta.musical_key?.trim()) return "Key is required.";
   if (!meta.release_date?.trim()) return "Release date is required.";
   if (!meta.description?.trim()) return "Description is required.";
   /* campaign_notes optional */
   return null;
 }
 
+/** Requires cover artwork plus at least one of radio_edit or dirty_full. */
 export function validatePackSlotsPresent(
   slotsPresent: Set<PackSlot | null | undefined>,
 ): string | null {
-  for (const req of REQUIRED_PACK_SLOTS) {
-    if (!slotsPresent.has(req)) {
-      return `Missing required file: ${req.replace(/_/g, " ")}`;
-    }
+  if (!slotsPresent.has(REQUIRED_COVER_SLOT)) {
+    return "Cover artwork is required.";
+  }
+  const hasEssential = ESSENTIAL_AUDIO_SLOTS.some((slot) => slotsPresent.has(slot));
+  if (!hasEssential) {
+    return "Upload at least one main audio file: radio edit and/or dirty / full version.";
   }
   return null;
 }

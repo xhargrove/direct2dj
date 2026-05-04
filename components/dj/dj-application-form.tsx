@@ -130,6 +130,21 @@ export function DjApplicationForm({
         />
       </label>
 
+      <label className="flex flex-col gap-1 text-sm">
+        <span className="font-medium">Crew / organization (optional)</span>
+        <input
+          name="crew_organization_name"
+          maxLength={120}
+          defaultValue={s(e.crew_organization_name)}
+          className="min-h-11 rounded-md border border-zinc-200 px-3 dark:border-zinc-700 dark:bg-zinc-950"
+          placeholder="e.g. your crew or collective name"
+        />
+        <span className="text-xs text-zinc-500 dark:text-zinc-500">
+          When at least two DJs use the same name, the group is considered formed. An admin must approve the
+          organization before it is official in the system.
+        </span>
+      </label>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-sm">
           <span className="font-medium">Years DJing</span>

@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { DeleteTrackButton } from "@/components/artist/delete-track-button";
 import { TrackStatusBadges } from "@/components/artist/track-status";
+import { createClient } from "@/lib/supabase/server";
 import type { Track } from "@/lib/types/database";
 
 export default async function ArtistTracksPage() {
@@ -63,7 +64,7 @@ export default async function ArtistTracksPage() {
                   />
                 </div>
               </div>
-              <div className="flex shrink-0 flex-wrap gap-3">
+              <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2">
                 <Link
                   href={`/artist/tracks/${t.id}/analytics`}
                   className="text-sm font-medium text-zinc-900 underline dark:text-zinc-100"
@@ -76,6 +77,11 @@ export default async function ArtistTracksPage() {
                 >
                   Edit
                 </Link>
+                <DeleteTrackButton
+                  trackId={t.id}
+                  trackTitle={t.title || "Untitled"}
+                  canDelete={t.moderation_status !== "approved"}
+                />
               </div>
             </li>
           ))}

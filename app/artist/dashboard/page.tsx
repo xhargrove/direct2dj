@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { StartDraftButton } from "@/components/artist/start-draft-button";
+import { SubmissionCheckout, type SubmissionTierOption } from "@/components/artist/submission-checkout";
+import { loadSubmissionPricingPlans } from "@/lib/billing/load-submission-pricing-plans";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ArtistDashboardPage() {
@@ -9,6 +10,10 @@ export default async function ArtistDashboardPage() {
   } = await supabase.auth.getUser();
   let draftCount = 0;
   let pendingCount = 0;
+
+  const tierRows = await loadSubmissionPricingPlans(supabase);
+  const tiers = tierRows as SubmissionTierOption[];
+
   if (user) {
     const { data: artist } = await supabase
       .from("artists")
@@ -37,8 +42,7 @@ export default async function ArtistDashboardPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Artist dashboard</h1>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          Upload DJ packs for promo pool distribution. Tracks stay private until an admin approves
-          them.
+          Upload DJ packs for promo pool distribution. Tracks stay private until an admin approves them.
         </p>
       </div>
 
@@ -54,7 +58,8 @@ export default async function ArtistDashboardPage() {
       </div>
 
       <div className="flex flex-col gap-3">
-        <StartDraftButton />
+        <h2 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">New DJ pack</h2>
+        <SubmissionCheckout tiers={tiers} />
         <Link
           href="/artist/tracks"
           className="inline-flex min-h-11 items-center justify-center rounded-md border border-zinc-300 px-4 text-sm font-medium dark:border-zinc-700"

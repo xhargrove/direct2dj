@@ -39,8 +39,9 @@ export async function createFeaturedCheckoutSession(input: {
 
   const { data: plan } = await supabase
     .from("pricing_plans")
-    .select("id, slug, label, duration_days, price_cents, currency, active")
+    .select("id, slug, label, duration_days, price_cents, currency, active, plan_kind")
     .eq("id", input.pricingPlanId)
+    .eq("plan_kind", "featured")
     .maybeSingle();
 
   if (!plan || !plan.active) return { error: "Invalid or inactive pricing plan." };

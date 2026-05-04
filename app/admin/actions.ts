@@ -273,6 +273,49 @@ export async function adminAssignDjTier(djId: string, tierRaw: string) {
   return { ok: true as const };
 }
 
+export async function adminApproveDjOrganization(orgId: string) {
+  const ctx = await getAdminContext();
+  if ("error" in ctx) return { error: ctx.error };
+
+  const now = new Date().toISOString();
+  const { error } = await ctx.supabase
+    .from("dj_organizations")
+    .update({
+      moderation_status: "approved",
+      reviewed_at: now,
+      reviewed_by: ctx.userId,
+      updated_at: now,
+    })
+    .eq("id", orgId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/dj-organizations");
+  revalidatePath("/admin/dj-applications");
+  return { ok: true as const };
+}
+
+export async function adminRejectDjOrganization(orgId: string) {
+  const ctx = await getAdminContext();
+  if ("error" in ctx) return { error: ctx.error };
+
+  const now = new Date().toISOString();
+  const { error } = await ctx.supabase
+    .from("dj_organizations")
+    .update({
+      moderation_status: "rejected",
+      reviewed_at: now,
+      reviewed_by: ctx.userId,
+      updated_at: now,
+    })
+    .eq("id", orgId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/dj-organizations");
+  return { ok: true as const };
+}
+
 export async function verifyPlayReport(playReportId: string) {
   const ctx = await getAdminContext();
   if ("error" in ctx) return { error: ctx.error };

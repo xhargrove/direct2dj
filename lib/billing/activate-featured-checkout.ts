@@ -1,6 +1,7 @@
 import "server-only";
 
 import type Stripe from "stripe";
+import { activateSubmissionFromCheckoutSession } from "@/lib/billing/activate-submission-checkout";
 import { sweepFeaturedPlacementNotifications } from "@/lib/notifications/events";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 
@@ -42,6 +43,21 @@ export async function activateFeaturedFromCheckoutSession(
     return { ok: true, skipped: true, reason: "payment_not_found" };
   }
 
+  const { data: planKindRow } = await admin
+    .from("pricing_plans")
+    .select("plan_kind, duration_days, label, active, slug")
+    .eq("id", payment.pricing_plan_id)
+    .maybeSingle();
+
+  const submissionLike =
+    planKindRow?.plan_kind === "submission" ||
+    (typeof planKindRow?.slug === "string" &&
+      (planKindRow.slug.startsWith("submission_") || planKindRow.slug === "submission_single"));
+
+  if (planKindRow && submissionLike) {
+    return activateSubmissionFromCheckoutSession(session, payment, planKindRow, options);
+  }
+
   if (payment.status === "succeeded") {
     return { ok: true, skipped: true, reason: "already_succeeded" };
   }
@@ -77,11 +93,11 @@ export async function activateFeaturedFromCheckoutSession(
 
   const { data: plan, error: planErr } = await admin
     .from("pricing_plans")
-    .select("id, duration_days, label, active")
+    .select("id, duration_days, label, active, plan_kind")
     .eq("id", payment.pricing_plan_id)
     .maybeSingle();
 
-  if (planErr || !plan || !plan.active) {
+  if (planErr || !plan || !plan.active || plan.plan_kind !== "featured") {
     await admin
       .from("payments")
       .update({ status: "failed", updated_at: new Date().toISOString() })

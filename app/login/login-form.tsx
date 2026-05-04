@@ -4,12 +4,13 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { applySelectedLoginRole } from "@/app/login/actions";
 import { describeLoginFailure } from "@/lib/auth/supabase-auth-error";
 import { dashboardPathForRole, safeAppPath } from "@/lib/auth/paths";
 import type { UserRole } from "@/lib/types/roles";
-import { isUserRole } from "@/lib/types/roles";
+import { isUserRole, USER_ROLES } from "@/lib/types/roles";
 
-export function LoginForm() {
+export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: boolean }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
@@ -21,6 +22,7 @@ export function LoginForm() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [feedback, setFeedback] = useState<{ text: string; variant: "error" | "info" } | null>(null);
   const [pending, setPending] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<UserRole>("artist");
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -76,7 +78,18 @@ export function LoginForm() {
       }
     }
 
-    const fallback = dashboardPathForRole(role);
+    let redirectRole = role;
+    if (mode === "signin" && showLoginRoleSelector) {
+      const applied = await applySelectedLoginRole(selectedRole);
+      if ("error" in applied && applied.error) {
+        setFeedback({ text: applied.error, variant: "error" });
+        setPending(false);
+        return;
+      }
+      redirectRole = selectedRole;
+    }
+
+    const fallback = dashboardPathForRole(redirectRole);
     router.push(safeAppPath(nextParam, fallback));
     router.refresh();
     setPending(false);
@@ -163,6 +176,27 @@ export function LoginForm() {
             className="min-h-11 w-full rounded-md border border-zinc-200 bg-white px-3 text-base outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950"
           />
         </label>
+
+        {mode === "signin" && showLoginRoleSelector ? (
+          <label className="block space-y-2">
+            <span className="text-sm font-medium">Sign in as</span>
+            <select
+              name="workspace_role"
+              value={selectedRole}
+              onChange={(ev) => setSelectedRole(ev.target.value as UserRole)}
+              className="min-h-11 w-full rounded-md border border-zinc-200 bg-white px-3 text-base outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950"
+            >
+              {USER_ROLES.map((r) => (
+                <option key={r} value={r}>
+                  {r === "artist" ? "Artist" : r === "dj" ? "DJ" : "Admin"}
+                </option>
+              ))}
+            </select>
+            <span className="block text-xs text-zinc-500 dark:text-zinc-400">
+              Saves to your account so the matching workspace opens after sign-in.
+            </span>
+          </label>
+        ) : null}
 
         {feedback ? (
           <p
