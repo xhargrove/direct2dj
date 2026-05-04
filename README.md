@@ -23,6 +23,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run build` | Production build |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript |
+| `npm test` | Vitest (catalog validation helpers) |
 | `npm run db:start` / `db:reset` / `db:push` | Supabase CLI |
 
 ## Documentation
@@ -34,6 +35,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | [RLS_POLICIES.md](./RLS_POLICIES.md) | Row Level Security overview |
 | [MVP_TEST_PLAN.md](./MVP_TEST_PLAN.md) | Manual QA matrix |
 | [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) | Production launch steps |
+| [docs/PHASE_4_5_DJ_CATALOG_SMOKE.md](./docs/PHASE_4_5_DJ_CATALOG_SMOKE.md) | DJ catalog manual smoke (Phase 4.5) |
 
 ## Architecture (high level)
 

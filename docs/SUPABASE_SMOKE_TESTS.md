@@ -1,18 +1,27 @@
 # Supabase smoke tests (manual)
 
-Use these checks after migrations are applied (**local** `supabase db reset` or **remote** SQL push). Perform tests as **three real sessions**: Artist A, Artist B (optional), DJ, Admin — created via Auth signup or seed users (see `supabase/seed.sql`).
+Use these checks after migrations are applied (**local** `npm run db:reset` or **remote** SQL push). Local reset creates **Phase 4.5 smoke users** in `supabase/seed.sql` (fixed UUIDs, `@example.com` — **not** for production).
 
 **Rules:** Use the **anon / publishable** key and real JWTs only (Studio “Run as user” or app login). Do **not** paste the service role key into the browser.
+
+**Docker / CLI issues** (`command not found`, `No such container`, `npm` + `#` errors, `db query` extra args): see [`LOCAL_SUPABASE.md`](LOCAL_SUPABASE.md).
 
 ---
 
 ## Prerequisites
 
-1. Migrations applied through `20260506100000_profiles_role_guard_maintenance.sql` (includes catalog rules + profile guard fix for local seed).
-2. Local-only seed: `supabase db reset` runs `supabase/seed.sql` (see `config.toml` `[db.seed]`). **Never run seed against production.**
-3. **Seed login (local):** password `Seed-local-only-v1` for emails `artist.seed@direct2dj.test`, `dj.seed@direct2dj.test`, `admin.seed@direct2dj.test`, `inactive.seed@direct2dj.test`.
-4. Supabase Studio → **Authentication → Users** lists seed users after reset.
-5. For API tests: REST or JS client with `Authorization: Bearer <access_token>` for each role.
+1. Migrations applied (current branch / `supabase/migrations`). Profile guard and catalog rules are part of the chain.
+2. Local-only seed: `npm run db:reset` runs `supabase/seed.sql` (see `config.toml` `[db.seed]`). **Never run seed against production.**
+3. **Seed login (local only):** password **`Password123!`** (test-only) for:
+   - `smoke-artist@example.com` — **artist** (active)
+   - `smoke-approved-dj@example.com` — **dj**, `djs.vetting_status = approved`
+   - `smoke-pending-dj@example.com` — **dj**, `djs.vetting_status = pending`
+   - `smoke-suspended-dj@example.com` — **dj**, `djs.vetting_status = suspended`
+   - `smoke-admin@example.com` — **admin**
+   - `smoke-inactive-artist@example.com` — **artist** with `artists.status = inactive` (catalog negative case)
+4. After reset, run **`npm run smoke:accounts`** (SQL checks against **local** DB; requires **`npm run db:start`** + **`npm run db:reset`** first). **Set Next.js `.env.local`** to the **same** local Supabase URL and anon key (`npm run db:status`) before `/login` smoke.
+5. Supabase Studio → **Authentication → Users** should list the six `smoke-*@example.com` users after reset.
+6. For API tests: REST or JS client with `Authorization: Bearer <access_token>` for each role.
 
 ---
 
@@ -60,13 +69,13 @@ where tgrelid = 'public.tracks'::regclass
 
 ---
 
-## When automated tests are absent
+## When automated API tests are absent
 
-This repo does **not** ship Vitest/Jest (see `package.json`). Policy behavior must be validated with:
+Unit tests: `npm test` (Vitest) cover `lib/dj/catalog-validation` only. **RLS** and **Auth** policy behavior must still be validated with:
 
 1. Manual REST/Studio checks above.  
-2. Local seed users + login through the Next.js app (`/login`).  
-3. Optional later: add Vitest with `@supabase/supabase-js` using test JWTs — documented here when introduced.
+2. Local smoke users + login through the Next.js app (`/login`) after `npm run db:reset`.  
+3. Optional: add more Vitest with `@supabase/supabase-js` using test JWTs.
 
 ---
 
@@ -75,16 +84,18 @@ This repo does **not** ship Vitest/Jest (see `package.json`). Policy behavior mu
 From repository root (`direct2dj/`):
 
 ```bash
-# Install Supabase CLI if needed: https://supabase.com/docs/guides/cli
+# CLI: use the repo devDependency (no global install required):
+# npm run db:start   → npx supabase start
+# npm run db:reset   → npx supabase db reset
 
-# Start local stack (Docker required)
-supabase start
+# Start local stack (Docker Desktop required)
+npm run db:start
 
 # Apply migrations + run seed (seed is destructive reset)
-supabase db reset
+npm run db:reset
 
 # Or link remote project and push migrations only (no seed on remote unless you run SQL manually)
-supabase db push
+npm run db:push
 ```
 
 Next.js app (separate terminal):
@@ -92,7 +103,7 @@ Next.js app (separate terminal):
 ```bash
 npm install
 cp .env.example .env.local
-# Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to local (supabase start prints these)
+# Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to local (`npm run db:status` prints these)
 
 npm run build
 npm run dev

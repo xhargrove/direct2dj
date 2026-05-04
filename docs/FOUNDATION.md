@@ -7,7 +7,7 @@ This document describes the initial structure you asked for: **route map**, **da
 - [`docs/RLS_VERIFICATION.md`](RLS_VERIFICATION.md) — role/table rule matrix and migration audit notes  
 - [`docs/SUPABASE_SMOKE_TESTS.md`](SUPABASE_SMOKE_TESTS.md) — manual QA checklist and commands  
 - [`docs/ADMIN_REVIEW.md`](ADMIN_REVIEW.md) — admin route map, moderation rules, storage signing, featured placement semantics, audit append-only policy  
-- [`supabase/seed.sql`](../supabase/seed.sql) — local-only fixtures (`supabase db reset`)
+- [`supabase/seed.sql`](../supabase/seed.sql) — local-only fixtures (`npm run db:reset`); Phase 4.5 smoke users `smoke-*@example.com` and catalog rows (see `docs/SUPABASE_SMOKE_TESTS.md`)
 
 ## Route map
 

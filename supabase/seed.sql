@@ -2,16 +2,20 @@
 -- Direct 2 DJ — LOCAL DATABASE SEED ONLY (supabase db reset)
 -- ============================================================================
 -- • Runs after migrations as the database owner (auth.uid() is null).
--- • Uses fake emails @direct2dj.test and password documented below — never production.
--- • Fixtures use fixed UUIDs for repeatable smoke tests (not app hardcoding).
--- • Login password for all seed users (local only): Seed-local-only-v1
--- • Do not run this file against production; use `supabase db reset` locally only.
+-- • Phase 4.5 smoke accounts use @example.com — local/staging only; never production.
+-- • Shared password (local smoke only): Password123!
+-- • Legacy @direct2dj.test users were replaced by deterministic smoke identities below.
+-- • Do not run this file against production.
 -- ============================================================================
 
 begin;
 
+-- Fixed UUIDs for repeatable smoke / docs (not referenced in app code).
+-- Profiles e1000001–e1000006
+-- Tracks f2000001–f2000006
+
 -- ---------------------------------------------------------------------------
--- Auth: four users (artist, dj, admin, inactive artist)
+-- Auth users (signInWithPassword requires identities + email_confirmed_at)
 -- ---------------------------------------------------------------------------
 
 insert into auth.users (
@@ -33,14 +37,14 @@ insert into auth.users (
 )
 values (
   coalesce((select id from auth.instances limit 1), '00000000-0000-0000-0000-000000000000'::uuid),
-  '11111111-1111-4111-8111-111111111101'::uuid,
+  'e1000001-0000-4000-8000-000000000001'::uuid,
   'authenticated',
   'authenticated',
-  'artist.seed@direct2dj.test',
-  crypt('Seed-local-only-v1', gen_salt('bf')),
+  'smoke-artist@example.com',
+  crypt('Password123!', gen_salt('bf')),
   now(),
   '{"provider":"email","providers":["email"]}',
-  '{"full_name":"Seed Artist"}'::jsonb,
+  '{"full_name":"Smoke Artist"}'::jsonb,
   now(),
   now(),
   '',
@@ -50,14 +54,14 @@ values (
 ),
 (
   coalesce((select id from auth.instances limit 1), '00000000-0000-0000-0000-000000000000'::uuid),
-  '22222222-2222-4222-8222-222222222202'::uuid,
+  'e1000002-0000-4000-8000-000000000002'::uuid,
   'authenticated',
   'authenticated',
-  'dj.seed@direct2dj.test',
-  crypt('Seed-local-only-v1', gen_salt('bf')),
+  'smoke-approved-dj@example.com',
+  crypt('Password123!', gen_salt('bf')),
   now(),
   '{"provider":"email","providers":["email"]}',
-  '{"full_name":"Seed DJ"}'::jsonb,
+  '{"full_name":"Smoke Approved DJ"}'::jsonb,
   now(),
   now(),
   '',
@@ -67,14 +71,14 @@ values (
 ),
 (
   coalesce((select id from auth.instances limit 1), '00000000-0000-0000-0000-000000000000'::uuid),
-  '33333333-3333-4333-8333-333333333303'::uuid,
+  'e1000003-0000-4000-8000-000000000003'::uuid,
   'authenticated',
   'authenticated',
-  'admin.seed@direct2dj.test',
-  crypt('Seed-local-only-v1', gen_salt('bf')),
+  'smoke-pending-dj@example.com',
+  crypt('Password123!', gen_salt('bf')),
   now(),
   '{"provider":"email","providers":["email"]}',
-  '{"full_name":"Seed Admin"}'::jsonb,
+  '{"full_name":"Smoke Pending DJ"}'::jsonb,
   now(),
   now(),
   '',
@@ -84,14 +88,48 @@ values (
 ),
 (
   coalesce((select id from auth.instances limit 1), '00000000-0000-0000-0000-000000000000'::uuid),
-  '44444444-4444-4444-8444-444444444404'::uuid,
+  'e1000004-0000-4000-8000-000000000004'::uuid,
   'authenticated',
   'authenticated',
-  'inactive.seed@direct2dj.test',
-  crypt('Seed-local-only-v1', gen_salt('bf')),
+  'smoke-suspended-dj@example.com',
+  crypt('Password123!', gen_salt('bf')),
   now(),
   '{"provider":"email","providers":["email"]}',
-  '{"full_name":"Seed Inactive Artist"}'::jsonb,
+  '{"full_name":"Smoke Suspended DJ"}'::jsonb,
+  now(),
+  now(),
+  '',
+  '',
+  '',
+  ''
+),
+(
+  coalesce((select id from auth.instances limit 1), '00000000-0000-0000-0000-000000000000'::uuid),
+  'e1000005-0000-4000-8000-000000000005'::uuid,
+  'authenticated',
+  'authenticated',
+  'smoke-admin@example.com',
+  crypt('Password123!', gen_salt('bf')),
+  now(),
+  '{"provider":"email","providers":["email"]}',
+  '{"full_name":"Smoke Admin"}'::jsonb,
+  now(),
+  now(),
+  '',
+  '',
+  '',
+  ''
+),
+(
+  coalesce((select id from auth.instances limit 1), '00000000-0000-0000-0000-000000000000'::uuid),
+  'e1000006-0000-4000-8000-000000000006'::uuid,
+  'authenticated',
+  'authenticated',
+  'smoke-inactive-artist@example.com',
+  crypt('Password123!', gen_salt('bf')),
+  now(),
+  '{"provider":"email","providers":["email"]}',
+  '{"full_name":"Smoke Inactive Artist"}'::jsonb,
   now(),
   now(),
   '',
@@ -100,7 +138,6 @@ values (
   ''
 );
 
--- Email identities (required for password sign-in in local GoTrue)
 insert into auth.identities (
   id,
   user_id,
@@ -114,108 +151,292 @@ insert into auth.identities (
 values
 (
   gen_random_uuid(),
-  '11111111-1111-4111-8111-111111111101'::uuid,
+  'e1000001-0000-4000-8000-000000000001'::uuid,
   jsonb_build_object(
-    'sub', '11111111-1111-4111-8111-111111111101',
-    'email', 'artist.seed@direct2dj.test',
+    'sub', 'e1000001-0000-4000-8000-000000000001',
+    'email', 'smoke-artist@example.com',
     'email_verified', true,
     'phone_verified', false
   ),
   'email',
-  '11111111-1111-4111-8111-111111111101'::uuid,
+  'e1000001-0000-4000-8000-000000000001'::uuid,
   now(),
   now(),
   now()
 ),
 (
   gen_random_uuid(),
-  '22222222-2222-4222-8222-222222222202'::uuid,
+  'e1000002-0000-4000-8000-000000000002'::uuid,
   jsonb_build_object(
-    'sub', '22222222-2222-4222-8222-222222222202',
-    'email', 'dj.seed@direct2dj.test',
+    'sub', 'e1000002-0000-4000-8000-000000000002',
+    'email', 'smoke-approved-dj@example.com',
     'email_verified', true,
     'phone_verified', false
   ),
   'email',
-  '22222222-2222-4222-8222-222222222202'::uuid,
+  'e1000002-0000-4000-8000-000000000002'::uuid,
   now(),
   now(),
   now()
 ),
 (
   gen_random_uuid(),
-  '33333333-3333-4333-8333-333333333303'::uuid,
+  'e1000003-0000-4000-8000-000000000003'::uuid,
   jsonb_build_object(
-    'sub', '33333333-3333-4333-8333-333333333303',
-    'email', 'admin.seed@direct2dj.test',
+    'sub', 'e1000003-0000-4000-8000-000000000003',
+    'email', 'smoke-pending-dj@example.com',
     'email_verified', true,
     'phone_verified', false
   ),
   'email',
-  '33333333-3333-4333-8333-333333333303'::uuid,
+  'e1000003-0000-4000-8000-000000000003'::uuid,
   now(),
   now(),
   now()
 ),
 (
   gen_random_uuid(),
-  '44444444-4444-4444-8444-444444444404'::uuid,
+  'e1000004-0000-4000-8000-000000000004'::uuid,
   jsonb_build_object(
-    'sub', '44444444-4444-4444-8444-444444444404',
-    'email', 'inactive.seed@direct2dj.test',
+    'sub', 'e1000004-0000-4000-8000-000000000004',
+    'email', 'smoke-suspended-dj@example.com',
     'email_verified', true,
     'phone_verified', false
   ),
   'email',
-  '44444444-4444-4444-8444-444444444404'::uuid,
+  'e1000004-0000-4000-8000-000000000004'::uuid,
+  now(),
+  now(),
+  now()
+),
+(
+  gen_random_uuid(),
+  'e1000005-0000-4000-8000-000000000005'::uuid,
+  jsonb_build_object(
+    'sub', 'e1000005-0000-4000-8000-000000000005',
+    'email', 'smoke-admin@example.com',
+    'email_verified', true,
+    'phone_verified', false
+  ),
+  'email',
+  'e1000005-0000-4000-8000-000000000005'::uuid,
+  now(),
+  now(),
+  now()
+),
+(
+  gen_random_uuid(),
+  'e1000006-0000-4000-8000-000000000006'::uuid,
+  jsonb_build_object(
+    'sub', 'e1000006-0000-4000-8000-000000000006',
+    'email', 'smoke-inactive-artist@example.com',
+    'email_verified', true,
+    'phone_verified', false
+  ),
+  'email',
+  'e1000006-0000-4000-8000-000000000006'::uuid,
   now(),
   now(),
   now()
 );
 
 -- ---------------------------------------------------------------------------
--- Roles: DJ + admin (seed runs as superuser; profiles_role_guard allows null uid)
+-- Roles (superuser: profiles_role_guard allows null auth.uid())
+-- Order: set DJ + admin; inactive artist profile stays artist
 -- ---------------------------------------------------------------------------
-
-update public.profiles
-set role = 'dj'::public.user_role
-where id = '22222222-2222-4222-8222-222222222202'::uuid;
 
 update public.profiles
 set role = 'admin'::public.user_role
-where id = '33333333-3333-4333-8333-333333333303'::uuid;
+where id = 'e1000005-0000-4000-8000-000000000005'::uuid;
 
--- Inactive artist profile stays artist; deactivate artist extension row
+update public.profiles
+set role = 'dj'::public.user_role
+where id in (
+  'e1000002-0000-4000-8000-000000000002'::uuid,
+  'e1000003-0000-4000-8000-000000000003'::uuid,
+  'e1000004-0000-4000-8000-000000000004'::uuid
+);
+
+-- ---------------------------------------------------------------------------
+-- DJ vetting (djs rows created by profile role sync; default = pending)
+-- ---------------------------------------------------------------------------
+
+update public.djs
+set vetting_status = 'approved'::public.dj_vetting_status
+where profile_id = 'e1000002-0000-4000-8000-000000000002'::uuid;
+
+update public.djs
+set vetting_status = 'pending'::public.dj_vetting_status
+where profile_id = 'e1000003-0000-4000-8000-000000000003'::uuid;
+
+update public.djs
+set vetting_status = 'suspended'::public.dj_vetting_status
+where profile_id = 'e1000004-0000-4000-8000-000000000004'::uuid;
+
+-- Inactive artist (G matrix: hidden from DJ catalog)
 update public.artists
 set status = 'inactive'::public.lifecycle_status
-where profile_id = '44444444-4444-4444-8444-444444444404'::uuid;
+where profile_id = 'e1000006-0000-4000-8000-000000000006'::uuid;
 
 -- ---------------------------------------------------------------------------
--- Tracks: one pending + one approved (main artist); one approved on inactive artist
+-- Tracks (smoke-artist = active; smoke-inactive-artist = inactive)
 -- ---------------------------------------------------------------------------
 
-insert into public.tracks (id, artist_id, title, description, moderation_status)
+insert into public.tracks (
+  id,
+  artist_id,
+  title,
+  description,
+  moderation_status,
+  credit_artist_name,
+  genre,
+  bpm,
+  explicit_rating,
+  is_draft,
+  catalog_active
+)
 values
 (
-  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01'::uuid,
-  (select id from public.artists where profile_id = '11111111-1111-4111-8111-111111111101'::uuid limit 1),
-  '[seed] Pending track',
-  'Smoke test: DJ must not see until approved.',
-  'pending'::public.approval_status
+  'f2000001-0000-4000-8000-000000000001'::uuid,
+  (select a.id from public.artists a where a.profile_id = 'e1000001-0000-4000-8000-000000000001'::uuid limit 1),
+  '[smoke] Pending moderation',
+  'Visibility: pending — not in DJ feed.',
+  'pending'::public.approval_status,
+  'Smoke Artist',
+  'Hip-Hop',
+  120.0,
+  'clean'::public.explicit_rating,
+  false,
+  true
 ),
 (
-  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02'::uuid,
-  (select id from public.artists where profile_id = '11111111-1111-4111-8111-111111111101'::uuid limit 1),
-  '[seed] Approved track',
-  'Smoke test: DJ can see when artist active.',
-  'approved'::public.approval_status
+  'f2000002-0000-4000-8000-000000000002'::uuid,
+  (select a.id from public.artists a where a.profile_id = 'e1000001-0000-4000-8000-000000000001'::uuid limit 1),
+  '[smoke] Approved visible + pack',
+  'Primary happy-path track for DJ feed / detail / preview / pack.',
+  'approved'::public.approval_status,
+  'Smoke Artist',
+  'Hip-Hop',
+  120.0,
+  'clean'::public.explicit_rating,
+  false,
+  true
 ),
 (
-  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa03'::uuid,
-  (select id from public.artists where profile_id = '44444444-4444-4444-8444-444444444404'::uuid limit 1),
-  '[seed] Inactive artist approved track',
-  'Smoke test: hidden from DJs via track_is_visible_to_dj.',
-  'approved'::public.approval_status
+  'f2000003-0000-4000-8000-000000000003'::uuid,
+  (select a.id from public.artists a where a.profile_id = 'e1000001-0000-4000-8000-000000000001'::uuid limit 1),
+  '[smoke] Catalog inactive',
+  'Approved but catalog_active=false — hidden from feed.',
+  'approved'::public.approval_status,
+  'Smoke Artist',
+  'Hip-Hop',
+  100.0,
+  'clean'::public.explicit_rating,
+  false,
+  false
+),
+(
+  'f2000004-0000-4000-8000-000000000004'::uuid,
+  (select a.id from public.artists a where a.profile_id = 'e1000001-0000-4000-8000-000000000001'::uuid limit 1),
+  '[smoke] Rejected',
+  'Rejected — not in catalog.',
+  'rejected'::public.approval_status,
+  'Smoke Artist',
+  'Hip-Hop',
+  90.0,
+  'clean'::public.explicit_rating,
+  false,
+  true
+),
+(
+  'f2000005-0000-4000-8000-000000000005'::uuid,
+  (select a.id from public.artists a where a.profile_id = 'e1000006-0000-4000-8000-000000000006'::uuid limit 1),
+  '[smoke] Inactive artist approved',
+  'Approved but artist lifecycle inactive — not visible to DJ.',
+  'approved'::public.approval_status,
+  'Inactive Artist',
+  'House',
+  128.0,
+  'clean'::public.explicit_rating,
+  false,
+  true
+),
+(
+  'f2000006-0000-4000-8000-000000000006'::uuid,
+  (select a.id from public.artists a where a.profile_id = 'e1000001-0000-4000-8000-000000000001'::uuid limit 1),
+  '[smoke] No pack files',
+  'Visible in feed but no track_files — pack/preview edge case.',
+  'approved'::public.approval_status,
+  'Smoke Artist',
+  'Hip-Hop',
+  110.0,
+  'clean'::public.explicit_rating,
+  false,
+  true
+);
+
+-- ---------------------------------------------------------------------------
+-- track_files (storage_path prefix = artist profile_id for RLS)
+-- f2000002: cover + audio pack for preview + download
+-- ---------------------------------------------------------------------------
+
+insert into public.track_files (
+  track_id,
+  kind,
+  pack_slot,
+  storage_path,
+  mime_type,
+  sort_order
+)
+values
+(
+  'f2000002-0000-4000-8000-000000000002'::uuid,
+  'cover'::public.track_file_kind,
+  'cover_art'::public.pack_slot,
+  'e1000001-0000-4000-8000-000000000001/smoke-visible/cover.jpg',
+  'image/jpeg',
+  0
+),
+(
+  'f2000002-0000-4000-8000-000000000002'::uuid,
+  'audio'::public.track_file_kind,
+  'radio_edit'::public.pack_slot,
+  'e1000001-0000-4000-8000-000000000001/smoke-visible/radio.mp3',
+  'audio/mpeg',
+  1
+),
+(
+  'f2000002-0000-4000-8000-000000000002'::uuid,
+  'audio'::public.track_file_kind,
+  'dirty_full'::public.pack_slot,
+  'e1000001-0000-4000-8000-000000000001/smoke-visible/dirty.mp3',
+  'audio/mpeg',
+  2
+);
+
+-- ---------------------------------------------------------------------------
+-- storage.objects (promos bucket) — enables createSignedUrl in local smoke
+-- ---------------------------------------------------------------------------
+
+insert into storage.objects (bucket_id, name, owner, metadata)
+values
+(
+  'promos',
+  'e1000001-0000-4000-8000-000000000001/smoke-visible/cover.jpg',
+  'e1000001-0000-4000-8000-000000000001'::uuid,
+  '{"mimetype":"image/jpeg"}'::jsonb
+),
+(
+  'promos',
+  'e1000001-0000-4000-8000-000000000001/smoke-visible/radio.mp3',
+  'e1000001-0000-4000-8000-000000000001'::uuid,
+  '{"mimetype":"audio/mpeg"}'::jsonb
+),
+(
+  'promos',
+  'e1000001-0000-4000-8000-000000000001/smoke-visible/dirty.mp3',
+  'e1000001-0000-4000-8000-000000000001'::uuid,
+  '{"mimetype":"audio/mpeg"}'::jsonb
 );
 
 commit;

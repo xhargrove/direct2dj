@@ -8,6 +8,11 @@ import {
   notifyTrackFeedback,
   notifyTrackRated,
 } from "@/lib/notifications/events";
+import {
+  validateFeedbackBody,
+  validateRatingComment,
+  validateRatingScore,
+} from "@/lib/dj/catalog-validation";
 import type { CrowdReaction, PackSlotDb } from "@/lib/types/database";
 
 const PREVIEW_SLOTS: PackSlotDb[] = [
@@ -49,7 +54,10 @@ async function loadVisibleTrackFiles(
 > {
   const { data: track, error: tErr } = await supabase.from("tracks").select("id").eq("id", trackId).maybeSingle();
   if (tErr || !track) {
-    return { error: "Track not found or not available in the catalog." };
+    return {
+      error:
+        "Track not found or not visible in the DJ catalog (wrong ID, not approved, or catalog inactive).",
+    };
   }
   const { data: files, error: fErr } = await supabase
     .from("track_files")
@@ -141,13 +149,14 @@ export async function submitRating(trackId: string, input: DjRatingInput) {
   const ctx = await getApprovedDjCatalogContext();
   if ("error" in ctx) return { error: ctx.error };
 
-  const s = Math.round(Number(input.score));
-  if (!Number.isFinite(s) || s < 1 || s > 5) return { error: "Rating must be between 1 and 5." };
+  const scoreCheck = validateRatingScore(input.score);
+  if (!scoreCheck.ok) return { error: scoreCheck.error };
+  const s = scoreCheck.value;
 
-  const comment = input.rating_comment?.trim() || null;
-  if (comment && comment.length > 4000) {
-    return { error: "Rating note must be 4000 characters or less." };
-  }
+  const commentRaw = input.rating_comment?.trim() || null;
+  const commentCheck = validateRatingComment(commentRaw);
+  if (!commentCheck.ok) return { error: commentCheck.error };
+  const comment = commentCheck.value;
 
   const { data: existingRating } = await ctx.supabase
     .from("ratings")
@@ -181,17 +190,13 @@ export async function submitRating(trackId: string, input: DjRatingInput) {
   return { ok: true as const };
 }
 
-const FEEDBACK_MAX_LEN = 8000;
-
 export async function submitFeedback(trackId: string, body: string) {
   const ctx = await getApprovedDjCatalogContext();
   if ("error" in ctx) return { error: ctx.error };
 
-  const text = body.trim();
-  if (text.length < 3) return { error: "Feedback must be at least a few characters." };
-  if (text.length > FEEDBACK_MAX_LEN) {
-    return { error: `Feedback must be ${FEEDBACK_MAX_LEN} characters or less.` };
-  }
+  const fbCheck = validateFeedbackBody(body);
+  if (!fbCheck.ok) return { error: fbCheck.error };
+  const text = fbCheck.value;
 
   const { data: existing } = await ctx.supabase
     .from("feedback")
