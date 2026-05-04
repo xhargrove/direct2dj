@@ -25,7 +25,7 @@ Schema is defined in SQL migrations under [`supabase/migrations/`](./supabase/mi
 |-------|---------|
 | `downloads` | DJ pack download logs + manifest JSON |
 | `ratings` | DJ ratings per track (unique `track_id`,`dj_id`) |
-| `feedback` | DJ → artist text feedback |
+| `feedback` | DJ → artist text feedback; **unique** `(track_id, dj_id)` (one row per DJ per track, updated in place) |
 | `play_reports` | DJ play reports (venue, dates, verification, etc.) |
 
 ## Featured & billing

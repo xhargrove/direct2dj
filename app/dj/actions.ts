@@ -2,7 +2,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
-import { getDjContext } from "@/lib/dj/context";
+import { getApprovedDjCatalogContext, getDjContext } from "@/lib/dj/context";
 import {
   notifyTrackDownloaded,
   notifyTrackFeedback,
@@ -61,7 +61,7 @@ async function loadVisibleTrackFiles(
 }
 
 export async function signTrackPreview(trackId: string) {
-  const ctx = await getDjContext();
+  const ctx = await getApprovedDjCatalogContext();
   if ("error" in ctx) return { error: ctx.error };
 
   const loaded = await loadVisibleTrackFiles(ctx.supabase, trackId);
@@ -92,7 +92,7 @@ export type PackDownloadFile = { pack_slot: string | null; filename: string; sig
 
 /** Logs a download with package manifest and returns signed URLs for each pack file (authenticated DJ only). */
 export async function prepareDjPackDownload(trackId: string) {
-  const ctx = await getDjContext();
+  const ctx = await getApprovedDjCatalogContext();
   if ("error" in ctx) return { error: ctx.error };
 
   const loaded = await loadVisibleTrackFiles(ctx.supabase, trackId);
@@ -138,13 +138,16 @@ export async function prepareDjPackDownload(trackId: string) {
 }
 
 export async function submitRating(trackId: string, input: DjRatingInput) {
-  const ctx = await getDjContext();
+  const ctx = await getApprovedDjCatalogContext();
   if ("error" in ctx) return { error: ctx.error };
 
   const s = Math.round(Number(input.score));
   if (!Number.isFinite(s) || s < 1 || s > 5) return { error: "Rating must be between 1 and 5." };
 
   const comment = input.rating_comment?.trim() || null;
+  if (comment && comment.length > 4000) {
+    return { error: "Rating note must be 4000 characters or less." };
+  }
 
   const { data: existingRating } = await ctx.supabase
     .from("ratings")
@@ -178,21 +181,45 @@ export async function submitRating(trackId: string, input: DjRatingInput) {
   return { ok: true as const };
 }
 
+const FEEDBACK_MAX_LEN = 8000;
+
 export async function submitFeedback(trackId: string, body: string) {
-  const ctx = await getDjContext();
+  const ctx = await getApprovedDjCatalogContext();
   if ("error" in ctx) return { error: ctx.error };
 
   const text = body.trim();
   if (text.length < 3) return { error: "Feedback must be at least a few characters." };
+  if (text.length > FEEDBACK_MAX_LEN) {
+    return { error: `Feedback must be ${FEEDBACK_MAX_LEN} characters or less.` };
+  }
 
-  const { error } = await ctx.supabase.from("feedback").insert({
-    track_id: trackId,
-    dj_id: ctx.djId,
-    body: text,
-    moderation_status: "pending",
-  });
+  const { data: existing } = await ctx.supabase
+    .from("feedback")
+    .select("id, moderation_status")
+    .eq("track_id", trackId)
+    .eq("dj_id", ctx.djId)
+    .maybeSingle();
 
-  if (error) return { error: error.message };
+  if (existing?.id) {
+    const { error } = await ctx.supabase
+      .from("feedback")
+      .update({
+        body: text,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", existing.id);
+
+    if (error) return { error: error.message };
+  } else {
+    const { error } = await ctx.supabase.from("feedback").insert({
+      track_id: trackId,
+      dj_id: ctx.djId,
+      body: text,
+      moderation_status: "pending",
+    });
+
+    if (error) return { error: error.message };
+  }
 
   await notifyTrackFeedback(trackId);
 

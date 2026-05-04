@@ -196,7 +196,11 @@ async function FeedList({
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">New releases & catalog</h2>
         {feed.length === 0 ? (
-          <p className="text-sm text-zinc-500">No tracks match these filters.</p>
+          <p className="text-sm text-zinc-500">
+            {q.trim() || genre.trim() || bpmMin != null || bpmMax != null || explicit
+              ? "No tracks match these filters."
+              : "No approved tracks in the catalog right now. Check back after artists publish packs."}
+          </p>
         ) : (
           <div className="flex flex-col gap-2">
             {feed.map((r) => (

@@ -44,6 +44,13 @@ export default async function DjTrackDetailPage({ params }: Props) {
     .eq("dj_id", dj.id)
     .maybeSingle();
 
+  const { data: myFeedbackRow } = await supabase
+    .from("feedback")
+    .select("body, moderation_status")
+    .eq("track_id", id)
+    .eq("dj_id", dj.id)
+    .maybeSingle();
+
   const { data: coverRow } = await supabase
     .from("track_files")
     .select("storage_path")
@@ -76,8 +83,14 @@ export default async function DjTrackDetailPage({ params }: Props) {
         bpm={track.bpm != null ? Number(track.bpm) : null}
         musicalKey={track.musical_key}
         explicitLabel={track.explicit_rating === "explicit" ? "Explicit" : "Clean"}
+        releaseDate={track.release_date}
+        description={track.description}
         coverSignedUrl={coverSignedUrl}
         initialRating={initialRating}
+        initialFeedbackBody={typeof myFeedbackRow?.body === "string" ? myFeedbackRow.body : ""}
+        feedbackModerationStatus={
+          typeof myFeedbackRow?.moderation_status === "string" ? myFeedbackRow.moderation_status : null
+        }
       />
     </div>
   );

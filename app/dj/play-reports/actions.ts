@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getDjContext } from "@/lib/dj/context";
+import { getApprovedDjCatalogContext } from "@/lib/dj/context";
 import { notifyTrackPlayReported } from "@/lib/notifications/events";
 import type { CrowdReaction } from "@/lib/types/database";
 
@@ -12,7 +12,7 @@ export async function submitPlayReport(
   _prev: { error?: string } | null,
   formData: FormData,
 ): Promise<{ error?: string }> {
-  const ctx = await getDjContext();
+  const ctx = await getApprovedDjCatalogContext();
   if ("error" in ctx) return { error: ctx.error };
 
   const trackId = formData.get("track_id")?.toString().trim() ?? "";
