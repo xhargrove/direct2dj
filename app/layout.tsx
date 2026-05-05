@@ -24,9 +24,35 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://direct2dj.vercel.app"),
   title: "Digital Service Pack — Promos built for the booth",
   description:
     "A sleek promo lane from artists to DJs: discovery, downloads, and reporting — without the inbox chaos.",
+  icons: {
+    icon: "/site-logo.png",
+    apple: "/site-logo.png",
+  },
+  openGraph: {
+    title: "Digital Service Pack — Promos built for the booth",
+    description:
+      "A sleek promo lane from artists to DJs: discovery, downloads, and reporting — without the inbox chaos.",
+    images: [
+      {
+        url: "/site-logo.png",
+        width: 1024,
+        height: 1024,
+        alt: "Digital Service Pack logo",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Digital Service Pack — Promos built for the booth",
+    description:
+      "A sleek promo lane from artists to DJs: discovery, downloads, and reporting — without the inbox chaos.",
+    images: ["/site-logo.png"],
+  },
 };
 
 export const viewport: Viewport = {

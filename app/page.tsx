@@ -79,12 +79,13 @@ export default async function Home() {
             </h1>
 
             <p className="dj-brand mt-5 max-w-xl text-xl font-semibold tracking-tight text-zinc-800 dark:text-zinc-100 sm:text-2xl">
-              Promos that hit the floor — not the spam folder.
+              DJ-ready promos. Delivered clean. Played loud.
             </p>
 
             <p className="dj-lede mt-4 max-w-xl">
-              One lane from artists to DJs: discovery, downloads, and play reporting — with real auth,
-              encrypted storage, and billing paths when you&apos;re ready to move crowds.
+              Digital Service Pack gives artists one professional lane to get music directly to DJs — with curated
+              discovery, secure DJ pack downloads, playlist access, feedback, and play reporting built for real campaign
+              movement.
             </p>
 
             <p className="mt-6 text-center lg:text-left">
@@ -140,28 +141,31 @@ export default async function Home() {
           <div className="dj-feature-tile flex flex-col gap-3 text-left">
             <IconWave />
             <h2 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-              Sound-first discovery
+              Curated DJ Discovery
             </h2>
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              Dig tracks in a feed built for headphones — less noise, more cuts worth spinning tonight.
+              Browse new music in a clean feed built for DJs — organized, searchable, and focused on records worth
+              playing.
             </p>
           </div>
           <div className="dj-feature-tile flex flex-col gap-3 text-left">
             <IconDeck />
             <h2 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-              Booth workflow
+              Download-Ready DJ Packs
             </h2>
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              Download, cue, and report plays without drowning in DMs or mystery links.
+              Artists can deliver clean edits, dirty versions, instrumentals, acapellas, artwork, and metadata in one
+              professional pack.
             </p>
           </div>
           <div className="dj-feature-tile flex flex-col gap-3 text-left">
             <IconSignal />
             <h2 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-              Ready when you scale
+              Built for Real Campaigns
             </h2>
             <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-              Solid Postgres + RLS, private assets, and subscription flows when the room gets bigger.
+              Track downloads, DJ feedback, playlist adds, and play reporting — with secure storage, verified access,
+              and billing when you&apos;re ready to scale.
             </p>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getUnreadNotificationCount } from "@/app/notifications/actions";
 import { requireRoles } from "@/lib/auth/require-role";
@@ -20,9 +21,19 @@ export default async function ArtistLayout({
   return (
     <div className="flex min-h-full flex-col">
       <header className="dj-header flex min-h-14 flex-wrap items-center justify-between gap-3 px-4 py-3">
-        <div className="flex flex-col gap-0.5">
-          <span className="dj-brand text-sm font-semibold leading-none tracking-tight">Digital Service Pack</span>
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">Artist booth</span>
+        <div className="flex items-center gap-2">
+          <Image
+            src="/site-logo.png"
+            alt="Digital Service Pack logo"
+            width={28}
+            height={28}
+            className="rounded-md"
+            priority
+          />
+          <div className="flex flex-col gap-0.5">
+            <span className="dj-brand text-sm font-semibold leading-none tracking-tight">Digital Service Pack</span>
+            <span className="text-xs text-zinc-500 dark:text-zinc-400">Artist booth</span>
+          </div>
         </div>
         <nav className="flex flex-wrap items-center gap-3 text-sm font-medium">
           <Link className="dj-nav-link hover:underline" href="/artist/dashboard">
