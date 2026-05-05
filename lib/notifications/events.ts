@@ -315,3 +315,69 @@ export async function notifyDjApplicationResult(djProfileId: string, approved: b
     metadata: { href: approved ? "/dj/feed" : "/dj/application-status" },
   });
 }
+
+const DJ_NOTIFY_CHUNK = 150;
+
+/**
+ * Notify all **approved** DJs when a track becomes visible in Discover (approved + catalog_active).
+ * Runs once per track (`tracks.dj_catalog_notify_sent_at`).
+ */
+export async function notifyApprovedDjsCatalogTrackLive(trackId: string): Promise<void> {
+  const admin = createServiceRoleClientOrNull();
+  if (!admin) return;
+
+  const { data: track } = await admin
+    .from("tracks")
+    .select("id, title, genre, moderation_status, catalog_active, dj_catalog_notify_sent_at")
+    .eq("id", trackId)
+    .maybeSingle();
+
+  if (!track) return;
+  if (track.moderation_status !== "approved" || track.catalog_active !== true) return;
+  if (track.dj_catalog_notify_sent_at) return;
+
+  const title =
+    typeof track.title === "string" && track.title.trim().length > 0 ? track.title.trim() : "New track";
+  const genre = typeof track.genre === "string" && track.genre.trim().length > 0 ? track.genre.trim() : null;
+
+  const { data: djRows, error: djErr } = await admin
+    .from("djs")
+    .select("profile_id")
+    .eq("vetting_status", "approved");
+
+  if (djErr) {
+    console.error("[notifications] notifyApprovedDjsCatalogTrackLive dj query:", djErr.message);
+    return;
+  }
+
+  const userIds = [
+    ...new Set((djRows ?? []).map((r) => r.profile_id).filter((id): id is string => typeof id === "string")),
+  ];
+  if (userIds.length === 0) return;
+
+  const body = genre
+    ? `“${title}” (${genre}) is live in Discover — open it in your DJ deck.`
+    : `“${title}” is live in Discover — open it in your DJ deck.`;
+
+  for (let i = 0; i < userIds.length; i += DJ_NOTIFY_CHUNK) {
+    const slice = userIds.slice(i, i + DJ_NOTIFY_CHUNK);
+    await emitNotifications(
+      slice.map((userId) => ({
+        userId,
+        kind: "catalog_new_track" as const,
+        title: "New track in Discover",
+        body,
+        metadata: { track_id: trackId, href: `/dj/tracks/${trackId}` },
+      })),
+    );
+  }
+
+  const { error: markErr } = await admin
+    .from("tracks")
+    .update({ dj_catalog_notify_sent_at: new Date().toISOString() })
+    .eq("id", trackId);
+
+  if (markErr) {
+    console.error("[notifications] dj_catalog_notify_sent_at update failed:", markErr.message);
+  }
+}

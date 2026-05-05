@@ -14,4 +14,5 @@ export type NotificationKind =
   | "featured_new_for_dj"
   | "rated_track_updated"
   | "dj_application_approved"
-  | "dj_application_rejected";
+  | "dj_application_rejected"
+  | "catalog_new_track";

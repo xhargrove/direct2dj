@@ -110,6 +110,8 @@ export type Track = {
   is_draft: boolean;
   rejection_reason: string | null;
   catalog_active: boolean;
+  /** Set when DJs were notified this track entered the catalog (fan-out idempotency). */
+  dj_catalog_notify_sent_at: string | null;
   admin_tags: string[];
 };
 

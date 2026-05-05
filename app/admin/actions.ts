@@ -8,6 +8,7 @@ import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import {
   notifyArtistPlayVerifiedAdmin,
   notifyDjApplicationResult,
+  notifyApprovedDjsCatalogTrackLive,
   notifyTrackApproved,
   notifyTrackRejected,
   sweepFeaturedPlacementNotifications,
@@ -34,6 +35,7 @@ export async function approveTrack(trackId: string) {
   if (rpcErr) return { error: rpcErr.message };
 
   await notifyTrackApproved(trackId);
+  await notifyApprovedDjsCatalogTrackLive(trackId);
 
   revalidatePath("/admin/submissions");
   revalidatePath(`/admin/submissions/${trackId}`);
@@ -80,9 +82,15 @@ export async function setTrackCatalogActive(trackId: string, catalogActive: bool
 
   if (error) return { error: error.message };
 
+  if (catalogActive) {
+    await notifyApprovedDjsCatalogTrackLive(trackId);
+  }
+
   revalidatePath("/admin/tracks");
   revalidatePath(`/admin/submissions/${trackId}`);
   revalidatePath(`/admin/tracks/${trackId}`);
+  revalidatePath("/dj/feed");
+  revalidatePath(`/dj/tracks/${trackId}`);
   return { ok: true as const };
 }
 
