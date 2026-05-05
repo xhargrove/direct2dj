@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
 
-  const [{ count: pendingSubmissions }, { count: totalTracks }, { data: featuredRows }] =
+  const [{ count: pendingSubmissions }, { count: totalTracks }, { data: featuredRows }, { count: pendingDjApps }] =
     await Promise.all([
       supabase
         .from("tracks")
@@ -16,6 +16,10 @@ export default async function AdminDashboardPage() {
         .from("featured_placements")
         .select("starts_at, ends_at, moderation_status")
         .eq("moderation_status", "approved"),
+      supabase
+        .from("djs")
+        .select("*", { count: "exact", head: true })
+        .eq("vetting_status", "pending"),
     ]);
 
   // Request-time snapshot for featured window display (not cache-revalidated UI).
@@ -50,7 +54,7 @@ export default async function AdminDashboardPage() {
         </Link>
       </section>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-4">
         <Link
           href="/admin/submissions"
           className="rounded-lg border border-zinc-200 p-4 transition hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900"
@@ -71,6 +75,13 @@ export default async function AdminDashboardPage() {
         >
           <div className="text-3xl font-semibold">{liveFeatured ?? 0}</div>
           <div className="text-xs text-zinc-500">Live featured (in window)</div>
+        </Link>
+        <Link
+          href="/admin/dj-applications"
+          className="rounded-lg border border-zinc-200 p-4 transition hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900"
+        >
+          <div className="text-3xl font-semibold">{pendingDjApps ?? 0}</div>
+          <div className="text-xs text-zinc-500">Pending DJ applications</div>
         </Link>
       </div>
 

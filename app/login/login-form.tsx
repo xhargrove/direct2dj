@@ -18,6 +18,7 @@ const WORKSPACE = {
 } as const;
 
 type WorkspaceKey = keyof typeof WORKSPACE;
+type SignupRole = "artist" | "dj";
 
 function workspaceFromNextParam(next: string | null): WorkspaceKey {
   if (!next?.startsWith("/")) return "artist";
@@ -40,6 +41,7 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
   const [feedback, setFeedback] = useState<{ text: string; variant: "error" | "info" } | null>(null);
   const [pending, setPending] = useState(false);
   const [workspace, setWorkspace] = useState<WorkspaceKey>(() => workspaceFromNextParam(nextParam));
+  const [signupRole, setSignupRole] = useState<SignupRole>("artist");
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -54,7 +56,7 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
         password,
         options: {
           emailRedirectTo: `${origin}/auth/callback`,
-          data: { full_name: fullName },
+          data: { full_name: fullName, signup_role: signupRole },
         },
       });
       setPending(false);
@@ -116,7 +118,11 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
       !deepLink!.includes("?") &&
       !deepLink!.includes("#");
 
-    const destinationPath = hasSafeDeepLink ? deepLink! : WORKSPACE[workspace];
+    const destinationPath = hasSafeDeepLink
+      ? deepLink!
+      : showLoginRoleSelector
+        ? WORKSPACE[workspace]
+        : fallback;
 
     router.push(safeAppPath(destinationPath, fallback));
     router.refresh();
@@ -203,6 +209,38 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
                 still controls access — wrong picks redirect to your actual dashboard.
               </>
             )}
+          </p>
+        </div>
+      ) : null}
+
+      {mode === "signup" ? (
+        <div className="space-y-2">
+          <p className="text-center text-xs font-medium text-zinc-700 dark:text-zinc-300 sm:text-left">
+            Create account as
+          </p>
+          <div className="flex gap-2 rounded-xl border border-white/10 bg-black/20 p-1 dark:border-white/10 dark:bg-black/30">
+            {(
+              [
+                { key: "artist" as const, label: "Artist" },
+                { key: "dj" as const, label: "DJ" },
+              ] as const
+            ).map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setSignupRole(key)}
+                className={`min-h-11 flex-1 rounded-lg px-2 text-sm font-medium transition ${
+                  signupRole === key
+                    ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-100 dark:text-zinc-950"
+                    : "text-zinc-600 dark:text-zinc-400"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            Admin access cannot be self-selected. DJs will be sent to the application flow for vetting review.
           </p>
         </div>
       ) : null}
