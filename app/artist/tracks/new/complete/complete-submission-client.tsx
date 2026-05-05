@@ -5,26 +5,17 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { finalizeSubmissionFromStripeSession } from "@/app/artist/tracks/actions";
 
-export function CompleteSubmissionClient() {
+function CompleteSubmissionPoll({ sessionId }: { sessionId: string }) {
   const router = useRouter();
-  const params = useSearchParams();
-  const sessionId = params.get("session_id");
   const [msg, setMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!sessionId) {
-      setMsg("Missing checkout session.");
-      return;
-    }
-
-    const sid = sessionId;
-
     let cancelled = false;
     let attempts = 0;
     const max = 12;
 
     async function tick() {
-      const r = await finalizeSubmissionFromStripeSession(sid);
+      const r = await finalizeSubmissionFromStripeSession(sessionId);
       if (cancelled) return;
 
       if (r.ok) {
@@ -56,7 +47,7 @@ export function CompleteSubmissionClient() {
   }, [sessionId, router]);
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-4">
+    <>
       <h1 className="text-2xl font-semibold tracking-tight">Opening your DJ pack…</h1>
       {msg ? (
         <>
@@ -70,6 +61,33 @@ export function CompleteSubmissionClient() {
       ) : (
         <p className="text-sm text-zinc-600 dark:text-zinc-400">Confirming payment with Stripe.</p>
       )}
+    </>
+  );
+}
+
+export function CompleteSubmissionClient() {
+  const params = useSearchParams();
+  const sessionId = params.get("session_id");
+
+  if (!sessionId) {
+    return (
+      <div className="mx-auto flex w-full max-w-lg flex-col gap-4">
+        <h1 className="text-2xl font-semibold tracking-tight">Checkout session missing</h1>
+        <p className="text-sm text-red-600 dark:text-red-400">
+          Return from Stripe after payment, or start again from New DJ pack.
+        </p>
+        <p className="text-center text-sm">
+          <Link href="/artist/tracks/new" className="underline">
+            New DJ pack
+          </Link>
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto flex w-full max-w-lg flex-col gap-4">
+      <CompleteSubmissionPoll sessionId={sessionId} />
     </div>
   );
 }

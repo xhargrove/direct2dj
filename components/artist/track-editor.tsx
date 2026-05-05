@@ -292,6 +292,7 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
       {!readOnly ? (
         <section className="border-t border-zinc-200 pt-8 dark:border-zinc-800">
           <DjPackUploader
+            key={[...files].map((f) => f.id).sort().join(",")}
             trackId={track.id}
             files={files}
             readOnly={readOnly}

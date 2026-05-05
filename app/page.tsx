@@ -4,6 +4,9 @@ import { dashboardPathForRole } from "@/lib/auth/paths";
 import { isUserRole } from "@/lib/types/roles";
 import { ClubHeroVisual } from "@/components/marketing/club-hero-visual";
 
+/** `cookies()` via Supabase client — must not be statically prerendered. */
+export const dynamic = "force-dynamic";
+
 function IconWave() {
   return (
     <svg className="h-8 w-8 shrink-0 text-cyan-400/90" viewBox="0 0 24 24" fill="none" aria-hidden>

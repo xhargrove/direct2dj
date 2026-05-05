@@ -10,8 +10,12 @@ export async function signCoverPaths(
   const map = new Map<string, string>();
   await Promise.all(
     unique.map(async (path) => {
-      const { data, error } = await supabase.storage.from("promos").createSignedUrl(path, 3600);
-      if (!error && data?.signedUrl) map.set(path, data.signedUrl);
+      try {
+        const { data, error } = await supabase.storage.from("promos").createSignedUrl(path, 3600);
+        if (!error && data?.signedUrl) map.set(path, data.signedUrl);
+      } catch {
+        /* avoid failing RSC when storage/network rejects */
+      }
     }),
   );
   return map;

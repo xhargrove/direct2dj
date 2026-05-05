@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { packSlotToTrackFileKind } from "@/lib/tracks/file-kind";
 import {
@@ -33,10 +33,6 @@ export function DjPackUploader({
   const [slotPhase, setSlotPhase] = useState<Partial<Record<PackSlot, SlotState>>>({});
   const [slotPct, setSlotPct] = useState<Partial<Record<PackSlot, number>>>({});
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    setFiles(initialFiles);
-  }, [initialFiles]);
 
   const bySlot = useMemo(() => {
     const m = new Map<PackSlot, TrackFile>();

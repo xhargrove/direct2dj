@@ -4,6 +4,8 @@ import { DjTrackCard } from "@/components/dj/track-card";
 import { signCoverPaths } from "@/lib/dj/cover-sign";
 import { createClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Featured on Direct 2 DJ",
   description:
@@ -25,14 +27,28 @@ type FeaturedPublicRow = {
 };
 
 export default async function PublicFeaturedPage() {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("public_active_featured_tracks", { p_limit: 24 });
+  let rows: FeaturedPublicRow[] = [];
+  let rpcError: { message: string } | null = null;
+  let coverMap = new Map<string, string>();
 
-  const rows = (data ?? []) as FeaturedPublicRow[];
-  const coverMap = await signCoverPaths(
-    supabase,
-    rows.map((r) => r.cover_storage_path),
-  );
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("public_active_featured_tracks", { p_limit: 24 });
+    if (error) {
+      rpcError = error;
+    } else {
+      rows = (data ?? []) as FeaturedPublicRow[];
+      coverMap = await signCoverPaths(
+        supabase,
+        rows.map((r) => r.cover_storage_path),
+      );
+    }
+  } catch (e) {
+    console.error("[featured] load failed", e);
+    rpcError = { message: e instanceof Error ? e.message : "Load failed" };
+  }
+
+  const error = rpcError;
 
   return (
     <main className="relative flex flex-1 flex-col overflow-x-hidden">
