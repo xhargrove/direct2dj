@@ -81,7 +81,7 @@ Unit tests: `npm test` (Vitest) cover `lib/dj/catalog-validation` only. **RLS** 
 
 ## Exact local commands
 
-From repository root (`direct2dj/`):
+From repository root:
 
 ```bash
 # CLI: use the repo devDependency (no global install required):

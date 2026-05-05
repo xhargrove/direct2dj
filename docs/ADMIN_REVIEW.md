@@ -1,4 +1,4 @@
-# Admin review system — Direct 2 DJ
+# Admin review system — Digital Service Pack
 
 Canonical implementation lives in `app/admin/*`, `app/api/admin/sign-storage`, `lib/admin/*`, and Supabase migrations. **Do not** add parallel admin trees or a second sign-URL path. The app uses the **anon/publishable** Supabase client with the user session (RLS). **Do not** use the service role key in normal app flows.
 

@@ -50,7 +50,7 @@ export default async function DjLayout({
     <div className="flex min-h-full flex-col">
       <header className="dj-header flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-col gap-0.5">
-          <span className="dj-brand text-sm font-semibold leading-none tracking-tight">Direct 2 DJ</span>
+          <span className="dj-brand text-sm font-semibold leading-none tracking-tight">Digital Service Pack</span>
           <span className="text-xs text-zinc-500 dark:text-zinc-400">DJ deck</span>
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">

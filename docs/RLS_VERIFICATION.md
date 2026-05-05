@@ -1,4 +1,4 @@
-# RLS verification — Direct 2 DJ domain schema
+# RLS verification — Digital Service Pack domain schema
 
 This document maps **intended access rules** to **implemented enforcement** (RLS policies + `SECURITY DEFINER` helpers + triggers). It does not replace SQL migrations; it is the human-readable audit trail.
 

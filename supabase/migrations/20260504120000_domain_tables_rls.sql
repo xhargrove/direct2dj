@@ -1,4 +1,4 @@
--- Direct 2 DJ — domain tables (artists, tracks, DJs, packs, engagement) + RLS
+-- Digital Service Pack — domain tables (artists, tracks, DJs, packs, engagement) + RLS
 -- Depends on: 20260503120000_init_direct2dj.sql (profiles, is_admin, handle_updated_at)
 
 begin;

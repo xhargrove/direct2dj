@@ -21,7 +21,7 @@ export default async function LoginPage() {
           D2
         </div>
         <p className="dj-brand text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-          Direct 2 DJ
+          Digital Service Pack
         </p>
         <p className="max-w-xs text-sm text-zinc-600 dark:text-zinc-400">
           Sign in and step into your booth.

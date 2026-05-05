@@ -1,4 +1,4 @@
--- Direct 2 DJ — foundation schema, RLS, private promo storage
+-- Digital Service Pack — foundation schema, RLS, private promo storage
 -- Apply with Supabase CLI (`supabase db push`) or Dashboard SQL editor.
 
 begin;

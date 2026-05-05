@@ -1,6 +1,6 @@
 # Deployment checklist (production)
 
-Use this before pointing a production domain at Direct 2 DJ.
+Use this before pointing a production domain at Digital Service Pack.
 
 ## Supabase
 

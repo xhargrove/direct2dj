@@ -1,10 +1,10 @@
 -- ============================================================================
--- Direct 2 DJ — LOCAL DATABASE SEED ONLY (supabase db reset)
+-- Digital Service Pack — LOCAL DATABASE SEED ONLY (supabase db reset)
 -- ============================================================================
 -- • Runs after migrations as the database owner (auth.uid() is null).
 -- • Phase 4.5 smoke accounts use @example.com — local/staging only; never production.
 -- • Shared password (local smoke only): Password123!
--- • Legacy @direct2dj.test users were replaced by deterministic smoke identities below.
+-- • Legacy smoke-domain users were replaced by deterministic smoke identities below.
 -- • Do not run this file against production.
 -- ============================================================================
 

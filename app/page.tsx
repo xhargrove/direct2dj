@@ -75,7 +75,7 @@ export default async function Home() {
             </p>
 
             <h1 className="dj-brand dj-glow-text max-w-[14ch] text-balance text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
-              Direct 2 DJ
+              Digital Service Pack
             </h1>
 
             <p className="dj-brand mt-5 max-w-xl text-xl font-semibold tracking-tight text-zinc-800 dark:text-zinc-100 sm:text-2xl">

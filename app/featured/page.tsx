@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Featured on Direct 2 DJ",
+  title: "Featured on Digital Service Pack",
   description:
     "Tracks spotlighted in Discover right now. DJs sign in to open packs and download.",
 };

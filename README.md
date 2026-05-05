@@ -1,4 +1,4 @@
-# Direct 2 DJ
+# Digital Service Pack
 
 Promo pool web app for **independent artists** (upload DJ packs, analytics, featured placements) and **DJs** (vetting-gated catalog, downloads, ratings, play reports). **Admins** moderate tracks and DJs.
 

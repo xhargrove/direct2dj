@@ -1,4 +1,4 @@
-# Direct 2 DJ — foundation
+# Digital Service Pack — foundation
 
 This document describes the initial structure you asked for: **route map**, **database schema plan**, and **environment checklist**. The executable source of truth for SQL is `supabase/migrations/`.
 
@@ -91,7 +91,7 @@ Copy `.env.example` to `.env.local` for local development.
 |----------|----------------|-------|
 | `NEXT_PUBLIC_SUPABASE_URL` | App + middleware | Supabase project URL. |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | App + middleware | Browser-safe key (legacy name “anon”; publishable key in newer dashboards). Never use the service role key in `NEXT_PUBLIC_*`. |
-| `NEXT_PUBLIC_SITE_URL` | Redirects, emails (future) | Production domain, e.g. `https://direct2dj.com`. |
+| `NEXT_PUBLIC_SITE_URL` | Redirects, emails (future) | Production domain, e.g. your custom domain or Vercel URL. |
 | `STRIPE_SECRET_KEY` | Webhooks + server billing | Server-only; use test keys in preview/staging. |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Client Checkout / Elements (when you add them) | Safe to expose. |
 | `STRIPE_WEBHOOK_SECRET` | `POST /api/webhooks/stripe` | From Stripe Dashboard for this endpoint. |

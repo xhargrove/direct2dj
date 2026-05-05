@@ -47,7 +47,7 @@ export async function sendNotificationEmail(payload: EmailPayload): Promise<void
 
   const resend = process.env.RESEND_API_KEY?.trim();
   if (resend) {
-    const from = process.env.RESEND_FROM_EMAIL?.trim() || "Direct 2 DJ <onboarding@resend.dev>";
+    const from = process.env.RESEND_FROM_EMAIL?.trim() || "Digital Service Pack <onboarding@resend.dev>";
     await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {

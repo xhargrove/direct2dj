@@ -24,7 +24,7 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  title: "Direct 2 DJ — Promos built for the booth",
+  title: "Digital Service Pack — Promos built for the booth",
   description:
     "A sleek promo lane from artists to DJs: discovery, downloads, and reporting — without the inbox chaos.",
 };
