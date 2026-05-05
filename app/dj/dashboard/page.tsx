@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DjCrewRoster } from "@/components/dj/dj-crew-roster";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DjDashboardPage() {
@@ -9,15 +10,17 @@ export default async function DjDashboardPage() {
 
   let downloadCount = 0;
   let playCount = 0;
+  let djId: string | null = null;
 
   if (user) {
     const { data: dj } = await supabase.from("djs").select("id").eq("profile_id", user.id).maybeSingle();
-    if (dj) {
+    djId = dj?.id ?? null;
+    if (djId) {
       const { count: dc } = await supabase
         .from("downloads")
         .select("*", { count: "exact", head: true })
-        .eq("dj_id", dj.id);
-      const { data: plays } = await supabase.from("play_reports").select("play_count").eq("dj_id", dj.id);
+        .eq("dj_id", djId);
+      const { data: plays } = await supabase.from("play_reports").select("play_count").eq("dj_id", djId);
       downloadCount = dc ?? 0;
       playCount = (plays ?? []).reduce((s, r) => s + r.play_count, 0);
     }
@@ -42,6 +45,8 @@ export default async function DjDashboardPage() {
           <div className="text-xs text-zinc-500">Reported plays</div>
         </div>
       </div>
+
+      {djId ? <DjCrewRoster djId={djId} /> : null}
 
       <div className="flex flex-col gap-3">
         <Link

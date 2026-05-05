@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { DjCrewRoster } from "@/components/dj/dj-crew-roster";
 import { djTierLabel } from "@/lib/dj/tier-label";
 import { formatDateDisplay } from "@/lib/format/datetime-display";
 import { createClient } from "@/lib/supabase/server";
@@ -111,6 +112,8 @@ export default async function DjApplicationStatusPage({ searchParams }: Props) {
           </>
         ) : null}
       </dl>
+
+      <DjCrewRoster djId={dj.id} />
 
       <div className="flex flex-col gap-3 text-sm">
         {dj.vetting_status === "pending" || dj.vetting_status === "rejected" ? (
