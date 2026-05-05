@@ -98,9 +98,9 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
   return (
     <div className="w-full max-w-sm space-y-6">
       <div className="space-y-1 text-center sm:text-left">
-        <h1 className="text-2xl font-semibold tracking-tight">Sign in</h1>
+        <h1 className="dj-brand dj-glow-text text-2xl font-bold tracking-tight">Sign in</h1>
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Use your Supabase Auth email and password.
+          Enter your booth — Supabase email & password.
         </p>
       </div>
 
@@ -110,13 +110,13 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
         </p>
       ) : null}
 
-      <div className="flex gap-2 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-900">
+      <div className="flex gap-2 rounded-xl border border-white/10 bg-black/20 p-1 dark:border-white/10 dark:bg-black/30">
         <button
           type="button"
           onClick={() => setMode("signin")}
-          className={`min-h-11 flex-1 rounded-md px-3 text-sm font-medium transition ${
+          className={`min-h-11 flex-1 rounded-lg px-3 text-sm font-medium transition ${
             mode === "signin"
-              ? "bg-white shadow dark:bg-zinc-800"
+              ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-100 dark:text-zinc-950"
               : "text-zinc-600 dark:text-zinc-400"
           }`}
         >
@@ -125,9 +125,9 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
         <button
           type="button"
           onClick={() => setMode("signup")}
-          className={`min-h-11 flex-1 rounded-md px-3 text-sm font-medium transition ${
+          className={`min-h-11 flex-1 rounded-lg px-3 text-sm font-medium transition ${
             mode === "signup"
-              ? "bg-white shadow dark:bg-zinc-800"
+              ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-100 dark:text-zinc-950"
               : "text-zinc-600 dark:text-zinc-400"
           }`}
         >
@@ -145,7 +145,7 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
               autoComplete="name"
               value={fullName}
               onChange={(ev) => setFullName(ev.target.value)}
-              className="min-h-11 w-full rounded-md border border-zinc-200 bg-white px-3 text-base outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950"
+              className="min-h-11 w-full rounded-lg border border-zinc-200/80 bg-white/90 px-3 text-base outline-none ring-offset-2 backdrop-blur-sm focus-visible:ring-2 focus-visible:ring-cyan-500/40 dark:border-white/10 dark:bg-black/40 dark:focus-visible:ring-fuchsia-500/35"
             />
           </label>
         ) : null}
@@ -159,7 +159,7 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
             required
             value={email}
             onChange={(ev) => setEmail(ev.target.value)}
-            className="min-h-11 w-full rounded-md border border-zinc-200 bg-white px-3 text-base outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950"
+            className="min-h-11 w-full rounded-lg border border-zinc-200/80 bg-white/90 px-3 text-base outline-none ring-offset-2 backdrop-blur-sm focus-visible:ring-2 focus-visible:ring-cyan-500/40 dark:border-white/10 dark:bg-black/40 dark:focus-visible:ring-fuchsia-500/35"
           />
         </label>
 
@@ -173,7 +173,7 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
             minLength={8}
             value={password}
             onChange={(ev) => setPassword(ev.target.value)}
-            className="min-h-11 w-full rounded-md border border-zinc-200 bg-white px-3 text-base outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950"
+            className="min-h-11 w-full rounded-lg border border-zinc-200/80 bg-white/90 px-3 text-base outline-none ring-offset-2 backdrop-blur-sm focus-visible:ring-2 focus-visible:ring-cyan-500/40 dark:border-white/10 dark:bg-black/40 dark:focus-visible:ring-fuchsia-500/35"
           />
         </label>
 
@@ -184,7 +184,7 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
               name="workspace_role"
               value={selectedRole}
               onChange={(ev) => setSelectedRole(ev.target.value as UserRole)}
-              className="min-h-11 w-full rounded-md border border-zinc-200 bg-white px-3 text-base outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-zinc-400 dark:border-zinc-700 dark:bg-zinc-950"
+              className="min-h-11 w-full rounded-lg border border-zinc-200/80 bg-white/90 px-3 text-base outline-none ring-offset-2 backdrop-blur-sm focus-visible:ring-2 focus-visible:ring-cyan-500/40 dark:border-white/10 dark:bg-black/40 dark:focus-visible:ring-fuchsia-500/35"
             >
               {USER_ROLES.map((r) => (
                 <option key={r} value={r}>
@@ -211,11 +211,7 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
           </p>
         ) : null}
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="min-h-11 w-full rounded-md bg-zinc-900 px-4 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
-        >
+        <button type="submit" disabled={pending} className="dj-btn-primary w-full disabled:opacity-60">
           {pending ? "Working…" : mode === "signup" ? "Create account" : "Continue"}
         </button>
       </form>

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Syne } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,15 +16,23 @@ const geistMono = Geist_Mono({
   adjustFontFallback: true,
 });
 
+const syne = Syne({
+  variable: "--font-syne",
+  subsets: ["latin"],
+  display: "swap",
+  adjustFontFallback: true,
+});
+
 export const metadata: Metadata = {
-  title: "Direct 2 DJ",
-  description: "Promo pool platform for independent artists and DJs.",
+  title: "Direct 2 DJ — Promos built for the booth",
+  description:
+    "A sleek promo lane from artists to DJs: discovery, downloads, and reporting — without the inbox chaos.",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#18181b" }, { color: "#fafafa" }],
+  themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#05030a" }, { color: "#faf8ff" }],
 };
 
 export default function RootLayout({
@@ -35,9 +43,20 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${syne.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="relative min-h-full">
+        <div className="dj-atmosphere" aria-hidden>
+          <div className="dj-atmosphere__mesh" />
+          <div className="dj-atmosphere__orb dj-atmosphere__orb--cyan" />
+          <div className="dj-atmosphere__orb dj-atmosphere__orb--magenta" />
+          <div className="dj-atmosphere__orb dj-atmosphere__orb--violet" />
+          <div className="dj-atmosphere__grid" />
+          <div className="dj-atmosphere__noise" />
+          <div className="dj-atmosphere__vignette" />
+        </div>
+        <div className="relative z-[1] flex min-h-full flex-col">{children}</div>
+      </body>
     </html>
   );
 }

@@ -2,6 +2,44 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { dashboardPathForRole } from "@/lib/auth/paths";
 import { isUserRole } from "@/lib/types/roles";
+import { ClubHeroVisual } from "@/components/marketing/club-hero-visual";
+
+function IconWave() {
+  return (
+    <svg className="h-8 w-8 shrink-0 text-cyan-400/90" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M4 12h2l2-6 4 12 3-9 2 6h3"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function IconDeck() {
+  return (
+    <svg className="h-8 w-8 shrink-0 text-fuchsia-400/90" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="9" cy="13" r="4.25" stroke="currentColor" strokeWidth="1.75" />
+      <circle cx="16.5" cy="13" r="4.25" stroke="currentColor" strokeWidth="1.75" />
+      <path d="M12 6v3M12 17v2" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconSignal() {
+  return (
+    <svg className="h-8 w-8 shrink-0 text-violet-400/90" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M12 20v-4M8 20v-8M16 20V8M4 20V12"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
 
 export default async function Home() {
   const supabase = await createClient();
@@ -25,48 +63,97 @@ export default async function Home() {
   }
 
   return (
-    <div className="flex flex-1 flex-col items-center px-4 py-10 sm:py-16">
-      <div className="w-full max-w-lg space-y-8 text-center sm:text-left">
-        <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-          Independent promo pool
-        </p>
-        <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-          Direct 2 DJ
-        </h1>
-        <p className="text-pretty text-base leading-relaxed text-zinc-600 dark:text-zinc-400">
-          A mobile-first foundation for artists to send promos and DJs to discover them — backed by
-          Supabase Auth, Postgres with row level security, private storage, and Stripe-ready webhooks.
-        </p>
+    <main className="relative flex flex-1 flex-col overflow-x-hidden">
+      <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-24 pt-14 sm:pt-20 md:pt-28">
+        <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(300px,440px)] lg:gap-12 xl:gap-20">
+          <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
+            <p className="dj-kicker dj-eyebrow mb-3 justify-center lg:justify-start">
+              Independent promo pool
+            </p>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-          {openApp ? (
-            <Link
-              href={openApp.href}
-              className="inline-flex min-h-11 items-center justify-center rounded-md bg-zinc-900 px-5 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
-            >
-              {openApp.label}
-            </Link>
-          ) : null}
-          <Link
-            href="/login"
-            className={`inline-flex min-h-11 items-center justify-center rounded-md border border-zinc-300 px-5 text-sm font-medium text-zinc-900 transition hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-100 dark:hover:bg-zinc-900 ${
-              openApp ? "" : "sm:min-w-[10rem]"
-            }`}
-          >
-            {user ? "Switch account" : "Sign in"}
-          </Link>
-          {user ? (
-            <form action="/auth/sign-out" method="post" className="sm:ml-0">
-              <button
-                type="submit"
-                className="min-h-11 w-full rounded-md px-3 text-sm font-medium text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-400 sm:w-auto"
+            <h1 className="dj-brand dj-glow-text max-w-[14ch] text-balance text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
+              Direct 2 DJ
+            </h1>
+
+            <p className="dj-brand mt-5 max-w-xl text-xl font-semibold tracking-tight text-zinc-800 dark:text-zinc-100 sm:text-2xl">
+              Promos that hit the floor — not the spam folder.
+            </p>
+
+            <p className="dj-lede mt-4 max-w-xl">
+              One lane from artists to DJs: discovery, downloads, and play reporting — with real auth,
+              encrypted storage, and billing paths when you&apos;re ready to move crowds.
+            </p>
+
+            <div className="mt-10 flex w-full max-w-md flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center lg:justify-start">
+              {openApp ? (
+                <Link href={openApp.href} className="dj-btn-primary justify-center sm:min-w-[12rem]">
+                  {openApp.label}
+                </Link>
+              ) : null}
+              <Link
+                href="/login"
+                className={`dj-btn-ghost justify-center ${openApp ? "" : "sm:min-w-[11rem]"}`}
               >
-                Sign out
-              </button>
-            </form>
-          ) : null}
+                {user ? "Switch account" : "Enter the booth"}
+              </Link>
+              {user ? (
+                <form action="/auth/sign-out" method="post" className="flex justify-center lg:justify-start">
+                  <button
+                    type="submit"
+                    className="dj-nav-link rounded-full px-3 py-2 text-sm font-medium text-zinc-500 underline-offset-4 hover:underline dark:text-zinc-400"
+                  >
+                    Sign out
+                  </button>
+                </form>
+              ) : null}
+            </div>
+
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-3 text-xs font-medium uppercase tracking-wider text-zinc-500 lg:justify-start dark:text-zinc-500">
+              <span className="rounded-full border border-zinc-900/10 bg-white/90 px-3 py-1.5 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
+                Mobile-first deck
+              </span>
+              <span className="rounded-full border border-zinc-900/10 bg-white/90 px-3 py-1.5 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
+                Row-level security
+              </span>
+              <span className="rounded-full border border-zinc-900/10 bg-white/90 px-3 py-1.5 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
+                Stripe-ready
+              </span>
+            </div>
+          </div>
+
+          <ClubHeroVisual />
+        </div>
+
+        <div className="mt-24 grid gap-4 sm:grid-cols-3">
+          <div className="dj-feature-tile flex flex-col gap-3 text-left">
+            <IconWave />
+            <h2 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+              Sound-first discovery
+            </h2>
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              Dig tracks in a feed built for headphones — less noise, more cuts worth spinning tonight.
+            </p>
+          </div>
+          <div className="dj-feature-tile flex flex-col gap-3 text-left">
+            <IconDeck />
+            <h2 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+              Booth workflow
+            </h2>
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              Download, cue, and report plays without drowning in DMs or mystery links.
+            </p>
+          </div>
+          <div className="dj-feature-tile flex flex-col gap-3 text-left">
+            <IconSignal />
+            <h2 className="text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+              Ready when you scale
+            </h2>
+            <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+              Solid Postgres + RLS, private assets, and subscription flows when the room gets bigger.
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

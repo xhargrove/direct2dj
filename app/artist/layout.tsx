@@ -19,49 +19,46 @@ export default async function ArtistLayout({
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="flex min-h-14 flex-wrap items-center justify-between gap-3 border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
+      <header className="dj-header flex min-h-14 flex-wrap items-center justify-between gap-3 px-4 py-3">
         <div className="flex flex-col gap-0.5">
-          <span className="text-sm font-semibold leading-none">Direct 2 DJ</span>
-          <span className="text-xs text-zinc-500 dark:text-zinc-400">Artist</span>
+          <span className="dj-brand text-sm font-semibold leading-none tracking-tight">Direct 2 DJ</span>
+          <span className="text-xs text-zinc-500 dark:text-zinc-400">Artist booth</span>
         </div>
         <nav className="flex flex-wrap items-center gap-3 text-sm font-medium">
-          <Link className="text-zinc-700 hover:underline dark:text-zinc-300" href="/artist/dashboard">
+          <Link className="dj-nav-link hover:underline" href="/artist/dashboard">
             Dashboard
           </Link>
-          <Link className="text-zinc-700 hover:underline dark:text-zinc-300" href="/artist/tracks">
+          <Link className="dj-nav-link hover:underline" href="/artist/tracks">
             Tracks
           </Link>
-          <Link className="text-zinc-700 hover:underline dark:text-zinc-300" href="/artist/tracks/new">
+          <Link className="dj-nav-link hover:underline" href="/artist/tracks/new">
             New pack
           </Link>
-          <Link className="text-zinc-700 hover:underline dark:text-zinc-300" href="/artist/analytics">
+          <Link className="dj-nav-link hover:underline" href="/artist/analytics">
             Analytics
           </Link>
-          <Link className="text-zinc-700 hover:underline dark:text-zinc-300" href="/artist/play-reports">
+          <Link className="dj-nav-link hover:underline" href="/artist/play-reports">
             Play reports
           </Link>
-          <Link className="text-zinc-700 hover:underline dark:text-zinc-300" href="/artist/promote">
+          <Link className="dj-nav-link hover:underline" href="/artist/promote">
             Promote
           </Link>
-          <Link className="text-zinc-700 hover:underline dark:text-zinc-300" href="/artist/billing">
+          <Link className="dj-nav-link hover:underline" href="/artist/billing">
             Billing
           </Link>
         </nav>
         <div className="flex flex-wrap items-center gap-2">
           <NotificationBell initialUnread={unread} />
           <form action="/auth/sign-out" method="post">
-            <button
-              type="submit"
-              className="min-h-10 rounded-md px-3 text-sm font-medium text-zinc-700 underline-offset-4 hover:underline dark:text-zinc-300"
-            >
+            <button type="submit" className="dj-nav-link min-h-10 rounded-md px-3 text-sm font-medium hover:underline">
               Sign out
             </button>
           </form>
         </div>
       </header>
       <main className="flex flex-1 flex-col px-4 py-6">{children}</main>
-      <footer className="border-t border-zinc-200 px-4 py-4 text-center text-xs text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
-        <Link href="/" className="underline underline-offset-4">
+      <footer className="dj-footer px-4 py-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
+        <Link href="/" className="dj-nav-link underline underline-offset-4 hover:underline">
           Home
         </Link>
       </footer>
