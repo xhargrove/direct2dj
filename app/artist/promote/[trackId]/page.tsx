@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PlanCheckoutForms } from "@/components/artist/plan-checkout-form";
+import { StripePaymentsNotice } from "@/components/artist/stripe-payments-notice";
 import { createClient } from "@/lib/supabase/server";
 
 type Props = { params: Promise<{ trackId: string }> };
@@ -64,6 +65,8 @@ export default async function ArtistPromoteTrackPage({ params }: Props) {
           Track detail
         </Link>
       </div>
+
+      <StripePaymentsNotice />
 
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">{track.title?.trim() || "Untitled"}</h1>

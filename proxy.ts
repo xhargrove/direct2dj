@@ -9,7 +9,7 @@ function copyCookies(from: NextResponse, to: NextResponse) {
   }
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const sessionResponse = await updateSession(request);
 
   const pathname = request.nextUrl.pathname;

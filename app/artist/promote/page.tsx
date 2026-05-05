@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { StripePaymentsNotice } from "@/components/artist/stripe-payments-notice";
 import { createClient } from "@/lib/supabase/server";
 import type { Track } from "@/lib/types/database";
 
@@ -32,6 +33,8 @@ export default async function ArtistPromoteIndexPage() {
           catalog-visible packs can be promoted.
         </p>
       </div>
+
+      <StripePaymentsNotice />
 
       {tracks.length === 0 ? (
         <p className="text-sm text-zinc-500">

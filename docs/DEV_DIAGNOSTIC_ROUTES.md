@@ -18,6 +18,16 @@
 | **Secrets** | Uses **anon/publishable** key only (same as browser). Never uses service role. |
 | **Manual check** | Production: `curl -s -o /dev/null -w "%{http_code}" https://YOUR_DOMAIN/api/dev/supabase-auth` → **404**. |
 
+### `GET /api/dev/stripe-config`
+
+| | |
+|--|--|
+| **Purpose** | Validate `STRIPE_*` / `NEXT_PUBLIC_STRIPE_*` shape (test vs live match), optional `STRIPE_WEBHOOK_SECRET`, and **ping Stripe** with `balance.retrieve()` using the secret key. |
+| **Production** | **`404`** — dev only. |
+| **Secrets** | Response never includes key values. |
+
+**CLI (no dev server):** from repo root, `npm run verify:stripe` loads `.env.local` and runs the same API-style checks plus `balance.retrieve()`.
+
 ### Other `/api/*` (non-dev)
 
 | Route | Prod behavior |
@@ -34,3 +44,4 @@
 2. Confirm **`GET /api/dev/supabase-auth`** → **404**.
 3. Confirm **`POST /api/dev/supabase-auth`** → **404**.
 4. Search codebase for **`SUPABASE_SERVICE_ROLE_KEY`** in `app/` and `components/` — must appear **only** in server-only modules (API routes, `lib/supabase/service-role.ts`, server actions), never in client bundles.
+5. Confirm **`GET /api/dev/stripe-config`** → **404** on production.

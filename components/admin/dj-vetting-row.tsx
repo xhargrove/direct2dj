@@ -13,6 +13,17 @@ import type { DjTier, DjVettingStatus } from "@/lib/types/database";
 
 const TIERS: DjTier[] = ["verified", "club_dj", "radio_dj", "influencer_dj", "curator"];
 
+/** Fixed locale + options so SSR and client output match (default locale differs Node vs browser). */
+const DISPLAY_DATETIME: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: true,
+};
+
 type AppSnippet = {
   dj_name: string;
   city: string;
@@ -100,7 +111,7 @@ export function DjVettingRow({
           </div>
           <div>
             <dt className="text-zinc-500">Updated</dt>
-            <dd>{new Date(app.updated_at).toLocaleString()}</dd>
+            <dd>{new Date(app.updated_at).toLocaleString("en-US", DISPLAY_DATETIME)}</dd>
           </div>
         </dl>
       ) : (

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { ARTIST_CHECKOUT_UNAVAILABLE } from "@/lib/billing/stripe-user-copy";
 import { getStripe } from "@/lib/stripe/server";
 import { submissionStripeDescription } from "@/lib/billing/submission-tier-copy";
 import { getSiteUrl } from "@/lib/billing/site-url";
@@ -77,8 +78,9 @@ export async function createSubmissionCheckoutSession(input: {
   let stripe: ReturnType<typeof getStripe>;
   try {
     stripe = getStripe();
-  } catch {
-    return { error: "Stripe is not configured (STRIPE_SECRET_KEY)." };
+  } catch (e) {
+    console.error("[billing] Stripe client unavailable for submission checkout", e);
+    return { error: ARTIST_CHECKOUT_UNAVAILABLE };
   }
 
   const base = getSiteUrl();
@@ -122,12 +124,13 @@ export async function createSubmissionCheckoutSession(input: {
       },
     });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "Stripe checkout failed.";
-    return { error: msg };
+    console.error("[billing] submission Stripe Checkout session failed", e);
+    return { error: ARTIST_CHECKOUT_UNAVAILABLE };
   }
 
   if (!session.url) {
-    return { error: "Stripe did not return a checkout URL." };
+    console.error("[billing] submission Checkout session missing url");
+    return { error: ARTIST_CHECKOUT_UNAVAILABLE };
   }
 
   try {

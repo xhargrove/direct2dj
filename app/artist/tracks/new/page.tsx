@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { StripePaymentsNotice } from "@/components/artist/stripe-payments-notice";
 import { SubmissionCheckout, type SubmissionTierOption } from "@/components/artist/submission-checkout";
 import { loadSubmissionPricingPlans } from "@/lib/billing/load-submission-pricing-plans";
 import { createClient } from "@/lib/supabase/server";
@@ -26,6 +27,7 @@ export default async function NewTrackPage({ searchParams }: Props) {
           Checkout was canceled. You have not been charged.
         </p>
       ) : null}
+      <StripePaymentsNotice />
       <SubmissionCheckout tiers={tiers} />
       <p className="text-center text-sm">
         <Link href="/artist/tracks" className="underline">

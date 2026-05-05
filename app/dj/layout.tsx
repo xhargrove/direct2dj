@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { getUnreadNotificationCount } from "@/app/notifications/actions";
 import { requireRoles } from "@/lib/auth/require-role";
+import { getAdminWorkspaceTestBannerState } from "@/lib/auth/admin-workspace-test-banner-state";
+import { AdminWorkspaceTestBanner } from "@/components/admin/admin-workspace-test-banner";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { createClient } from "@/lib/supabase/server";
 
@@ -47,8 +49,11 @@ export default async function DjLayout({
     }
   }
 
+  const workspaceBanner = await getAdminWorkspaceTestBannerState();
+
   return (
     <div className="flex min-h-full flex-col">
+      {workspaceBanner.show ? <AdminWorkspaceTestBanner role={workspaceBanner.role} /> : null}
       <header className="dj-header flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
           <Image
@@ -56,7 +61,7 @@ export default async function DjLayout({
             alt="Digital Service Pack logo"
             width={28}
             height={28}
-            className="rounded-md"
+            className="h-7 w-7 shrink-0 rounded-md"
             priority
           />
           <div className="flex flex-col gap-0.5">

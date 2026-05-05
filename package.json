@@ -16,7 +16,9 @@
     "db:link": "npx supabase link",
     "smoke:accounts": "npx supabase db query --local -f supabase/verify-smoke-data.sql -o table",
     "db:status": "npx supabase status",
-    "types:supabase": "supabase gen types typescript --local --schema public > lib/types/database.generated.ts"
+    "types:supabase": "supabase gen types typescript --local --schema public > lib/types/database.generated.ts",
+    "verify:stripe": "node scripts/verify-stripe.cjs",
+    "verify:stripe-webhooks": "node scripts/verify-stripe-webhooks.cjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.2",

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { ARTIST_CHECKOUT_UNAVAILABLE } from "@/lib/billing/stripe-user-copy";
 import { getStripe } from "@/lib/stripe/server";
 import { getSiteUrl } from "@/lib/billing/site-url";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
@@ -68,8 +69,9 @@ export async function createFeaturedCheckoutSession(input: {
   let stripe: ReturnType<typeof getStripe>;
   try {
     stripe = getStripe();
-  } catch {
-    return { error: "Stripe is not configured (STRIPE_SECRET_KEY)." };
+  } catch (e) {
+    console.error("[billing] Stripe client unavailable for featured checkout", e);
+    return { error: ARTIST_CHECKOUT_UNAVAILABLE };
   }
 
   const base = getSiteUrl();
@@ -110,12 +112,13 @@ export async function createFeaturedCheckoutSession(input: {
     },
   });
   } catch (e) {
-    const msg = e instanceof Error ? e.message : "Stripe checkout failed.";
-    return { error: msg };
+    console.error("[billing] featured Stripe Checkout session failed", e);
+    return { error: ARTIST_CHECKOUT_UNAVAILABLE };
   }
 
   if (!session.url) {
-    return { error: "Stripe did not return a checkout URL." };
+    console.error("[billing] featured Checkout session missing url");
+    return { error: ARTIST_CHECKOUT_UNAVAILABLE };
   }
 
   try {

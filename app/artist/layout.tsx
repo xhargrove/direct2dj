@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { getUnreadNotificationCount } from "@/app/notifications/actions";
 import { requireRoles } from "@/lib/auth/require-role";
+import { getAdminWorkspaceTestBannerState } from "@/lib/auth/admin-workspace-test-banner-state";
+import { AdminWorkspaceTestBanner } from "@/components/admin/admin-workspace-test-banner";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { createClient } from "@/lib/supabase/server";
 
@@ -17,9 +19,11 @@ export default async function ArtistLayout({
     data: { user },
   } = await supabase.auth.getUser();
   const unread = user ? await getUnreadNotificationCount() : 0;
+  const workspaceBanner = await getAdminWorkspaceTestBannerState();
 
   return (
     <div className="flex min-h-full flex-col">
+      {workspaceBanner.show ? <AdminWorkspaceTestBanner role={workspaceBanner.role} /> : null}
       <header className="dj-header flex min-h-14 flex-wrap items-center justify-between gap-3 px-4 py-3">
         <div className="flex items-center gap-2">
           <Image
@@ -27,7 +31,7 @@ export default async function ArtistLayout({
             alt="Digital Service Pack logo"
             width={28}
             height={28}
-            className="rounded-md"
+            className="h-7 w-7 shrink-0 rounded-md"
             priority
           />
           <div className="flex flex-col gap-0.5">

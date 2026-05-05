@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { finalizeSubmissionFromStripeSession } from "@/app/artist/tracks/actions";
+import { ARTIST_CHECKOUT_UNAVAILABLE } from "@/lib/billing/stripe-user-copy";
 
 function CompleteSubmissionPoll({ sessionId }: { sessionId: string }) {
   const router = useRouter();
@@ -33,6 +34,11 @@ function CompleteSubmissionPoll({ sessionId }: { sessionId: string }) {
             "Still confirming payment. Try refreshing this page or open your tracks list in a moment.",
           );
         }
+        return;
+      }
+
+      if ("error" in r && r.error === "stripe_not_configured") {
+        setMsg(ARTIST_CHECKOUT_UNAVAILABLE);
         return;
       }
 

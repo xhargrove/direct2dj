@@ -4,6 +4,7 @@ import {
   type BillingFeaturedTier,
   type BillingSubmissionTier,
 } from "@/components/artist/billing-promo-cards";
+import { StripePaymentsNotice } from "@/components/artist/stripe-payments-notice";
 import { loadFeaturedPricingPlans } from "@/lib/billing/load-featured-pricing-plans";
 import { loadSubmissionPricingPlans } from "@/lib/billing/load-submission-pricing-plans";
 import { createClient } from "@/lib/supabase/server";
@@ -103,6 +104,8 @@ export default async function ArtistBillingPage({ searchParams }: Props) {
           Payments for DJ pack uploads and Discover featured placements. Activity syncs from Stripe after checkout.
         </p>
       </div>
+
+      <StripePaymentsNotice />
 
       <BillingPromoCards submissionTiers={submissionTiers} featuredTiers={featuredTiers} />
 

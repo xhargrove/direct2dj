@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { adminWorkspaceTestEnabled, getAdminWorkspaceTestSecret } from "@/lib/auth/admin-workspace-test";
 import { requireRoles } from "@/lib/auth/require-role";
+import { AdminWorkspaceTestMenu } from "@/components/admin/admin-workspace-test-menu";
 
 const nav = [
   { href: "/admin/dashboard", label: "Dashboard" },
@@ -22,6 +24,8 @@ export default async function AdminLayout({
 }) {
   await requireRoles(["admin"]);
 
+  const showWorkspaceTest = adminWorkspaceTestEnabled() && Boolean(getAdminWorkspaceTestSecret());
+
   return (
     <div className="flex min-h-full flex-col">
       <header className="dj-header flex min-h-14 flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
@@ -31,7 +35,7 @@ export default async function AdminLayout({
             alt="Digital Service Pack logo"
             width={28}
             height={28}
-            className="rounded-md"
+            className="h-7 w-7 shrink-0 rounded-md"
             priority
           />
           <div className="flex flex-col gap-0.5">
@@ -46,11 +50,14 @@ export default async function AdminLayout({
             </Link>
           ))}
         </nav>
-        <form action="/auth/sign-out" method="post">
-          <button type="submit" className="dj-nav-link min-h-10 rounded-md px-3 text-sm font-medium hover:underline">
-            Sign out
-          </button>
-        </form>
+        <div className="flex flex-col items-stretch gap-2 sm:items-end">
+          {showWorkspaceTest ? <AdminWorkspaceTestMenu /> : null}
+          <form action="/auth/sign-out" method="post">
+            <button type="submit" className="dj-nav-link min-h-10 rounded-md px-3 text-sm font-medium hover:underline">
+              Sign out
+            </button>
+          </form>
+        </div>
       </header>
       <main className="flex flex-1 flex-col px-4 py-6">{children}</main>
       <footer className="dj-footer px-4 py-4 text-center text-xs text-zinc-500 dark:text-zinc-400">

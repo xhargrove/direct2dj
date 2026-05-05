@@ -17,6 +17,11 @@ function validateStripeSecretKey(key: string): void {
   }
 }
 
+/** True when a Stripe secret key env value is present (does not validate key format). */
+export function hasStripeSecretKeyEnv(): boolean {
+  return Boolean(process.env.STRIPE_SECRET_KEY?.trim());
+}
+
 export function getStripe(): Stripe {
   if (!stripe) {
     const raw = process.env.STRIPE_SECRET_KEY;
