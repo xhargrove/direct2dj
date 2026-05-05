@@ -311,7 +311,9 @@ export default async function ArtistAnalyticsPage() {
                 className="flex flex-col gap-1 rounded-lg border border-zinc-200 px-4 py-3 text-sm dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div>
-                  <span className="font-medium">{row.dj_label}</span>
+                  <Link href={`/artist/djs/${row.dj_id}`} className="font-medium underline underline-offset-4">
+                    {row.dj_label}
+                  </Link>
                   <div className="mt-0.5 text-xs text-zinc-500">
                     {djTierLabel(row.dj_tier as DjTier | null)}
                     {row.city || row.state
