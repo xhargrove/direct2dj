@@ -99,4 +99,4 @@ These paths are the product contract for role dashboards. **Do not add a second 
 | `/admin/featured` | Featured placement management. |
 | `/admin/play-reports` | Play report verification. |
 
-**Also in app:** `/admin/dashboard`, `/admin/artists`, `/admin/artists/[id]`, `/admin/tracks/[id]`, `/admin/submissions/[id]`, etc.
+**Also in app:** `/admin/dashboard`, `/admin/artists`, `/admin/artists/[id]`, `/admin/tracks/[id]`, `/admin/tracks/[id]/analytics`, `/admin/submissions/[id]`, etc.

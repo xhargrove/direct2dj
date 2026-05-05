@@ -52,14 +52,28 @@ export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
       <AdminTrackBasicsForm track={track} />
 
       <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-        <h2 className="text-sm font-semibold">Artist</h2>
-        <p className="mt-1 text-sm">{artist.display_name}</p>
-        <p className="text-xs text-zinc-500">
-          {profile.full_name ?? profile.email ?? "—"} · {artist.status}
-        </p>
+        <h2 className="text-sm font-semibold">Release & account</h2>
+        <dl className="mt-3 space-y-3 text-sm">
+          {track.credit_artist_name?.trim() ? (
+            <div>
+              <dt className="text-xs text-zinc-500">Release credit</dt>
+              <dd className="mt-0.5 font-medium">{track.credit_artist_name.trim()}</dd>
+              <dd className="mt-1 text-xs text-zinc-500">Credited on the release (metadata).</dd>
+            </div>
+          ) : null}
+          <div>
+            <dt className="text-xs text-zinc-500">
+              {track.credit_artist_name?.trim() ? "Artist account" : "Artist"}
+            </dt>
+            <dd className="mt-0.5 font-medium">{artist.display_name}</dd>
+            <dd className="mt-1 text-xs text-zinc-500">
+              {profile.full_name ?? profile.email ?? "—"} · {artist.status}
+            </dd>
+          </div>
+        </dl>
         <Link
           href={`/admin/artists/${artist.id}`}
-          className="mt-2 inline-block text-sm font-medium text-zinc-700 underline underline-offset-4 dark:text-zinc-300"
+          className="mt-3 inline-block text-sm font-medium text-zinc-700 underline underline-offset-4 dark:text-zinc-300"
         >
           View artist profile
         </Link>
@@ -112,7 +126,15 @@ export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
       </section>
 
       <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-        <h2 className="text-sm font-semibold">DJ engagement</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold">DJ engagement</h2>
+          <Link
+            href={`/admin/tracks/${track.id}/analytics`}
+            className="text-sm font-medium text-zinc-700 underline underline-offset-4 dark:text-zinc-300"
+          >
+            Full analytics →
+          </Link>
+        </div>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div className="rounded-md border border-zinc-100 p-3 text-center dark:border-zinc-800">
             <div className="text-xl font-semibold">{engagement.downloadCount}</div>

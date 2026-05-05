@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { primaryReleaseArtistLabel, workspaceArtistNote } from "@/lib/admin/track-artist-labels";
 import { createClient } from "@/lib/supabase/server";
 
 type Row = {
@@ -52,20 +53,26 @@ export default async function AdminSubmissionsPage() {
         <p className="text-sm text-zinc-500">No pending submissions.</p>
       ) : (
         <ul className="flex flex-col gap-2">
-          {list.map((r) => (
-            <li key={r.id}>
-              <Link
-                href={`/admin/submissions/${r.id}`}
-                className="block rounded-lg border border-zinc-200 px-4 py-3 transition hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900"
-              >
-                <div className="font-medium">{r.title}</div>
-                <div className="text-xs text-zinc-500">
-                  {r.artists?.display_name ?? "Artist"} · {r.credit_artist_name} ·{" "}
-                  {new Date(r.created_at).toLocaleString()}
-                </div>
-              </Link>
-            </li>
-          ))}
+          {list.map((r) => {
+            const workspace = workspaceArtistNote(r.credit_artist_name, r.artists?.display_name);
+            return (
+              <li key={r.id}>
+                <Link
+                  href={`/admin/submissions/${r.id}`}
+                  className="block rounded-lg border border-zinc-200 px-4 py-3 transition hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900"
+                >
+                  <div className="font-medium">{r.title}</div>
+                  <div className="mt-0.5 text-sm text-zinc-700 dark:text-zinc-300">
+                    {primaryReleaseArtistLabel(r.credit_artist_name, r.artists?.display_name)}
+                  </div>
+                  {workspace ? (
+                    <div className="text-xs text-zinc-500">Account: {workspace}</div>
+                  ) : null}
+                  <div className="mt-1 text-xs text-zinc-500">{new Date(r.created_at).toLocaleString()}</div>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
