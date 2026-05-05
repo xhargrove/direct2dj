@@ -1,7 +1,10 @@
 "use server";
 
+import { randomBytes } from "crypto";
 import { revalidatePath } from "next/cache";
 import { getAdminContext } from "@/lib/admin/context";
+import { getSiteUrl } from "@/lib/billing/site-url";
+import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import {
   notifyArtistPlayVerifiedAdmin,
   notifyDjApplicationResult,
@@ -36,6 +39,9 @@ export async function approveTrack(trackId: string) {
   revalidatePath(`/admin/submissions/${trackId}`);
   revalidatePath("/admin/tracks");
   revalidatePath("/admin/dashboard");
+  revalidatePath("/dj/feed");
+  revalidatePath(`/dj/tracks/${trackId}`);
+  revalidatePath("/featured");
   return { ok: true as const };
 }
 
@@ -178,6 +184,73 @@ export async function adminCreateFreeDraftTrack(artistId: string) {
   revalidatePath("/admin/submissions");
   revalidatePath("/admin/dashboard");
   return { id: data };
+}
+
+/**
+ * Creates (if needed) a single `artists` row with profile_id = the signed-in admin, then opens a draft track.
+ * Pack files use the admin's storage prefix — no separate artist login or invite.
+ */
+export async function adminCreateHouseDraftTrack() {
+  const ctx = await getAdminContext();
+  if ("error" in ctx) return { error: ctx.error };
+
+  const { data: artistId, error: ensureErr } = await ctx.supabase.rpc("admin_ensure_house_artist");
+  if (ensureErr) return { error: ensureErr.message };
+  if (typeof artistId !== "string" || !artistId) {
+    return { error: "Could not create or load house artist. Apply migration admin_house_artist (admin_ensure_house_artist)." };
+  }
+
+  const { data: trackId, error: draftErr } = await ctx.supabase.rpc("admin_create_draft_track", {
+    p_artist_id: artistId,
+  });
+  if (draftErr) return { error: draftErr.message };
+  if (typeof trackId !== "string" || !trackId) {
+    return { error: "Could not create draft track." };
+  }
+
+  revalidatePath("/admin/tracks");
+  revalidatePath("/admin/submissions");
+  revalidatePath("/admin/dashboard");
+  return { id: trackId };
+}
+
+/** Removes promo storage objects for the track, then deletes the row (cascades related DB rows). Admin only. */
+export async function adminDeleteTrack(trackId: string) {
+  const ctx = await getAdminContext();
+  if ("error" in ctx) return { error: ctx.error };
+
+  const trimmed = trackId.trim();
+  if (!UUID_RE.test(trimmed)) {
+    return { error: "Invalid track." };
+  }
+
+  const { data: row, error: findErr } = await ctx.supabase.from("tracks").select("id").eq("id", trimmed).maybeSingle();
+  if (findErr) return { error: findErr.message };
+  if (!row) return { error: "Track not found." };
+
+  const { data: files } = await ctx.supabase
+    .from("track_files")
+    .select("storage_path")
+    .eq("track_id", trimmed);
+
+  const paths = (files ?? []).map((f) => f.storage_path).filter(Boolean);
+  if (paths.length > 0) {
+    const { error: rmErr } = await ctx.supabase.storage.from("promos").remove(paths);
+    if (rmErr) return { error: `Could not remove storage files: ${rmErr.message}` };
+  }
+
+  const { error: delErr } = await ctx.supabase.from("tracks").delete().eq("id", trimmed);
+  if (delErr) return { error: delErr.message };
+
+  revalidatePath("/admin/tracks");
+  revalidatePath("/admin/submissions");
+  revalidatePath("/admin/dashboard");
+  revalidatePath("/admin/featured");
+  revalidatePath(`/admin/tracks/${trimmed}`);
+  revalidatePath("/dj/feed");
+  revalidatePath("/featured");
+  revalidatePath("/artist/tracks");
+  return { ok: true as const };
 }
 
 const DJ_TIERS: DjTier[] = [
@@ -364,4 +437,128 @@ export async function verifyPlayReport(playReportId: string) {
   revalidatePath("/artist/play-reports");
   revalidatePath("/dj/play-reports");
   return { ok: true as const };
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Creates a new Auth user + profile + artist row with a chosen stage display name (server-only; uses service role).
+ */
+export async function adminCreateArtistAccount(input: {
+  email: string;
+  displayName: string;
+  profileFullName?: string;
+  mode: "invite" | "create_confirmed";
+}) {
+  const ctx = await getAdminContext();
+  if ("error" in ctx) return { error: ctx.error };
+
+  const email = input.email.trim().toLowerCase();
+  const displayName = input.displayName.trim();
+  const profileFullName = input.profileFullName?.trim();
+
+  if (!email || !EMAIL_RE.test(email)) {
+    return { error: "Enter a valid email address." };
+  }
+  if (!displayName) {
+    return { error: "Artist display name is required." };
+  }
+  if (displayName.length > 200) {
+    return { error: "Display name is too long." };
+  }
+
+  const metaFullName = profileFullName || displayName;
+
+  let admin;
+  try {
+    admin = createServiceRoleClient();
+  } catch {
+    return { error: "Server misconfiguration: SUPABASE_SERVICE_ROLE_KEY is not set." };
+  }
+
+  const redirectTo = `${getSiteUrl()}/auth/callback`;
+
+  let userId: string | null = null;
+  let methodMessage: string;
+
+  if (input.mode === "invite") {
+    const { data, error } = await admin.auth.admin.inviteUserByEmail(email, {
+      data: { full_name: metaFullName },
+      redirectTo,
+    });
+
+    if (error) {
+      return { error: error.message };
+    }
+    userId = data.user?.id ?? null;
+    methodMessage = "Invite sent. The user can follow the email link to finish signup.";
+  } else {
+    const { data, error } = await admin.auth.admin.createUser({
+      email,
+      email_confirm: true,
+      user_metadata: { full_name: metaFullName },
+      password: randomBytes(32).toString("base64url"),
+    });
+    if (error) {
+      return { error: error.message };
+    }
+    userId = data.user?.id ?? null;
+    methodMessage =
+      "Account created with a confirmed email. The user should use “Forgot password” on the login page to set a password.";
+  }
+
+  if (!userId) {
+    return { error: "User was not created." };
+  }
+
+  const { error: profileErr } = await admin
+    .from("profiles")
+    .update({
+      email,
+      full_name: metaFullName,
+      role: "artist",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", userId);
+
+  if (profileErr) {
+    return { error: profileErr.message };
+  }
+
+  const { data: existingArtist, error: findArtistErr } = await admin
+    .from("artists")
+    .select("id")
+    .eq("profile_id", userId)
+    .maybeSingle();
+
+  if (findArtistErr) {
+    return { error: findArtistErr.message };
+  }
+
+  if (existingArtist?.id) {
+    const { error: updErr } = await admin
+      .from("artists")
+      .update({ display_name: displayName, updated_at: new Date().toISOString() })
+      .eq("id", existingArtist.id);
+    if (updErr) {
+      return { error: updErr.message };
+    }
+  } else {
+    const { error: insErr } = await admin.from("artists").insert({
+      profile_id: userId,
+      display_name: displayName,
+      status: "active",
+    });
+    if (insErr) {
+      return { error: insErr.message };
+    }
+  }
+
+  revalidatePath("/admin/artists");
+  revalidatePath("/admin/tracks/new");
+
+  return {
+    ok: true as const,
+    message: `${methodMessage} Artist display name set to “${displayName}”.`,
+  };
 }

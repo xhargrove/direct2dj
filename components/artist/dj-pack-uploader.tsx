@@ -22,11 +22,14 @@ export function DjPackUploader({
   files: initialFiles,
   readOnly,
   onUploaded,
+  /** When set (admin track review only), pack files are stored under this profile id’s prefix — the artist’s account, not the admin’s. */
+  artistProfileIdForStorage,
 }: {
   trackId: string;
   files: TrackFile[];
   readOnly?: boolean;
   onUploaded?: () => void;
+  artistProfileIdForStorage?: string;
 }) {
   const router = useRouter();
   const [files, setFiles] = useState<TrackFile[]>(initialFiles);
@@ -55,6 +58,53 @@ export function DjPackUploader({
         return;
       }
 
+      setSlotPhase((s) => ({ ...s, [slot]: "uploading" }));
+      setSlotPct((s) => ({ ...s, [slot]: 8 }));
+
+      if (artistProfileIdForStorage?.trim()) {
+        setSlotPct((s) => ({ ...s, [slot]: 55 }));
+        const fd = new FormData();
+        fd.append("trackId", trackId);
+        fd.append("slot", slot);
+        fd.append("file", file);
+        const res = await fetch("/api/admin/tracks/pack-slot", {
+          method: "POST",
+          body: fd,
+        });
+        let r: { ok?: boolean; error?: string; file?: TrackFile };
+        try {
+          r = (await res.json()) as { ok?: boolean; error?: string; file?: TrackFile };
+        } catch {
+          setSlotPhase((s) => ({ ...s, [slot]: "error" }));
+          setError("Upload failed.");
+          return;
+        }
+        if (!res.ok || r.error) {
+          setSlotPhase((s) => ({ ...s, [slot]: "error" }));
+          setError(r.error ?? "Upload failed.");
+          return;
+        }
+        if (r.ok && r.file) {
+          setFiles((prev) => {
+            const rest = prev.filter((f) => f.pack_slot !== slot);
+            return [...rest, r.file as TrackFile];
+          });
+        }
+        setSlotPct((s) => ({ ...s, [slot]: 100 }));
+        setSlotPhase((s) => ({ ...s, [slot]: "done" }));
+        router.refresh();
+        onUploaded?.();
+        setTimeout(() => {
+          setSlotPhase((s) => ({ ...s, [slot]: "idle" }));
+          setSlotPct((s) => {
+            const n = { ...s };
+            delete n[slot];
+            return n;
+          });
+        }, 600);
+        return;
+      }
+
       const supabase = createClient();
       const {
         data: { user },
@@ -64,8 +114,9 @@ export function DjPackUploader({
         return;
       }
 
-      setSlotPhase((s) => ({ ...s, [slot]: "uploading" }));
-      setSlotPct((s) => ({ ...s, [slot]: 8 }));
+      const storagePrefix = user.id;
+
+      setSlotPct((s) => ({ ...s, [slot]: 12 }));
 
       const existing = bySlot.get(slot);
       if (existing?.storage_path) {
@@ -73,7 +124,7 @@ export function DjPackUploader({
         await supabase.from("track_files").delete().eq("id", existing.id);
       }
 
-      const path = `${user.id}/tracks/${trackId}/${slot}_${safeStorageFileName(file.name)}`;
+      const path = `${storagePrefix}/tracks/${trackId}/${slot}_${safeStorageFileName(file.name)}`;
       setSlotPct((s) => ({ ...s, [slot]: 35 }));
 
       const { error: upErr } = await supabase.storage
@@ -129,7 +180,7 @@ export function DjPackUploader({
         });
       }, 600);
     },
-    [bySlot, onUploaded, readOnly, router, trackId],
+    [artistProfileIdForStorage, bySlot, onUploaded, readOnly, router, trackId],
   );
 
   function slotProgress(slot: PackSlot) {

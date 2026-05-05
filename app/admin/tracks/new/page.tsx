@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { AdminAddArtistForm } from "@/components/admin/admin-add-artist-form";
+import { AdminHouseDraftButton } from "@/components/admin/admin-house-draft-button";
 import { AdminNewTrackForm } from "@/components/admin/admin-new-track-form";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,17 +22,45 @@ export default async function AdminNewTrackPage() {
   const rows = (artists ?? []) as { id: string; display_name: string }[];
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">New track (admin)</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">New DJ pack (admin)</h1>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          Create a draft for any artist without Stripe submission checkout. Use this for comps,
-          internal uploads, or waived fees — then finish metadata and packs from the track review
-          screen like any other submission.
+          Start a free draft for internal promos, DJ service drops, comps, or waived-fee releases — no artist submission
+          checkout. Use the quick path to upload under your own login, or assign the pack to another artist account
+          below.
         </p>
       </div>
 
-      <AdminNewTrackForm artists={rows} />
+      <section className="flex flex-col gap-3 rounded-lg border border-zinc-200 bg-zinc-50/80 px-4 py-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+        <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+          Quick upload (you as owner)
+        </h2>
+        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          No separate artist email or invite. Creates one internal “house” artist row tied to your admin profile so
+          files live under your account prefix. Put real promo / featured artist names in track metadata on the next
+          screen.
+        </p>
+        <AdminHouseDraftButton />
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+          1. Artist account (if they are not in the database yet)
+        </h2>
+        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          Use the same email/display name you want on promos. After saving, the page refreshes so you can select them in
+          step 2.
+        </p>
+        <AdminAddArtistForm />
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+          2. Create draft for that artist
+        </h2>
+        <AdminNewTrackForm key={rows.map((r) => r.id).join(",") || "no-artists"} artists={rows} />
+      </section>
 
       <p className="text-center text-sm">
         <Link href="/admin/tracks" className="underline underline-offset-4">

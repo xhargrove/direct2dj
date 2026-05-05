@@ -5,6 +5,7 @@ const nav = [
   { href: "/admin/dashboard", label: "Dashboard" },
   { href: "/admin/submissions", label: "Submissions" },
   { href: "/admin/tracks", label: "Tracks" },
+  { href: "/admin/tracks/new", label: "New DJ pack" },
   { href: "/admin/featured", label: "Featured" },
   { href: "/admin/artists", label: "Artists" },
   { href: "/admin/djs", label: "DJs" },

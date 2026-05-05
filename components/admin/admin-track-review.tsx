@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { AdminTrackBasicsForm } from "@/components/admin/admin-track-basics-form";
+import { DjPackUploader } from "@/components/artist/dj-pack-uploader";
 import type { TrackFile } from "@/lib/types/database";
 import { PACK_SLOT_LABELS, type PackSlot } from "@/lib/tracks/pack-slots";
 import type { TrackReviewBundle } from "@/lib/admin/load-track-for-review";
@@ -46,6 +48,8 @@ export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
           {track.featured_artist ? ` · Feat. ${track.featured_artist}` : ""}
         </p>
       </div>
+
+      <AdminTrackBasicsForm track={track} />
 
       <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
         <h2 className="text-sm font-semibold">Artist</h2>
@@ -159,7 +163,34 @@ export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
       </section>
 
       <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-        <h2 className="text-sm font-semibold">Pack files</h2>
+        <h2 className="text-sm font-semibold">DJ pack (for DJs)</h2>
+        {(track.is_draft ||
+          track.moderation_status !== "approved" ||
+          track.catalog_active === false) ? (
+          <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
+            DJs only see this pack when the track is <strong>approved</strong>, <strong>not a draft</strong>,{" "}
+            <strong>visible in catalog</strong>, and the artist is active. Artists can still see files here while the
+            release is being prepared.
+          </p>
+        ) : null}
+        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+          These files are what approved DJs download from the catalog. Files are stored under this artist&apos;s
+          account ({artist.display_name}), not your admin login. Uploads use the service role so Storage RLS does not
+          block artist paths. Ensure <code className="font-mono text-[11px]">SUPABASE_SERVICE_ROLE_KEY</code> is set in{" "}
+          <code className="font-mono text-[11px]">.env.local</code> for local admin uploads, or apply the promos admin
+          storage migration if you prefer browser-only uploads.
+        </p>
+        <div className="mt-4">
+          <DjPackUploader
+            trackId={track.id}
+            files={files}
+            artistProfileIdForStorage={artist.profile_id}
+          />
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+        <h2 className="text-sm font-semibold">Pack file previews</h2>
         <ul className="mt-4 flex flex-col gap-6">
           {files.map((f) => (
             <li key={f.id} className="border-b border-zinc-100 pb-6 last:border-0 last:pb-0 dark:border-zinc-800">

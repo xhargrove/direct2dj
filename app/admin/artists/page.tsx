@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminAddArtistForm } from "@/components/admin/admin-add-artist-form";
 import { createClient } from "@/lib/supabase/server";
 
 type Row = {
@@ -37,6 +38,8 @@ export default async function AdminArtistsPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Artists</h1>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">Linked accounts and lifecycle status.</p>
       </div>
+
+      <AdminAddArtistForm />
 
       <ul className="flex flex-col gap-2">
         {list.map((a) => (

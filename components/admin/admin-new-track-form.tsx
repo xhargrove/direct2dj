@@ -1,6 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { adminCreateFreeDraftTrack } from "@/app/admin/actions";
@@ -35,7 +36,8 @@ export function AdminNewTrackForm({
   if (artists.length === 0) {
     return (
       <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100">
-        No artists in the database yet. Create an artist account first, then open a free draft here.
+        No artists yet — complete step 1 above (&quot;Add artist account&quot;). When it succeeds, this page refreshes
+        and you can choose the artist here.
       </p>
     );
   }
@@ -58,7 +60,12 @@ export function AdminNewTrackForm({
           ))}
         </select>
         <span className="block text-xs font-normal text-zinc-500 dark:text-zinc-400">
-          The draft is owned by this artist; uploads use their promo storage prefix.
+          The draft is owned by this artist; uploads use their promo storage prefix. Need another login? Use step 1 on
+          this page or{" "}
+          <Link href="/admin/artists" className="underline underline-offset-4">
+            Admin → Artists
+          </Link>
+          .
         </span>
       </label>
 
@@ -67,7 +74,7 @@ export function AdminNewTrackForm({
         disabled={pending}
         className="inline-flex min-h-11 items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white"
       >
-        {pending ? "Creating…" : "Create draft (no submission fee)"}
+        {pending ? "Creating…" : "Create draft — upload DJ pack next"}
       </button>
 
       {error ? (

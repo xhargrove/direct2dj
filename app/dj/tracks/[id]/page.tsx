@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { unstable_noStore as noStore } from "next/cache";
 import { TrackDetailPanel } from "@/components/dj/track-detail-panel";
 import { signCoverPaths } from "@/lib/dj/cover-sign";
 import { createClient } from "@/lib/supabase/server";
@@ -7,6 +8,7 @@ import type { CrowdReaction, Track } from "@/lib/types/database";
 type Props = { params: Promise<{ id: string }> };
 
 export default async function DjTrackDetailPage({ params }: Props) {
+  noStore();
   const { id } = await params;
   const supabase = await createClient();
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminDeleteTrackButton } from "@/components/admin/admin-delete-track-button";
 import { createClient } from "@/lib/supabase/server";
 
 type Row = {
@@ -41,14 +42,15 @@ export default async function AdminTracksPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Tracks</h1>
           <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Full catalog — open a track to review, moderate, feature, or hide.
+            Full catalog — open a track to review, moderate, feature, or hide. For internal promos and DJ service packs,
+            use New DJ pack (no submission fee), then upload the full pack on the track page.
           </p>
         </div>
         <Link
           href="/admin/tracks/new"
           className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-md border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
         >
-          New track (no fee)
+          New DJ pack (internal)
         </Link>
       </div>
 
@@ -60,6 +62,7 @@ export default async function AdminTracksPage() {
               <th className="px-3 py-2 font-medium">Artist</th>
               <th className="px-3 py-2 font-medium">Status</th>
               <th className="px-3 py-2 font-medium">Catalog</th>
+              <th className="px-3 py-2 font-medium text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -76,6 +79,9 @@ export default async function AdminTracksPage() {
                 <td className="px-3 py-2 text-zinc-600 dark:text-zinc-400">{r.artists?.display_name ?? "—"}</td>
                 <td className="px-3 py-2">{r.moderation_status}</td>
                 <td className="px-3 py-2">{r.catalog_active === false ? "hidden" : "live"}</td>
+                <td className="px-3 py-2 text-right align-top">
+                  <AdminDeleteTrackButton trackId={r.id} trackTitle={r.title} />
+                </td>
               </tr>
             ))}
           </tbody>

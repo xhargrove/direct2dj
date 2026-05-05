@@ -8,7 +8,24 @@ import { applySelectedLoginRole } from "@/app/login/actions";
 import { describeLoginFailure } from "@/lib/auth/supabase-auth-error";
 import { dashboardPathForRole, safeAppPath } from "@/lib/auth/paths";
 import type { UserRole } from "@/lib/types/roles";
-import { isUserRole, USER_ROLES } from "@/lib/types/roles";
+import { isUserRole } from "@/lib/types/roles";
+
+/** Where to send the user after email/password sign-in when no `?next=` deep-link is present. */
+const WORKSPACE = {
+  artist: "/artist",
+  dj: "/dj/dashboard",
+  admin: "/admin",
+} as const;
+
+type WorkspaceKey = keyof typeof WORKSPACE;
+
+function workspaceFromNextParam(next: string | null): WorkspaceKey {
+  if (!next?.startsWith("/")) return "artist";
+  if (next.startsWith("/dj")) return "dj";
+  if (next.startsWith("/admin")) return "admin";
+  if (next.startsWith("/artist")) return "artist";
+  return "artist";
+}
 
 export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: boolean }) {
   const router = useRouter();
@@ -22,7 +39,7 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [feedback, setFeedback] = useState<{ text: string; variant: "error" | "info" } | null>(null);
   const [pending, setPending] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<UserRole>("artist");
+  const [workspace, setWorkspace] = useState<WorkspaceKey>(() => workspaceFromNextParam(nextParam));
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -80,17 +97,28 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
 
     let redirectRole = role;
     if (mode === "signin" && showLoginRoleSelector) {
-      const applied = await applySelectedLoginRole(selectedRole);
+      const applied = await applySelectedLoginRole(workspace);
       if ("error" in applied && applied.error) {
         setFeedback({ text: applied.error, variant: "error" });
         setPending(false);
         return;
       }
-      redirectRole = selectedRole;
+      redirectRole = workspace;
     }
 
     const fallback = dashboardPathForRole(redirectRole);
-    router.push(safeAppPath(nextParam, fallback));
+
+    const deepLink = nextParam;
+    const hasSafeDeepLink =
+      Boolean(deepLink) &&
+      deepLink!.startsWith("/") &&
+      !deepLink!.startsWith("//") &&
+      !deepLink!.includes("?") &&
+      !deepLink!.includes("#");
+
+    const destinationPath = hasSafeDeepLink ? deepLink! : WORKSPACE[workspace];
+
+    router.push(safeAppPath(destinationPath, fallback));
     router.refresh();
     setPending(false);
   }
@@ -135,6 +163,50 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
         </button>
       </div>
 
+      {mode === "signin" ? (
+        <div className="space-y-2">
+          <p className="text-center text-xs font-medium text-zinc-700 dark:text-zinc-300 sm:text-left">
+            {showLoginRoleSelector ? "Sign in as (dev/staging also sets account role)" : "Open after sign-in"}
+          </p>
+          <div className="flex gap-2 rounded-xl border border-white/10 bg-black/20 p-1 dark:border-white/10 dark:bg-black/30">
+            {(
+              [
+                { key: "artist" as const, label: "Artist" },
+                { key: "dj" as const, label: "DJ" },
+                { key: "admin" as const, label: "Admin" },
+              ] as const
+            ).map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => setWorkspace(key)}
+                className={`min-h-11 flex-1 rounded-lg px-2 text-sm font-medium transition ${
+                  workspace === key
+                    ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-100 dark:text-zinc-950"
+                    : "text-zinc-600 dark:text-zinc-400"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            {showLoginRoleSelector ? (
+              <>
+                One choice for both destination and <code className="font-mono text-[11px]">profiles.role</code> on this
+                server (needs <code className="font-mono text-[11px]">SUPABASE_SERVICE_ROLE_KEY</code>). Do not expose
+                role switching on untrusted production.
+              </>
+            ) : (
+              <>
+                Picks your first screen when you didn&apos;t arrive via a deep link. Your real role in the database
+                still controls access — wrong picks redirect to your actual dashboard.
+              </>
+            )}
+          </p>
+        </div>
+      ) : null}
+
       <form onSubmit={onSubmit} className="space-y-4">
         {mode === "signup" ? (
           <label className="block space-y-2">
@@ -176,27 +248,6 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
             className="min-h-11 w-full rounded-lg border border-zinc-200/80 bg-white/90 px-3 text-base outline-none ring-offset-2 backdrop-blur-sm focus-visible:ring-2 focus-visible:ring-cyan-500/40 dark:border-white/10 dark:bg-black/40 dark:focus-visible:ring-fuchsia-500/35"
           />
         </label>
-
-        {mode === "signin" && showLoginRoleSelector ? (
-          <label className="block space-y-2">
-            <span className="text-sm font-medium">Sign in as</span>
-            <select
-              name="workspace_role"
-              value={selectedRole}
-              onChange={(ev) => setSelectedRole(ev.target.value as UserRole)}
-              className="min-h-11 w-full rounded-lg border border-zinc-200/80 bg-white/90 px-3 text-base outline-none ring-offset-2 backdrop-blur-sm focus-visible:ring-2 focus-visible:ring-cyan-500/40 dark:border-white/10 dark:bg-black/40 dark:focus-visible:ring-fuchsia-500/35"
-            >
-              {USER_ROLES.map((r) => (
-                <option key={r} value={r}>
-                  {r === "artist" ? "Artist" : r === "dj" ? "DJ" : "Admin"}
-                </option>
-              ))}
-            </select>
-            <span className="block text-xs text-zinc-500 dark:text-zinc-400">
-              Saves to your account so the matching workspace opens after sign-in.
-            </span>
-          </label>
-        ) : null}
 
         {feedback ? (
           <p
