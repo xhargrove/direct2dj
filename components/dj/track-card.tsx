@@ -9,6 +9,7 @@ export function DjTrackCard({
   explicitLabel,
   coverUrl,
   footer,
+  href,
 }: {
   id: string;
   title: string;
@@ -18,10 +19,13 @@ export function DjTrackCard({
   explicitLabel: string;
   coverUrl: string | null;
   footer?: React.ReactNode;
+  /** When set (e.g. public marketing page), overrides default `/dj/tracks/:id`. */
+  href?: string;
 }) {
+  const to = href ?? `/dj/tracks/${id}`;
   return (
     <Link
-      href={`/dj/tracks/${id}`}
+      href={to}
       className="flex gap-3 rounded-lg border border-zinc-200 p-3 transition hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900"
     >
       <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-zinc-100 dark:bg-zinc-800">

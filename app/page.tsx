@@ -84,6 +84,15 @@ export default async function Home() {
               encrypted storage, and billing paths when you&apos;re ready to move crowds.
             </p>
 
+            <p className="mt-6 text-center lg:text-left">
+              <Link
+                href="/featured"
+                className="dj-nav-link text-sm font-semibold underline-offset-4 hover:underline"
+              >
+                What&apos;s featured on Discover →
+              </Link>
+            </p>
+
             <div className="mt-10 flex w-full max-w-md flex-col gap-3 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center lg:justify-start">
               {openApp ? (
                 <Link href={openApp.href} className="dj-btn-primary justify-center sm:min-w-[12rem]">

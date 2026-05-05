@@ -37,11 +37,19 @@ export default async function AdminTracksPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Tracks</h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          Full catalog — open a track to review, moderate, feature, or hide.
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Tracks</h1>
+          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+            Full catalog — open a track to review, moderate, feature, or hide.
+          </p>
+        </div>
+        <Link
+          href="/admin/tracks/new"
+          className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-md border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+        >
+          New track (no fee)
+        </Link>
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-zinc-200 dark:border-zinc-800">

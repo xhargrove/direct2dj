@@ -152,6 +152,34 @@ export async function deleteFeaturedPlacement(placementId: string, trackId: stri
   return { ok: true as const };
 }
 
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/** Opens a new draft for an artist without a submission checkout (admin tooling only). */
+export async function adminCreateFreeDraftTrack(artistId: string) {
+  const ctx = await getAdminContext();
+  if ("error" in ctx) return { error: ctx.error };
+
+  const trimmed = artistId.trim();
+  if (!UUID_RE.test(trimmed)) {
+    return { error: "Invalid artist." };
+  }
+
+  const { data, error } = await ctx.supabase.rpc("admin_create_draft_track", {
+    p_artist_id: trimmed,
+  });
+
+  if (error) return { error: error.message };
+  if (typeof data !== "string" || !data) {
+    return { error: "Could not create draft track." };
+  }
+
+  revalidatePath("/admin/tracks");
+  revalidatePath("/admin/submissions");
+  revalidatePath("/admin/dashboard");
+  return { id: data };
+}
+
 const DJ_TIERS: DjTier[] = [
   "verified",
   "club_dj",
