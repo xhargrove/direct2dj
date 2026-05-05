@@ -224,9 +224,9 @@ begin
 
   return query
   with involved as (
-    select distinct dj_id from public.downloads where track_id = p_track_id
+    select distinct dl.dj_id from public.downloads dl where dl.track_id = p_track_id
     union
-    select distinct dj_id from public.ratings where track_id = p_track_id
+    select distinct r.dj_id from public.ratings r where r.track_id = p_track_id
   )
   select
     d.id,
