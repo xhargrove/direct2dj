@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { djTierLabel } from "@/lib/dj/tier-label";
+import { formatDateDisplay } from "@/lib/format/datetime-display";
 import { createClient } from "@/lib/supabase/server";
 import type { DjVettingStatus } from "@/lib/types/database";
 
@@ -103,7 +104,7 @@ export default async function DjApplicationStatusPage({ searchParams }: Props) {
               <dt className="text-zinc-500">Group formed</dt>
               <dd className="text-right text-xs text-zinc-600 dark:text-zinc-400">
                 {org.formed_at
-                  ? `Yes (${new Date(org.formed_at).toLocaleDateString()})`
+                  ? `Yes (${formatDateDisplay(org.formed_at)})`
                   : "Not yet (needs 2+ DJs on this name)"}
               </dd>
             </div>

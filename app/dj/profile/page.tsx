@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { djTierLabel } from "@/lib/dj/tier-label";
+import { formatDateDisplay } from "@/lib/format/datetime-display";
 import { createClient } from "@/lib/supabase/server";
 import type { DjVettingStatus } from "@/lib/types/database";
 
@@ -111,7 +112,7 @@ export default async function DjProfilePage() {
           </div>
           <div>
             <dt className="text-zinc-500">Member since</dt>
-            <dd className="mt-0.5">{new Date(d.created_at).toLocaleDateString()}</dd>
+            <dd className="mt-0.5">{formatDateDisplay(d.created_at)}</dd>
           </div>
         </dl>
       )}

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { djTierLabel } from "@/lib/dj/tier-label";
 import type { DjTier } from "@/lib/types/database";
 import { DownloadTimelineStrip, fillDailyDownloads, type TimelinePoint } from "@/components/artist/analytics-charts";
+import { formatDateTimeDisplay } from "@/lib/format/datetime-display";
 import { createClient } from "@/lib/supabase/server";
 
 type Props = { params: Promise<{ id: string }> };
@@ -201,8 +202,8 @@ export default async function ArtistTrackAnalyticsPage({ params }: Props) {
                   <div className="font-medium">{row.label || "Featured"}</div>
                   <div className="mt-1 text-xs text-zinc-500">{row.moderation_status}</div>
                   <div className="mt-1 text-xs text-zinc-500">
-                    {row.starts_at ? new Date(row.starts_at).toLocaleString() : "Start: open"} →{" "}
-                    {row.ends_at ? new Date(row.ends_at).toLocaleString() : "End: open"}
+                    {row.starts_at ? formatDateTimeDisplay(row.starts_at) : "Start: open"} →{" "}
+                    {row.ends_at ? formatDateTimeDisplay(row.ends_at) : "End: open"}
                   </div>
                 </div>
                 <div className="text-right">
@@ -260,7 +261,7 @@ export default async function ArtistTrackAnalyticsPage({ params }: Props) {
             {feedbackList.map((f) => (
               <li key={f.id} className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <span className="text-xs text-zinc-500">{new Date(f.created_at).toLocaleString()}</span>
+                  <span className="text-xs text-zinc-500">{formatDateTimeDisplay(f.created_at)}</span>
                   <span className="text-xs text-zinc-500">{f.moderation_status}</span>
                 </div>
                 <div className="mt-1 text-xs text-zinc-500">From {f.dj_label}</div>

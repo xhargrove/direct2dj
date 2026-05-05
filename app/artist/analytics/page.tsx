@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { djTierLabel } from "@/lib/dj/tier-label";
+import { formatDateTimeDisplay } from "@/lib/format/datetime-display";
 import { createClient } from "@/lib/supabase/server";
 import type { DjTier } from "@/lib/types/database";
 import {
@@ -281,8 +282,8 @@ export default async function ArtistAnalyticsPage() {
                     {row.label || "Featured"} · {row.moderation_status}
                   </div>
                   <div className="mt-1 text-xs text-zinc-500">
-                    {row.starts_at ? new Date(row.starts_at).toLocaleString() : "Start: open"} →{" "}
-                    {row.ends_at ? new Date(row.ends_at).toLocaleString() : "End: open"}
+                    {row.starts_at ? formatDateTimeDisplay(row.starts_at) : "Start: open"} →{" "}
+                    {row.ends_at ? formatDateTimeDisplay(row.ends_at) : "End: open"}
                   </div>
                 </div>
                 <div className="shrink-0 text-right">
@@ -338,7 +339,7 @@ export default async function ArtistAnalyticsPage() {
               <li key={f.id} className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <span className="font-medium">{f.track_title}</span>
-                  <span className="text-xs text-zinc-500">{new Date(f.created_at).toLocaleString()}</span>
+                  <span className="text-xs text-zinc-500">{formatDateTimeDisplay(f.created_at)}</span>
                 </div>
                 <div className="mt-1 text-xs text-zinc-500">
                   From {f.dj_label} · {f.moderation_status}

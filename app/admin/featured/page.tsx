@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatDateTimeDisplay } from "@/lib/format/datetime-display";
 import { createClient } from "@/lib/supabase/server";
 
 type Row = {
@@ -75,8 +76,8 @@ export default async function AdminFeaturedPage() {
                   </td>
                   <td className="px-3 py-2 text-zinc-600 dark:text-zinc-400">{r.label ?? "—"}</td>
                   <td className="px-3 py-2 text-xs">
-                    {r.starts_at ? new Date(r.starts_at).toLocaleString() : "open"} →{" "}
-                    {r.ends_at ? new Date(r.ends_at).toLocaleString() : "open"}
+                    {r.starts_at ? formatDateTimeDisplay(r.starts_at) : "open"} →{" "}
+                    {r.ends_at ? formatDateTimeDisplay(r.ends_at) : "open"}
                   </td>
                   <td className="px-3 py-2">
                     {inWindow ? (

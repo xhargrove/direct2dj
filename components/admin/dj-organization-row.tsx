@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { adminApproveDjOrganization, adminRejectDjOrganization } from "@/app/admin/actions";
+import { formatDateTimeDisplay } from "@/lib/format/datetime-display";
 import type { ApprovalStatus } from "@/lib/types/database";
 
 export function DjOrganizationRow({
@@ -12,6 +13,7 @@ export function DjOrganizationRow({
   moderationStatus,
   formedAt,
   memberCount,
+  inGroup,
 }: {
   orgId: string;
   displayName: string;
@@ -19,6 +21,8 @@ export function DjOrganizationRow({
   moderationStatus: ApprovalStatus;
   formedAt: string | null;
   memberCount: number;
+  /** Set when rendered inside a grouped panel on admin DJ organizations. */
+  inGroup?: boolean;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -36,7 +40,13 @@ export function DjOrganizationRow({
   const formed = memberCount >= 2;
 
   return (
-    <li className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+    <li
+      className={`rounded-lg border p-4 ${
+        inGroup
+          ? "border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-950"
+          : "border-zinc-200 dark:border-zinc-800"
+      }`}
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="font-medium">{displayName}</div>
@@ -45,7 +55,9 @@ export function DjOrganizationRow({
             {formed ? " · Formed (2+)" : " · Not yet formed"}
           </div>
           {formedAt ? (
-            <div className="mt-1 text-xs text-zinc-500">Formed milestone: {new Date(formedAt).toLocaleString()}</div>
+            <div className="mt-1 text-xs text-zinc-500">
+              Formed milestone: {formatDateTimeDisplay(formedAt)}
+            </div>
           ) : null}
         </div>
         <div className="text-xs capitalize text-zinc-600 dark:text-zinc-400">

@@ -8,6 +8,7 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
 } from "@/app/notifications/actions";
+import { formatDateTimeDisplay } from "@/lib/format/datetime-display";
 import type { Notification } from "@/lib/types/database";
 
 function hrefFromMeta(meta: Record<string, unknown>): string | null {
@@ -99,7 +100,7 @@ export function NotificationBell({ initialUnread }: { initialUnread: number }) {
                       </div>
                     ) : null}
                     <div className="mt-1 text-[10px] text-zinc-400">
-                      {new Date(n.created_at).toLocaleString()}
+                      {formatDateTimeDisplay(n.created_at)}
                     </div>
                   </>
                 );

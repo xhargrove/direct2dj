@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { djTierLabel } from "@/lib/dj/tier-label";
 import { DownloadTimelineStrip, fillDailyDownloads, type TimelinePoint } from "@/components/artist/analytics-charts";
 import type { DjTier } from "@/lib/types/database";
+import { formatDateTimeDisplay } from "@/lib/format/datetime-display";
 import { createClient } from "@/lib/supabase/server";
 
 type Props = { params: Promise<{ id: string }> };
@@ -50,16 +51,6 @@ function n(v: unknown, fallback = 0): number {
   const x = Number(v);
   return Number.isFinite(x) ? x : fallback;
 }
-
-/** Fixed locale so SSR/client match. */
-const DISPLAY_DATETIME: Intl.DateTimeFormatOptions = {
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: true,
-};
 
 export default async function AdminTrackAnalyticsPage({ params }: Props) {
   const { id } = await params;
@@ -212,8 +203,8 @@ export default async function AdminTrackAnalyticsPage({ params }: Props) {
                   <div className="font-medium">{row.label || "Featured"}</div>
                   <div className="mt-1 text-xs text-zinc-500">{row.moderation_status}</div>
                   <div className="mt-1 text-xs text-zinc-500">
-                    {row.starts_at ? new Date(row.starts_at).toLocaleString("en-US", DISPLAY_DATETIME) : "Start: open"} →{" "}
-                    {row.ends_at ? new Date(row.ends_at).toLocaleString("en-US", DISPLAY_DATETIME) : "End: open"}
+                    {row.starts_at ? formatDateTimeDisplay(row.starts_at) : "Start: open"} →{" "}
+                    {row.ends_at ? formatDateTimeDisplay(row.ends_at) : "End: open"}
                   </div>
                 </div>
                 <div className="text-right">
@@ -264,7 +255,7 @@ export default async function AdminTrackAnalyticsPage({ params }: Props) {
               <li key={f.id} className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <span className="text-xs text-zinc-500">
-                    {new Date(f.created_at).toLocaleString("en-US", DISPLAY_DATETIME)}
+                    {formatDateTimeDisplay(f.created_at)}
                   </span>
                   <span className="text-xs text-zinc-500">{f.moderation_status}</span>
                 </div>

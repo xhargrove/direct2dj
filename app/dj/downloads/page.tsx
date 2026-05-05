@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatDateTimeDisplay } from "@/lib/format/datetime-display";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DjDownloadsPage() {
@@ -82,7 +83,7 @@ export default async function DjDownloadsPage() {
                 </Link>
                 <div className="text-xs text-zinc-500">
                   {artist}
-                  {t?.genre ? ` · ${t.genre}` : ""} · {new Date(r.created_at).toLocaleString()}
+                  {t?.genre ? ` · ${t.genre}` : ""} · {formatDateTimeDisplay(r.created_at)}
                 </div>
               </li>
             );

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatDateTimeDisplay } from "@/lib/format/datetime-display";
 import { createClient } from "@/lib/supabase/server";
 
 type Activity = {
@@ -110,7 +111,7 @@ export default async function DjHistoryPage() {
         <ul className="flex flex-col gap-3">
           {activities.slice(0, 80).map((a, i) => (
             <li key={`${a.kind}-${a.at}-${i}`} className="border-b border-zinc-100 pb-3 text-sm dark:border-zinc-800">
-              <div className="text-xs text-zinc-500">{new Date(a.at).toLocaleString()}</div>
+              <div className="text-xs text-zinc-500">{formatDateTimeDisplay(a.at)}</div>
               <Link href={a.href} className="font-medium underline-offset-4 hover:underline">
                 {a.label}
               </Link>

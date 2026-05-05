@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { formatDateTimeDisplay } from "@/lib/format/datetime-display";
 import { createClient } from "@/lib/supabase/server";
 
 type Props = { params: Promise<{ id: string }> };
@@ -73,7 +74,7 @@ export default async function AdminArtistProfilePage({ params }: Props) {
           </div>
           <div>
             <dt className="text-xs text-zinc-500">Profile since</dt>
-            <dd>{p?.created_at ? new Date(p.created_at).toLocaleString() : "—"}</dd>
+            <dd>{p?.created_at ? formatDateTimeDisplay(p.created_at) : "—"}</dd>
           </div>
         </dl>
       </section>

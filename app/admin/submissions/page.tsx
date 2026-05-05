@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { primaryReleaseArtistLabel, workspaceArtistNote } from "@/lib/admin/track-artist-labels";
+import { formatDateTimeDisplay } from "@/lib/format/datetime-display";
 import { createClient } from "@/lib/supabase/server";
 
 type Row = {
@@ -68,7 +69,7 @@ export default async function AdminSubmissionsPage() {
                   {workspace ? (
                     <div className="text-xs text-zinc-500">Account: {workspace}</div>
                   ) : null}
-                  <div className="mt-1 text-xs text-zinc-500">{new Date(r.created_at).toLocaleString()}</div>
+                  <div className="mt-1 text-xs text-zinc-500">{formatDateTimeDisplay(r.created_at)}</div>
                 </Link>
               </li>
             );

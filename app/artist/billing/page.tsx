@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatDateTimeDisplay } from "@/lib/format/datetime-display";
 import {
   BillingPromoCards,
   type BillingFeaturedTier,
@@ -157,7 +158,7 @@ export default async function ArtistBillingPage({ searchParams }: Props) {
                     <span className="font-medium text-zinc-700 dark:text-zinc-300">{r.status}</span>
                   </div>
                   <div className="mt-1 text-xs text-zinc-400">
-                    {new Date(r.created_at).toLocaleString()}
+                    {formatDateTimeDisplay(r.created_at)}
                     {r.stripe_checkout_session_id ? ` · ${r.stripe_checkout_session_id.slice(0, 12)}…` : ""}
                   </div>
                 </li>
