@@ -25,6 +25,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run typecheck` | TypeScript |
 | `npm test` | Vitest (catalog validation helpers) |
 | `npm run db:start` / `db:reset` / `db:push` | Supabase CLI |
+| `npm run types:supabase` | Generate `lib/types/database.generated.ts` (local Supabase; see [docs/SUPABASE_TYPES_GENERATION.md](./docs/SUPABASE_TYPES_GENERATION.md)) |
 
 ## Documentation
 
@@ -35,6 +36,11 @@ Open [http://localhost:3000](http://localhost:3000).
 | [RLS_POLICIES.md](./RLS_POLICIES.md) | Row Level Security overview |
 | [MVP_TEST_PLAN.md](./MVP_TEST_PLAN.md) | Manual QA matrix |
 | [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md) | Production launch steps |
+| [docs/DEPLOY_READINESS_REPORT.md](./docs/DEPLOY_READINESS_REPORT.md) | **Deploy gate summary** |
+| [docs/ENV_DEPLOYMENT_CHECKLIST.md](./docs/ENV_DEPLOYMENT_CHECKLIST.md) | Vercel / env table |
+| [docs/SUPABASE_MIGRATION_PARITY_CHECKLIST.md](./docs/SUPABASE_MIGRATION_PARITY_CHECKLIST.md) | DB + RPC verification |
+| [docs/STRIPE_DEPLOYMENT_CHECKLIST.md](./docs/STRIPE_DEPLOYMENT_CHECKLIST.md) | Webhooks + smoke |
+| [docs/PRODUCTION_SMOKE_TEST_PLAN.md](./docs/PRODUCTION_SMOKE_TEST_PLAN.md) | Post-deploy smoke |
 | [docs/PHASE_4_5_DJ_CATALOG_SMOKE.md](./docs/PHASE_4_5_DJ_CATALOG_SMOKE.md) | DJ catalog manual smoke (Phase 4.5) |
 
 ## Architecture (high level)

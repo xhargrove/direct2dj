@@ -74,6 +74,10 @@ async function getArtistContext() {
   return { supabase, userId: user.id, artistId: artist.id };
 }
 
+/**
+ * Not used by the current UI (new packs go through paid submission checkout).
+ * Kept for the `create_draft_track` RPC if you add a tool or script later; see `docs/DEAD_CODE_AND_LEGACY_PATHS.md`.
+ */
 export async function createDraftTrack() {
   const ctx = await getArtistContext();
   if ("error" in ctx) return { error: ctx.error };

@@ -3,6 +3,30 @@ import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/env";
 
 export const dynamic = "force-dynamic";
 
+/** Production: always 404. Dev: wrong HTTP method. */
+function devRouteMethodResponse() {
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
+}
+
+export async function POST() {
+  return devRouteMethodResponse();
+}
+
+export async function PUT() {
+  return devRouteMethodResponse();
+}
+
+export async function PATCH() {
+  return devRouteMethodResponse();
+}
+
+export async function DELETE() {
+  return devRouteMethodResponse();
+}
+
 /** Decode legacy anon JWT payload (no signature verification) for ref mismatch hints only. */
 function jwtPayloadRef(key: string): string | null {
   if (!key.startsWith("eyJ")) return null;

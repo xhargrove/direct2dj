@@ -1,6 +1,12 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+/** Last path segment only — helps ops correlate logs without exposing full user prefixes. */
+function pathTailForLog(storagePath: string): string {
+  const parts = storagePath.split("/").filter(Boolean);
+  return parts.length ? parts[parts.length - 1]! : "(empty)";
+}
+
 /** Map storage_path -> short-lived signed URL for catalog images. */
 export async function signCoverPaths(
   supabase: SupabaseClient,
@@ -12,9 +18,21 @@ export async function signCoverPaths(
     unique.map(async (path) => {
       try {
         const { data, error } = await supabase.storage.from("promos").createSignedUrl(path, 3600);
-        if (!error && data?.signedUrl) map.set(path, data.signedUrl);
-      } catch {
-        /* avoid failing RSC when storage/network rejects */
+        if (!error && data?.signedUrl) {
+          map.set(path, data.signedUrl);
+          return;
+        }
+        console.warn("[cover-sign] createSignedUrl rejected", {
+          bucket: "promos",
+          pathTail: pathTailForLog(path),
+          message: error?.message ?? "no_signed_url",
+        });
+      } catch (e) {
+        console.warn("[cover-sign] createSignedUrl threw", {
+          bucket: "promos",
+          pathTail: pathTailForLog(path),
+          err: e instanceof Error ? e.message : String(e),
+        });
       }
     }),
   );

@@ -15,7 +15,8 @@
     "db:push": "npx supabase db push",
     "db:link": "npx supabase link",
     "smoke:accounts": "npx supabase db query --local -f supabase/verify-smoke-data.sql -o table",
-    "db:status": "npx supabase status"
+    "db:status": "npx supabase status",
+    "types:supabase": "supabase gen types typescript --local --schema public > lib/types/database.generated.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.2",
