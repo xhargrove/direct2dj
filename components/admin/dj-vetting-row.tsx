@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import {
   adminApproveDj,
   adminAssignDjTier,
+  adminDeleteDjApplicant,
   adminRejectDj,
   adminSuspendDj,
 } from "@/app/admin/actions";
@@ -148,6 +149,20 @@ export function DjVettingRow({
               onClick={() => run(() => adminRejectDj(djId))}
             >
               Reject
+            </button>
+            <button
+              type="button"
+              disabled={pending}
+              className="inline-flex min-h-10 items-center rounded-md border border-red-400 bg-red-50 px-3 text-sm font-medium text-red-900 dark:border-red-800 dark:bg-red-950/40 dark:text-red-100"
+              onClick={() => {
+                const ok = window.confirm(
+                  "Permanently delete this applicant? Their login will be removed and all DJ data for this account will be erased. This cannot be undone.",
+                );
+                if (!ok) return;
+                run(() => adminDeleteDjApplicant(djId));
+              }}
+            >
+              Remove…
             </button>
           </>
         ) : null}

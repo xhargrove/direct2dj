@@ -314,6 +314,61 @@ export async function adminApproveDj(djId: string, tierRaw: string) {
   return { ok: true as const };
 }
 
+/**
+ * Permanently removes a pending or rejected DJ applicant: deletes their Auth user, which cascades
+ * profile + djs + application and engagement rows. Does not apply to approved/suspended DJs.
+ */
+export async function adminDeleteDjApplicant(djId: string) {
+  const ctx = await getAdminContext();
+  if ("error" in ctx) return { error: ctx.error };
+
+  const { data: row, error: selErr } = await ctx.supabase
+    .from("djs")
+    .select("id, profile_id, vetting_status")
+    .eq("id", djId)
+    .maybeSingle();
+
+  if (selErr) return { error: selErr.message };
+  if (!row) return { error: "DJ not found." };
+
+  if (row.profile_id === ctx.userId) {
+    return { error: "You cannot remove your own account." };
+  }
+
+  if (row.vetting_status !== "pending" && row.vetting_status !== "rejected") {
+    return {
+      error:
+        "Only pending or rejected applicants can be removed. Use Suspend for approved DJs, or contact support for full removal.",
+    };
+  }
+
+  const { data: prof, error: profErr } = await ctx.supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", row.profile_id)
+    .maybeSingle();
+
+  if (profErr) return { error: profErr.message };
+  if (prof?.role === "admin") {
+    return { error: "Cannot delete an admin account." };
+  }
+
+  let adminClient;
+  try {
+    adminClient = createServiceRoleClient();
+  } catch {
+    return { error: "Server misconfiguration: SUPABASE_SERVICE_ROLE_KEY is not set." };
+  }
+
+  const { error: delErr } = await adminClient.auth.admin.deleteUser(row.profile_id);
+
+  if (delErr) return { error: delErr.message };
+
+  revalidatePath("/admin/dj-applications");
+  revalidatePath("/admin/djs");
+  return { ok: true as const };
+}
+
 export async function adminRejectDj(djId: string) {
   const ctx = await getAdminContext();
   if ("error" in ctx) return { error: ctx.error };
