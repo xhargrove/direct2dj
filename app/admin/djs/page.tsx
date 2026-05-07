@@ -34,7 +34,11 @@ export default async function AdminDjsPage() {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">DJs</h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">Registered DJ profiles.</p>
+        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+          <span className="font-medium text-zinc-900 dark:text-zinc-100">{list.length}</span>{" "}
+          {list.length === 1 ? "DJ signed up" : "DJs signed up"}
+          <span className="text-zinc-500 dark:text-zinc-400"> · Registered DJ profiles in this workspace.</span>
+        </p>
       </div>
 
       <ul className="flex flex-col gap-2">
