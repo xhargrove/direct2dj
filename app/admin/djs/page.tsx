@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 type Row = {
@@ -47,12 +48,21 @@ export default async function AdminDjsPage() {
             key={d.id}
             className="rounded-lg border border-zinc-200 px-4 py-3 dark:border-zinc-800"
           >
-            <div className="font-medium">{d.display_name}</div>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="font-medium">{d.display_name}</div>
+              <Link
+                href={`/admin/djs/${d.id}/activity`}
+                className="text-xs font-medium text-zinc-700 underline-offset-4 hover:underline dark:text-zinc-300"
+              >
+                View activity →
+              </Link>
+            </div>
             <div className="text-xs text-zinc-500">
               {d.profiles?.full_name ?? d.profiles?.email ?? "—"} · {d.status}
             </div>
             <p className="mt-1 text-xs text-zinc-500">
-              Per-track engagement is on each track’s admin page (downloads, plays, ratings, feedback).
+              Downloads, plays, ratings, and feedback are summarized on activity; per-track detail stays on each track’s
+              admin page.
             </p>
           </li>
         ))}

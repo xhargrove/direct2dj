@@ -12,6 +12,7 @@ const nav = [
   { href: "/admin/featured", label: "Featured" },
   { href: "/admin/artists", label: "Artists" },
   { href: "/admin/djs", label: "DJs" },
+  { href: "/admin/dj-activity", label: "DJ activity" },
   { href: "/admin/dj-applications", label: "DJ applications" },
   { href: "/admin/dj-organizations", label: "DJ organizations" },
   { href: "/admin/play-reports", label: "Play reports" },
