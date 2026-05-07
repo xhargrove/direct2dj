@@ -1,11 +1,14 @@
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { getUnreadNotificationCount } from "@/app/notifications/actions";
 import { requireRoles } from "@/lib/auth/require-role";
 import { getAdminWorkspaceTestBannerState } from "@/lib/auth/admin-workspace-test-banner-state";
 import { AdminWorkspaceTestBanner } from "@/components/admin/admin-workspace-test-banner";
+import { DjWorkspaceGateBanner } from "@/components/dj/dj-workspace-gate-banner";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { createClient } from "@/lib/supabase/server";
+import type { DjVettingStatus } from "@/lib/types/database";
 
 const promoNav = [
   { href: "/dj/dashboard", label: "Dashboard" },
@@ -30,22 +33,34 @@ export default async function DjLayout({
   } = await supabase.auth.getUser();
 
   let navItems: readonly { href: string; label: string }[] = promoNav;
+  let gateBanner: ReactNode = null;
 
   const unread = user ? await getUnreadNotificationCount() : 0;
 
   if (user) {
-    const { data: dj } = await supabase.from("djs").select("vetting_status").eq("profile_id", user.id).maybeSingle();
+    const { data: dj } = await supabase.from("djs").select("id, vetting_status").eq("profile_id", user.id).maybeSingle();
     const status = dj?.vetting_status;
     if (status !== "approved") {
       const gated: { href: string; label: string }[] = [
+        { href: "/dj/dashboard", label: "Dashboard" },
         { href: "/dj/application-status", label: "Status" },
         { href: "/dj/profile", label: "Profile" },
         { href: "/dj/settings", label: "Privacy" },
       ];
       if (status !== "suspended") {
-        gated.splice(1, 0, { href: "/dj/apply", label: "Apply" });
+        gated.splice(2, 0, { href: "/dj/apply", label: "Apply" });
       }
       navItems = gated;
+    }
+
+    if (dj && status && status !== "approved") {
+      const { data: appRow } = await supabase.from("dj_applications").select("dj_id").eq("dj_id", dj.id).maybeSingle();
+      gateBanner = (
+        <DjWorkspaceGateBanner
+          vettingStatus={status as DjVettingStatus}
+          hasSubmittedApplication={!!appRow}
+        />
+      );
     }
   }
 
@@ -85,6 +100,7 @@ export default async function DjLayout({
           </form>
         </div>
       </header>
+      {gateBanner}
       <main className="flex flex-1 flex-col px-4 py-6">{children}</main>
       <footer className="dj-footer px-4 py-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
         <Link href="/" className="dj-nav-link underline underline-offset-4 hover:underline">

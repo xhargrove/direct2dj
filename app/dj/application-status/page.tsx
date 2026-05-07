@@ -8,10 +8,12 @@ import type { DjVettingStatus } from "@/lib/types/database";
 
 type Props = { searchParams: Promise<{ submitted?: string }> };
 
-function statusMessage(status: DjVettingStatus) {
+function statusMessage(status: DjVettingStatus, hasApplication: boolean) {
   switch (status) {
     case "pending":
-      return "Your application is pending review. You’ll get promo access once an admin approves you.";
+      return hasApplication
+        ? "Your application is pending review. You’ll get promo access once an admin approves you."
+        : "You haven’t submitted a DJ application yet. Complete the form first — then we can review you for the promo pool.";
     case "approved":
       return "You’re approved — the Discover feed, downloads, and ratings are available.";
     case "rejected":
@@ -41,6 +43,9 @@ export default async function DjApplicationStatusPage({ searchParams }: Props) {
 
   if (!dj) redirect("/login");
 
+  const { data: applicationRow } = await supabase.from("dj_applications").select("dj_id").eq("dj_id", dj.id).maybeSingle();
+  const hasApplication = !!applicationRow;
+
   const { data: orgMembership } = await supabase
     .from("dj_organization_members")
     .select(
@@ -69,8 +74,26 @@ export default async function DjApplicationStatusPage({ searchParams }: Props) {
     <div className="mx-auto flex w-full max-w-xl flex-col gap-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Application status</h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{statusMessage(dj.vetting_status as DjVettingStatus)}</p>
+        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+          {statusMessage(dj.vetting_status as DjVettingStatus, hasApplication)}
+        </p>
       </div>
+
+      {dj.vetting_status === "pending" && !hasApplication ? (
+        <div className="rounded-lg border border-cyan-200 bg-cyan-50 px-4 py-4 text-sm text-zinc-900 dark:border-cyan-900/40 dark:bg-cyan-950/40 dark:text-zinc-100">
+          <p className="font-semibold">Next step: submit your application</p>
+          <p className="mt-2 text-zinc-700 dark:text-zinc-300">
+            Discover, downloads, and ratings stay locked until you send us your application and an admin approves your DJ
+            profile.
+          </p>
+          <Link
+            href="/dj/apply"
+            className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900 sm:w-auto"
+          >
+            Start DJ application
+          </Link>
+        </div>
+      ) : null}
 
       {submitted ? (
         <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-100">
@@ -121,7 +144,11 @@ export default async function DjApplicationStatusPage({ searchParams }: Props) {
             href="/dj/apply"
             className="inline-flex min-h-11 items-center justify-center rounded-md bg-zinc-900 px-4 font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
           >
-            {dj.vetting_status === "rejected" ? "Update application" : "Edit application"}
+            {dj.vetting_status === "rejected"
+              ? "Update application"
+              : hasApplication
+                ? "Edit application"
+                : "Complete application"}
           </Link>
         ) : null}
         {dj.vetting_status === "approved" ? (
