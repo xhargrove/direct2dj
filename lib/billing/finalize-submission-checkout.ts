@@ -35,7 +35,7 @@ export async function finalizeSubmissionCheckout(sessionId: string): Promise<Fin
   }
 
   const admin = createServiceRoleClient();
-  const { data: payment } = await admin
+  let { data: payment } = await admin
     .from("payments")
     .select("track_id, status, pricing_plan_id")
     .eq("id", paymentId)
@@ -43,6 +43,17 @@ export async function finalizeSubmissionCheckout(sessionId: string): Promise<Fin
 
   if (!payment) {
     return { ok: false, error: "payment_not_found" };
+  }
+
+  /** Rare race with webhook / first activation tick — second pass is idempotent. */
+  if (!payment.track_id) {
+    await activateFeaturedFromCheckoutSession(session, { trustPaymentComplete: true });
+    const { data: paymentAgain } = await admin
+      .from("payments")
+      .select("track_id, status, pricing_plan_id")
+      .eq("id", paymentId)
+      .maybeSingle();
+    if (paymentAgain) payment = paymentAgain;
   }
 
   const { data: plan } = await admin

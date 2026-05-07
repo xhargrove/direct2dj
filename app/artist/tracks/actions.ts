@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { ensureArtistRowForUser } from "@/lib/artists/ensure-artist-row";
 import { createSubmissionCheckoutSession } from "@/lib/billing/create-submission-checkout-session";
 import { finalizeSubmissionCheckout } from "@/lib/billing/finalize-submission-checkout";
 import { createClient } from "@/lib/supabase/server";
@@ -18,60 +19,12 @@ async function getArtistContext() {
     return { error: "Not signed in." as const };
   }
 
-  const { data: profile, error: profileErr } = await supabase
-    .from("profiles")
-    .select("role, full_name")
-    .eq("id", user.id)
-    .maybeSingle();
-  if (profileErr) {
-    return { error: profileErr.message };
+  const ensured = await ensureArtistRowForUser(supabase, user.id);
+  if ("error" in ensured) {
+    return { error: ensured.error };
   }
 
-  const { data: found, error: artistErr } = await supabase
-    .from("artists")
-    .select("id")
-    .eq("profile_id", user.id)
-    .maybeSingle();
-  if (artistErr) {
-    return { error: artistErr.message };
-  }
-
-  let artist = found;
-  if (!artist) {
-    if (profile?.role !== "artist") {
-      return { error: "No artist profile found." as const };
-    }
-    const displayName = (typeof profile.full_name === "string" && profile.full_name.trim().length > 0
-      ? profile.full_name.trim()
-      : "Artist");
-    const { data: created, error: insErr } = await supabase
-      .from("artists")
-      .insert({
-        profile_id: user.id,
-        display_name: displayName,
-        status: "active",
-      })
-      .select("id")
-      .single();
-    if (insErr) {
-      const { data: raced } = await supabase
-        .from("artists")
-        .select("id")
-        .eq("profile_id", user.id)
-        .maybeSingle();
-      if (raced) {
-        artist = raced;
-      } else {
-        return { error: insErr.message };
-      }
-    } else if (created) {
-      artist = created;
-    } else {
-      return { error: "Could not create artist profile." as const };
-    }
-  }
-
-  return { supabase, userId: user.id, artistId: artist.id };
+  return { supabase, userId: user.id, artistId: ensured.artistId };
 }
 
 /**

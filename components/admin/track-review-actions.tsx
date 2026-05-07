@@ -6,7 +6,6 @@ import {
   approveTrack,
   deleteFeaturedPlacement,
   rejectTrack,
-  setTrackAdminTags,
   setTrackCatalogActive,
   upsertFeaturedPlacement,
 } from "@/app/admin/actions";
@@ -16,7 +15,6 @@ type Props = {
   trackId: string;
   moderationStatus: string;
   catalogActive: boolean;
-  adminTagsSerialized: string;
   featuredRows: FeaturedPlacement[];
 };
 
@@ -24,14 +22,12 @@ export function TrackReviewActions({
   trackId,
   moderationStatus,
   catalogActive,
-  adminTagsSerialized,
   featuredRows,
 }: Props) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [rejectReason, setRejectReason] = useState("");
   const [message, setMessage] = useState<string | null>(null);
-  const [tags, setTags] = useState(adminTagsSerialized);
 
   const refresh = () => router.refresh();
 
@@ -119,32 +115,6 @@ export function TrackReviewActions({
           />
           Visible in DJ catalog
         </label>
-      </section>
-
-      <section className="flex flex-col gap-3 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-        <h2 className="text-sm font-semibold">Admin tags</h2>
-        <p className="text-xs text-zinc-500">Comma-separated genre or category labels.</p>
-        <input
-          type="text"
-          value={tags}
-          onChange={(e) => setTags(e.target.value)}
-          className="rounded-md border border-zinc-300 bg-transparent px-3 py-2 text-sm dark:border-zinc-600"
-        />
-        <button
-          type="button"
-          disabled={pending}
-          className="min-h-10 self-start rounded-md border border-zinc-300 px-4 text-sm dark:border-zinc-600"
-          onClick={() =>
-            startTransition(async () => {
-              setMessage(null);
-              const r = await setTrackAdminTags(trackId, tags);
-              setMessage("error" in r ? (r.error ?? "Error") : "Tags saved.");
-              refresh();
-            })
-          }
-        >
-          Save tags
-        </button>
       </section>
 
       <section className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">

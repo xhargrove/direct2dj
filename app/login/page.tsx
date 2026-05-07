@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { loginRoleSelectorEnabled } from "@/lib/auth/login-role-selector";
 import { getRoleDashboardPath } from "@/lib/auth/session";
@@ -27,15 +26,9 @@ export default async function LoginPage() {
           Sign in and step into your booth.
         </p>
       </div>
-      <Suspense
-        fallback={
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">Loading…</p>
-        }
-      >
-        <div className="dj-card w-full max-w-md p-6 sm:p-9">
-          <LoginForm showLoginRoleSelector={showLoginRoleSelector} />
-        </div>
-      </Suspense>
+      <div className="dj-card w-full max-w-md p-6 sm:p-9">
+        <LoginForm showLoginRoleSelector={showLoginRoleSelector} />
+      </div>
       <p className="mt-8 text-center text-sm text-zinc-600 dark:text-zinc-400">
         <Link href="/" className="dj-nav-link underline underline-offset-4 hover:underline">
           Back to home

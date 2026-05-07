@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { authGetUserOrTimeout } from "@/lib/supabase/auth-bounded";
 import { createClient } from "@/lib/supabase/server";
+import { maybeSingleTimeoutFallback } from "@/lib/supabase/maybe-single-timeout-fallback";
+import { withTimeout } from "@/lib/supabase/with-timeout";
 import { dashboardPathForRole } from "@/lib/auth/paths";
 import { isUserRole } from "@/lib/types/roles";
 import { ClubHeroVisual } from "@/components/marketing/club-hero-visual";
@@ -45,24 +48,32 @@ function IconSignal() {
 }
 
 export default async function Home() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
   let openApp: { href: string; label: string } | null = null;
-  if (user) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
-    if (profile?.role && isUserRole(profile.role)) {
-      openApp = {
-        href: dashboardPathForRole(profile.role),
-        label: "Open your workspace",
-      };
+  let user: { id: string } | null = null;
+
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user: u },
+    } = await authGetUserOrTimeout(supabase);
+    user = u;
+
+    if (user) {
+      const profileRow = await withTimeout(
+        supabase.from("profiles").select("role").eq("id", user.id).maybeSingle(),
+        4000,
+        maybeSingleTimeoutFallback<{ role: string }>(),
+      );
+      const profile = profileRow.data;
+      if (profile?.role && isUserRole(profile.role)) {
+        openApp = {
+          href: dashboardPathForRole(profile.role),
+          label: "Open your workspace",
+        };
+      }
     }
+  } catch {
+    // Missing NEXT_PUBLIC_SUPABASE_* or other config — still render marketing shell.
   }
 
   return (

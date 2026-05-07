@@ -20,6 +20,7 @@ type DjPublicProfileRow = {
   phone: string | null;
   mixcloud_soundcloud_url: string | null;
   club_radio_affiliation: string | null;
+  avatar_url: string | null;
 };
 
 function vettingLabel(s: DjVettingStatus) {
@@ -59,11 +60,21 @@ export default async function ArtistDjProfilePage({ params }: Props) {
         </Link>
       </div>
 
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{row.display_name}</h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          DJ profile visibility is limited to artists this DJ has already interacted with.
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+        {row.avatar_url ? (
+          // eslint-disable-next-line @next/next/no-img-element -- public Supabase storage URL
+          <img
+            src={row.avatar_url}
+            alt=""
+            className="h-24 w-24 shrink-0 rounded-full border border-zinc-200 object-cover dark:border-zinc-700"
+          />
+        ) : null}
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">{row.display_name}</h1>
+          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+            DJ profile visibility is limited to artists this DJ has already interacted with.
+          </p>
+        </div>
       </div>
 
       <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">

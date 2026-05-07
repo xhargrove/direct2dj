@@ -1,5 +1,6 @@
 import "server-only";
 
+import { ensureArtistRowForUser } from "@/lib/artists/ensure-artist-row";
 import { ARTIST_CHECKOUT_UNAVAILABLE } from "@/lib/billing/stripe-user-copy";
 import { getStripe } from "@/lib/stripe/server";
 import { submissionStripeDescription } from "@/lib/billing/submission-tier-copy";
@@ -21,12 +22,11 @@ export async function createSubmissionCheckoutSession(input: {
   } = await supabase.auth.getUser();
   if (!user) return { error: "You must be signed in." };
 
-  const { data: artist } = await supabase
-    .from("artists")
-    .select("id")
-    .eq("profile_id", user.id)
-    .maybeSingle();
-  if (!artist) return { error: "Artist profile not found." };
+  const ensuredArtist = await ensureArtistRowForUser(supabase, user.id);
+  if ("error" in ensuredArtist) {
+    return { error: ensuredArtist.error };
+  }
+  const artist = { id: ensuredArtist.artistId };
 
   const { data: plan, error: planErr } = await supabase
     .from("pricing_plans")

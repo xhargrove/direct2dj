@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   FEEDBACK_MAX_LEN,
+  feedbackQualifiesForDownload,
   validateFeedbackBody,
   validateRatingComment,
   validateRatingScore,
@@ -41,5 +42,14 @@ describe("validateFeedbackBody", () => {
   it("rejects over max", () => {
     const r = validateFeedbackBody("x".repeat(FEEDBACK_MAX_LEN + 1));
     expect(r.ok).toBe(false);
+  });
+});
+
+describe("feedbackQualifiesForDownload", () => {
+  it("is false until minimum length is met", () => {
+    expect(feedbackQualifiesForDownload(null)).toBe(false);
+    expect(feedbackQualifiesForDownload("")).toBe(false);
+    expect(feedbackQualifiesForDownload("ab")).toBe(false);
+    expect(feedbackQualifiesForDownload("abc")).toBe(true);
   });
 });

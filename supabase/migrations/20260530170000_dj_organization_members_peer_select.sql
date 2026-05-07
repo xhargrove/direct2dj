@@ -3,6 +3,8 @@
 
 begin;
 
+drop policy if exists "dj_organization_members_select_peer_same_org" on public.dj_organization_members;
+
 create policy "dj_organization_members_select_peer_same_org"
   on public.dj_organization_members for select
   to authenticated

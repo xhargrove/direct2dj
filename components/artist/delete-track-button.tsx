@@ -9,6 +9,7 @@ export function DeleteTrackButton({
   trackTitle,
   canDelete,
   redirectTo = "/artist/tracks",
+  deleteFn,
   className,
   children,
 }: {
@@ -16,6 +17,8 @@ export function DeleteTrackButton({
   trackTitle?: string;
   canDelete: boolean;
   redirectTo?: string;
+  /** When set (e.g. label-managed packs), runs instead of the artist `deleteTrack` action. */
+  deleteFn?: (trackId: string) => Promise<{ error?: string } | { ok: true }>;
   className?: string;
   children?: React.ReactNode;
 }) {
@@ -36,7 +39,7 @@ export function DeleteTrackButton({
     }
     setError(null);
     setPending(true);
-    const r = await deleteTrack(trackId);
+    const r = deleteFn ? await deleteFn(trackId) : await deleteTrack(trackId);
     setPending(false);
     if ("error" in r && r.error) {
       setError(r.error);

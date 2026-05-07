@@ -29,7 +29,9 @@ export type PackSlotDb =
 
 export type Artist = {
   id: string;
-  profile_id: string;
+  profile_id: string | null;
+  /** Present when this roster artist is managed by a label rep (no independent login). */
+  managed_by_label_rep_id?: string | null;
   display_name: string;
   bio: string | null;
   status: LifecycleStatus;
@@ -113,6 +115,8 @@ export type Track = {
   /** Set when DJs were notified this track entered the catalog (fan-out idempotency). */
   dj_catalog_notify_sent_at: string | null;
   admin_tags: string[];
+  /** Label-managed promo vs indie uploads; surfaced to DJs as a roster badge. */
+  label_roster_release?: boolean;
 };
 
 export type DjPack = {

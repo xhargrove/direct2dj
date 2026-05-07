@@ -55,6 +55,17 @@ body {
     animation: dj-shimmer 14s ease-in-out infinite;
   }
 
+  /* If background-clip:text isn’t supported, transparent fill makes the headline invisible. */
+  @supports not (background-clip: text) {
+    .dj-glow-text {
+      color: var(--foreground);
+      background: none;
+      -webkit-background-clip: unset;
+      background-clip: unset;
+      animation: none;
+    }
+  }
+
   .dj-lede {
     font-size: 1.125rem;
     line-height: 1.75rem;

@@ -4,17 +4,18 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { applySelectedLoginRole } from "@/app/login/actions";
 import { describeLoginFailure } from "@/lib/auth/supabase-auth-error";
 import { dashboardPathForRole, safeAppPath } from "@/lib/auth/paths";
 import type { UserRole } from "@/lib/types/roles";
 import { isUserRole } from "@/lib/types/roles";
+import { applySelectedLoginRole } from "./actions";
 
 /** Where to send the user after email/password sign-in when no `?next=` deep-link is present. */
 const WORKSPACE = {
   artist: "/artist",
   dj: "/dj/dashboard",
   admin: "/admin",
+  label_rep: "/label/dashboard",
 } as const;
 
 type WorkspaceKey = keyof typeof WORKSPACE;
@@ -24,6 +25,7 @@ function workspaceFromNextParam(next: string | null): WorkspaceKey {
   if (!next?.startsWith("/")) return "artist";
   if (next.startsWith("/dj")) return "dj";
   if (next.startsWith("/admin")) return "admin";
+  if (next.startsWith("/label")) return "label_rep";
   if (next.startsWith("/artist")) return "artist";
   return "artist";
 }
@@ -82,6 +84,15 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
       return;
     }
 
+    if (showLoginRoleSelector) {
+      const applied = await applySelectedLoginRole(workspace);
+      if ("error" in applied) {
+        setPending(false);
+        setFeedback({ text: applied.error ?? "Could not update role.", variant: "error" });
+        return;
+      }
+    }
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -97,18 +108,7 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
       }
     }
 
-    let redirectRole = role;
-    if (mode === "signin" && showLoginRoleSelector) {
-      const applied = await applySelectedLoginRole(workspace);
-      if ("error" in applied && applied.error) {
-        setFeedback({ text: applied.error, variant: "error" });
-        setPending(false);
-        return;
-      }
-      redirectRole = workspace;
-    }
-
-    const fallback = dashboardPathForRole(redirectRole);
+    const fallback = dashboardPathForRole(role);
 
     const deepLink = nextParam;
     const hasSafeDeepLink =

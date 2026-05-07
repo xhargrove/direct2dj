@@ -48,10 +48,17 @@ export async function loadTrackForReview(
     return { error: aErr?.message ?? "Artist not found." };
   }
 
+  const row = artist as Artist;
+  const profileSourceId = row.profile_id ?? row.managed_by_label_rep_id ?? null;
+
+  if (!profileSourceId) {
+    return { error: "Artist has no linked profile." };
+  }
+
   const { data: profile, error: pErr } = await supabase
     .from("profiles")
     .select("email, full_name")
-    .eq("id", artist.profile_id)
+    .eq("id", profileSourceId)
     .maybeSingle();
 
   if (pErr || !profile) {

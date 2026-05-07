@@ -35,3 +35,9 @@ export function validateFeedbackBody(raw: string): ValidationResult<string> {
   }
   return { ok: true, value: text };
 }
+
+/** Saved feedback row qualifies for pack download (same rules as `validateFeedbackBody`). */
+export function feedbackQualifiesForDownload(body: string | null | undefined): boolean {
+  if (body == null || typeof body !== "string") return false;
+  return validateFeedbackBody(body).ok;
+}

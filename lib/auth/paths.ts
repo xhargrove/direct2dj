@@ -4,10 +4,12 @@ const ROLE_HOME: Record<UserRole, string> = {
   artist: "/artist",
   dj: "/dj/dashboard",
   admin: "/admin",
+  label_rep: "/label/dashboard",
 };
 
 export function dashboardPathForRole(role: UserRole): string {
-  return ROLE_HOME[role];
+  const path = ROLE_HOME[role];
+  return path ?? "/login";
 }
 
 /** Limits open redirects after login to same-origin app paths. */

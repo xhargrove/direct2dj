@@ -14,4 +14,5 @@ export type DjCatalogFeedRow = {
   download_count: number;
   rating_avg: number | null;
   rating_count: number;
+  label_roster_release?: boolean;
 };

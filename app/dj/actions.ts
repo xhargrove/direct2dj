@@ -9,6 +9,7 @@ import {
   notifyTrackRated,
 } from "@/lib/notifications/events";
 import {
+  feedbackQualifiesForDownload,
   validateFeedbackBody,
   validateRatingComment,
   validateRatingScore,
@@ -102,6 +103,20 @@ export type PackDownloadFile = { pack_slot: string | null; filename: string; sig
 export async function prepareDjPackDownload(trackId: string) {
   const ctx = await getApprovedDjCatalogContext();
   if ("error" in ctx) return { error: ctx.error };
+
+  const { data: feedbackRow } = await ctx.supabase
+    .from("feedback")
+    .select("body")
+    .eq("track_id", trackId)
+    .eq("dj_id", ctx.djId)
+    .maybeSingle();
+
+  if (!feedbackQualifiesForDownload(feedbackRow?.body ?? null)) {
+    return {
+      error:
+        "Submit feedback for this track before downloading the DJ pack (at least a few characters). This helps artists improve their promos.",
+    };
+  }
 
   const loaded = await loadVisibleTrackFiles(ctx.supabase, trackId);
   if ("error" in loaded) return { error: loaded.error };
@@ -265,6 +280,53 @@ export async function updateDjCity(cityRaw: string) {
 
   if (error) return { error: error.message };
 
+  revalidatePath("/dj/settings");
+  revalidatePath("/dj/profile");
+  revalidatePath("/dj/profile/edit");
+  revalidatePath("/artist/analytics");
+  return { ok: true as const };
+}
+
+export async function updateDjProfile(input: {
+  display_name: string;
+  bio: string | null;
+  city: string | null;
+  state: string | null;
+}) {
+  const ctx = await getDjContext();
+  if ("error" in ctx) return { error: ctx.error };
+
+  const name = input.display_name.trim();
+  if (name.length < 2) return { error: "Display name must be at least 2 characters." };
+  if (name.length > 120) return { error: "Display name must be 120 characters or less." };
+
+  const bioRaw = input.bio?.trim() ?? "";
+  const bio = bioRaw.length === 0 ? null : bioRaw;
+  if (bio && bio.length > 2000) return { error: "Bio must be 2000 characters or less." };
+
+  const cityTrim = input.city?.trim() ?? "";
+  const city = cityTrim.length === 0 ? null : cityTrim;
+  if (city && city.length > 120) return { error: "City must be 120 characters or less." };
+
+  const stateTrim = input.state?.trim() ?? "";
+  const state = stateTrim.length === 0 ? null : stateTrim;
+  if (state && state.length > 120) return { error: "State or region must be 120 characters or less." };
+
+  const { error } = await ctx.supabase
+    .from("djs")
+    .update({
+      display_name: name,
+      bio,
+      city,
+      state,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", ctx.djId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/dj/profile");
+  revalidatePath("/dj/profile/edit");
   revalidatePath("/dj/settings");
   revalidatePath("/artist/analytics");
   return { ok: true as const };

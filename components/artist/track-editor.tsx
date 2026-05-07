@@ -7,6 +7,11 @@ import {
   updateTrackMetadata,
   type TrackMetadataPayload,
 } from "@/app/artist/tracks/actions";
+import {
+  labelRepDeleteTrack,
+  labelRepSubmitTrackForReview,
+  labelRepUpdateTrackMetadata,
+} from "@/app/label/actions";
 import { DeleteTrackButton } from "@/components/artist/delete-track-button";
 import { DjPackUploader } from "@/components/artist/dj-pack-uploader";
 import { TrackStatusBadges } from "@/components/artist/track-status";
@@ -45,9 +50,19 @@ type MetaState = {
   campaign_notes: string;
 };
 
-export function TrackEditor({ track, files }: { track: Track; files: TrackFile[] }) {
+export function TrackEditor({
+  track,
+  files,
+  mode = "artist",
+}: {
+  track: Track;
+  files: TrackFile[];
+  /** Label reps edit packs for roster artists they manage (not indie artist accounts). */
+  mode?: "artist" | "label";
+}) {
   const router = useRouter();
-  const readOnly = track.moderation_status === "approved";
+  /** Approved releases: artists can still edit listing metadata; pack files stay fixed here. */
+  const packLocked = track.moderation_status === "approved";
 
   const initial = useMemo<MetaState>(
     () => ({
@@ -76,7 +91,10 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
     e.preventDefault();
     setSaveMsg(null);
     setPendingSave(true);
-    const r = await updateTrackMetadata(track.id, toPayload(meta));
+    const r =
+      mode === "label"
+        ? await labelRepUpdateTrackMetadata(track.id, toPayload(meta))
+        : await updateTrackMetadata(track.id, toPayload(meta));
     setPendingSave(false);
     if ("error" in r && r.error) {
       setSaveMsg(r.error);
@@ -95,14 +113,21 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
       return;
     }
     setPendingSubmit(true);
-    const r = await submitTrackForReview(track.id, payload);
+    const r =
+      mode === "label"
+        ? await labelRepSubmitTrackForReview(track.id, payload)
+        : await submitTrackForReview(track.id, payload);
     setPendingSubmit(false);
     if ("error" in r && r.error) {
       setSubmitMsg(r.error);
       return;
     }
     router.refresh();
-    router.push(`/artist/tracks/${track.id}`);
+    if (mode === "label") {
+      router.push(`/label/artists/${track.artist_id}/tracks`);
+    } else {
+      router.push(`/artist/tracks/${track.id}`);
+    }
   }
 
   return (
@@ -112,9 +137,10 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
         isDraft={track.is_draft}
       />
 
-      {readOnly ? (
+      {packLocked ? (
         <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/40 dark:text-emerald-100">
-          This track is approved and locked for editing here.
+          This track is approved — you can update release metadata below. DJ pack file slots are locked; contact support if
+          you need to replace audio after publication.
         </p>
       ) : null}
 
@@ -125,7 +151,6 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
           <span className="text-sm font-medium">Song title *</span>
           <input
             required
-            disabled={readOnly}
             value={meta.title}
             onChange={(e) => setMeta((m) => ({ ...m, title: e.target.value }))}
             className="min-h-11 w-full rounded-md border border-zinc-300 bg-white px-3 dark:border-zinc-700 dark:bg-zinc-950"
@@ -135,7 +160,6 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
         <label className="block space-y-1">
           <span className="text-sm font-medium">Artist name *</span>
           <input
-            disabled={readOnly}
             value={meta.credit_artist_name}
             onChange={(e) =>
               setMeta((m) => ({ ...m, credit_artist_name: e.target.value }))
@@ -147,7 +171,6 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
         <label className="block space-y-1">
           <span className="text-sm font-medium">Featured artist</span>
           <input
-            disabled={readOnly}
             value={meta.featured_artist}
             onChange={(e) =>
               setMeta((m) => ({ ...m, featured_artist: e.target.value }))
@@ -159,7 +182,6 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
         <label className="block space-y-1">
           <span className="text-sm font-medium">Producer</span>
           <input
-            disabled={readOnly}
             value={meta.producer}
             onChange={(e) => setMeta((m) => ({ ...m, producer: e.target.value }))}
             className="min-h-11 w-full rounded-md border border-zinc-300 bg-white px-3 dark:border-zinc-700 dark:bg-zinc-950"
@@ -170,7 +192,6 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
           <label className="block space-y-1">
             <span className="text-sm font-medium">Genre *</span>
             <input
-              disabled={readOnly}
               value={meta.genre}
               onChange={(e) => setMeta((m) => ({ ...m, genre: e.target.value }))}
               className="min-h-11 w-full rounded-md border border-zinc-300 bg-white px-3 dark:border-zinc-700 dark:bg-zinc-950"
@@ -180,7 +201,6 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
             <span className="text-sm font-medium">BPM *</span>
             <input
               inputMode="decimal"
-              disabled={readOnly}
               value={meta.bpm}
               onChange={(e) => setMeta((m) => ({ ...m, bpm: e.target.value }))}
               className="min-h-11 w-full rounded-md border border-zinc-300 bg-white px-3 dark:border-zinc-700 dark:bg-zinc-950"
@@ -195,7 +215,6 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
               <span className="font-normal text-zinc-500 dark:text-zinc-400">(optional)</span>
             </span>
             <input
-              disabled={readOnly}
               placeholder="e.g. Am, F#m — leave blank if unknown"
               aria-label="Musical key (optional)"
               value={meta.musical_key}
@@ -205,7 +224,7 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
               className="min-h-11 w-full rounded-md border border-zinc-300 bg-white px-3 dark:border-zinc-700 dark:bg-zinc-950"
             />
           </label>
-          <fieldset disabled={readOnly} className="space-y-2">
+          <fieldset className="space-y-2">
             <legend className="text-sm font-medium">Explicit / clean *</legend>
             <div className="flex gap-4">
               <label className="flex items-center gap-2 text-sm">
@@ -238,7 +257,6 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
           <span className="text-sm font-medium">Release date *</span>
           <input
             type="date"
-            disabled={readOnly}
             value={meta.release_date}
             onChange={(e) =>
               setMeta((m) => ({ ...m, release_date: e.target.value }))
@@ -251,7 +269,6 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
           <span className="text-sm font-medium">Description *</span>
           <textarea
             rows={4}
-            disabled={readOnly}
             value={meta.description}
             onChange={(e) =>
               setMeta((m) => ({ ...m, description: e.target.value }))
@@ -264,7 +281,6 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
           <span className="text-sm font-medium">Campaign notes</span>
           <textarea
             rows={3}
-            disabled={readOnly}
             value={meta.campaign_notes}
             onChange={(e) =>
               setMeta((m) => ({ ...m, campaign_notes: e.target.value }))
@@ -273,35 +289,33 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
           />
         </label>
 
-        {!readOnly ? (
-          <div className="flex flex-wrap gap-3">
-            <button
-              type="submit"
-              disabled={pendingSave}
-              className="min-h-11 rounded-md border border-zinc-300 bg-white px-4 text-sm font-medium dark:border-zinc-700 dark:bg-zinc-900"
-            >
-              {pendingSave ? "Saving…" : "Save draft"}
-            </button>
-          </div>
-        ) : null}
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="submit"
+            disabled={pendingSave}
+            className="min-h-11 rounded-md border border-zinc-300 bg-white px-4 text-sm font-medium dark:border-zinc-700 dark:bg-zinc-900"
+          >
+            {pendingSave ? "Saving…" : packLocked ? "Save metadata" : "Save draft"}
+          </button>
+        </div>
         {saveMsg ? (
           <p className="text-sm text-zinc-600 dark:text-zinc-400">{saveMsg}</p>
         ) : null}
       </form>
 
-      {!readOnly ? (
+      {!packLocked ? (
         <section className="border-t border-zinc-200 pt-8 dark:border-zinc-800">
           <DjPackUploader
             key={[...files].map((f) => f.id).sort().join(",")}
             trackId={track.id}
             files={files}
-            readOnly={readOnly}
+            readOnly={packLocked}
             onUploaded={() => router.refresh()}
           />
         </section>
       ) : null}
 
-      {!readOnly && (track.is_draft || track.moderation_status === "rejected") ? (
+      {!packLocked && (track.is_draft || track.moderation_status === "rejected") ? (
         <div className="border-t border-zinc-200 pt-8 dark:border-zinc-800">
           <h3 className="text-lg font-semibold">Submit for admin review</h3>
           <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
@@ -327,7 +341,7 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
         </div>
       ) : null}
 
-      {!readOnly ? (
+      {track.moderation_status !== "approved" ? (
         <section className="border-t border-red-200 pt-8 dark:border-red-900/40">
           <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
             Delete this DJ pack
@@ -340,7 +354,13 @@ export function TrackEditor({ track, files }: { track: Track; files: TrackFile[]
             <DeleteTrackButton
               trackId={track.id}
               trackTitle={track.title || "Untitled"}
-              canDelete={track.moderation_status !== "approved"}
+              canDelete
+              deleteFn={mode === "label" ? labelRepDeleteTrack : undefined}
+              redirectTo={
+                mode === "label"
+                  ? `/label/artists/${track.artist_id}/tracks`
+                  : "/artist/tracks"
+              }
               className="min-h-11 rounded-md border border-red-300 bg-white px-4 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60 dark:border-red-800 dark:bg-zinc-900 dark:text-red-300 dark:hover:bg-red-950/40"
             >
               Delete DJ pack

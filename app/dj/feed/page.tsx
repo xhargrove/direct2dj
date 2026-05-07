@@ -218,6 +218,7 @@ async function FeedList({
                 bpm={r.bpm != null ? Number(r.bpm) : null}
                 explicitLabel={r.explicit_rating === "explicit" ? "Explicit" : "Clean"}
                 coverUrl={r.cover_storage_path ? coverMap.get(r.cover_storage_path) ?? null : null}
+                labelRosterRelease={Boolean(r.label_roster_release)}
                 footer={<span className="text-zinc-500">Latest from this artist</span>}
               />
             ))}
@@ -226,12 +227,18 @@ async function FeedList({
       ) : null}
 
       {!feedErr && featuredCards.length > 0 ? (
-        <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold">Featured</h2>
-          <div className="flex flex-col gap-2">
+        <section className="flex flex-col gap-5">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Featured</h2>
+            <p className="mt-1.5 text-base text-zinc-600 dark:text-zinc-400">
+              Spotlight picks at the top of Discover — open a pack to preview and download.
+            </p>
+          </div>
+          <div className="flex flex-col gap-4">
             {featuredCards.map(({ fp, tid, title, artistLine, genre, bpm, explicitLabel, coverUrl, label }) => (
               <DjTrackCard
                 key={fp.id}
+                variant="featured"
                 id={tid}
                 title={title}
                 artistLine={artistLine}
@@ -239,7 +246,11 @@ async function FeedList({
                 bpm={bpm}
                 explicitLabel={explicitLabel}
                 coverUrl={coverUrl}
-                footer={label ? <span className="text-amber-700 dark:text-amber-400">{label}</span> : null}
+                footer={
+                  label ? (
+                    <span className="text-amber-800 dark:text-amber-300">{label}</span>
+                  ) : null
+                }
               />
             ))}
           </div>
@@ -270,6 +281,7 @@ async function FeedList({
                 bpm={r.bpm != null ? Number(r.bpm) : null}
                 explicitLabel={r.explicit_rating === "explicit" ? "Explicit" : "Clean"}
                 coverUrl={r.cover_storage_path ? coverMap.get(r.cover_storage_path) ?? null : null}
+                labelRosterRelease={Boolean(r.label_roster_release)}
                 footer={
                   <span>
                     {r.download_count} downloads ·{" "}
@@ -315,7 +327,7 @@ export default function DjFeedPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Discover</h1>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">

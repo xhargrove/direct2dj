@@ -29,7 +29,7 @@ export default async function DjProfilePage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("email, full_name")
+    .select("email, full_name, avatar_url")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -43,15 +43,25 @@ export default async function DjProfilePage() {
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Your DJ profile</h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          How you appear in the system. Contact and location options are on{" "}
-          <Link href="/dj/settings" className="font-medium text-zinc-900 underline dark:text-zinc-100">
-            Privacy
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Your DJ profile</h1>
+          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+            How you appear in the system. Contact preferences are on{" "}
+            <Link href="/dj/settings" className="font-medium text-zinc-900 underline dark:text-zinc-100">
+              Privacy
+            </Link>
+            .
+          </p>
+        </div>
+        {d ? (
+          <Link
+            href="/dj/profile/edit"
+            className="inline-flex shrink-0 min-h-11 items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
+          >
+            Edit profile
           </Link>
-          .
-        </p>
+        ) : null}
       </div>
 
       {!d ? (
@@ -68,6 +78,16 @@ export default async function DjProfilePage() {
         </p>
       ) : (
         <dl className="space-y-4 rounded-lg border border-zinc-200 p-4 text-sm dark:border-zinc-800">
+          {profile?.avatar_url ? (
+            <div className="flex justify-center pb-2">
+              {/* eslint-disable-next-line @next/next/no-img-element -- Supabase public bucket URL */}
+              <img
+                src={profile.avatar_url}
+                alt=""
+                className="h-28 w-28 rounded-full border border-zinc-200 object-cover dark:border-zinc-700"
+              />
+            </div>
+          ) : null}
           <div>
             <dt className="text-zinc-500">Display name</dt>
             <dd className="mt-0.5 font-medium text-zinc-900 dark:text-zinc-100">{d.display_name}</dd>

@@ -625,3 +625,40 @@ export async function adminCreateArtistAccount(input: {
     message: `${methodMessage} Artist display name set to “${displayName}”.`,
   };
 }
+
+export async function adminUpdateArtist(
+  artistId: string,
+  input: {
+    display_name: string;
+    bio: string | null;
+    status: "active" | "inactive";
+  },
+) {
+  const ctx = await getAdminContext();
+  if ("error" in ctx) return { error: ctx.error };
+
+  const name = input.display_name.trim();
+  if (name.length < 2) return { error: "Display name must be at least 2 characters." };
+  if (name.length > 120) return { error: "Display name must be 120 characters or less." };
+
+  const bioRaw = input.bio?.trim() ?? "";
+  const bio = bioRaw.length === 0 ? null : bioRaw;
+  if (bio && bio.length > 2000) return { error: "Bio must be 2000 characters or less." };
+
+  const { error } = await ctx.supabase
+    .from("artists")
+    .update({
+      display_name: name,
+      bio,
+      status: input.status,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", artistId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath("/admin/artists");
+  revalidatePath(`/admin/artists/${artistId}`);
+  revalidatePath("/admin/tracks");
+  return { ok: true as const };
+}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AdminTrackBasicsForm } from "@/components/admin/admin-track-basics-form";
+import { AdminTrackMetadataForm } from "@/components/admin/admin-track-metadata-form";
 import { DjPackUploader } from "@/components/artist/dj-pack-uploader";
 import type { TrackFile } from "@/lib/types/database";
 import { PACK_SLOT_LABELS, type PackSlot } from "@/lib/tracks/pack-slots";
@@ -22,9 +23,6 @@ function isImageFile(f: TrackFile): boolean {
 
 export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
   const { track, files, artist, profile, featuredRows, engagement } = bundle;
-
-  const tagsArr = Array.isArray(track.admin_tags) ? track.admin_tags : [];
-  const adminTags = tagsArr.length > 0 ? tagsArr.join(", ") : "";
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
@@ -67,6 +65,7 @@ export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
             </dt>
             <dd className="mt-0.5 font-medium">{artist.display_name}</dd>
             <dd className="mt-1 text-xs text-zinc-500">
+              {!artist.profile_id ? "Label-managed roster · rep account: " : null}
               {profile.full_name ?? profile.email ?? "—"} · {artist.status}
             </dd>
           </div>
@@ -79,51 +78,7 @@ export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
         </Link>
       </section>
 
-      <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-        <h2 className="text-sm font-semibold">Metadata</h2>
-        <dl className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
-          <div>
-            <dt className="text-xs text-zinc-500">Genre</dt>
-            <dd>{track.genre}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-zinc-500">BPM / Key</dt>
-            <dd>
-              {track.bpm ?? "—"} / {track.musical_key ?? "—"}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-xs text-zinc-500">Explicit</dt>
-            <dd>{track.explicit_rating}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-zinc-500">Release</dt>
-            <dd>{track.release_date ?? "—"}</dd>
-          </div>
-          <div className="sm:col-span-2">
-            <dt className="text-xs text-zinc-500">Producer</dt>
-            <dd>{track.producer ?? "—"}</dd>
-          </div>
-          <div className="sm:col-span-2">
-            <dt className="text-xs text-zinc-500">Description</dt>
-            <dd className="whitespace-pre-wrap">{track.description ?? "—"}</dd>
-          </div>
-          <div className="sm:col-span-2">
-            <dt className="text-xs text-zinc-500">Campaign notes</dt>
-            <dd className="whitespace-pre-wrap">{track.campaign_notes ?? "—"}</dd>
-          </div>
-          {track.rejection_reason ? (
-            <div className="sm:col-span-2">
-              <dt className="text-xs text-zinc-500">Rejection reason</dt>
-              <dd className="whitespace-pre-wrap text-red-700 dark:text-red-300">{track.rejection_reason}</dd>
-            </div>
-          ) : null}
-          <div className="sm:col-span-2">
-            <dt className="text-xs text-zinc-500">Admin tags</dt>
-            <dd>{adminTags || "—"}</dd>
-          </div>
-        </dl>
-      </section>
+      <AdminTrackMetadataForm track={track} />
 
       <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -206,7 +161,7 @@ export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
           <DjPackUploader
             trackId={track.id}
             files={files}
-            artistProfileIdForStorage={artist.profile_id}
+            artistProfileIdForStorage={artist.profile_id ?? artist.managed_by_label_rep_id ?? undefined}
           />
         </div>
       </section>
@@ -239,7 +194,6 @@ export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
         trackId={track.id}
         moderationStatus={track.moderation_status}
         catalogActive={track.catalog_active !== false}
-        adminTagsSerialized={adminTags}
         featuredRows={featuredRows}
       />
     </div>

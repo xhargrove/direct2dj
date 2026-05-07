@@ -87,6 +87,17 @@ These paths are the product contract for role dashboards. **Do not add a second 
 
 **Also in app:** `/dj/dashboard`, `/dj/history`, etc.
 
+### Label representative
+
+| Path | Purpose |
+|------|---------|
+| `/label` | Entry: redirects to `/label/dashboard`. |
+| `/label/dashboard` | Hub for label reps (not DJs or indie artists). |
+| `/label/roster` | Create roster artist pages (managed acts without their own login). |
+| `/label/catalog` | Read-only overview of tracks submitted on the site. |
+| `/label/artists/[artistId]/tracks` | DJ packs for one roster artist. |
+| `/label/artists/[artistId]/tracks/[id]/edit` | Upload pack files and submit for admin review. |
+
 ### Admin
 
 | Path | Purpose |
