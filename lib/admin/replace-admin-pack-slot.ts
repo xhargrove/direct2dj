@@ -49,15 +49,19 @@ export async function replaceAdminPackSlot(
 
   const { data: tr, error: trErr } = await userSupabase
     .from("tracks")
-    .select("id, artists ( profile_id )")
+    .select("id, artists ( profile_id, managed_by_label_rep_id )")
     .eq("id", trackId)
     .maybeSingle();
 
   if (trErr) return { error: trErr.message };
   if (!tr) return { error: "Track not found." };
 
-  const artists = tr.artists as { profile_id: string } | { profile_id: string }[] | null;
-  const profileId = Array.isArray(artists) ? artists[0]?.profile_id : artists?.profile_id;
+  const artists = tr.artists as
+    | { profile_id: string | null; managed_by_label_rep_id?: string | null }
+    | { profile_id: string | null; managed_by_label_rep_id?: string | null }[]
+    | null;
+  const art = Array.isArray(artists) ? artists[0] : artists;
+  const profileId = art?.profile_id?.trim() || art?.managed_by_label_rep_id?.trim() || null;
   if (!profileId || !UUID_RE.test(profileId)) {
     return { error: "Could not resolve artist profile for this track." };
   }

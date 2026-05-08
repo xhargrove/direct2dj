@@ -3,9 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { readImageFileDimensions } from "@/lib/images/read-image-dimensions";
 
 const AVATAR_PATH_SUFFIX = "avatar";
 const MAX_BYTES = 5 * 1024 * 1024;
+/** Longest edge allowed (pixels); avoids huge uploads and keeps booth UI predictable. */
+const MAX_EDGE_PX = 4096;
 const ACCEPT_MIME = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 
 export function DjAvatarUpload({
@@ -31,6 +34,19 @@ export function DjAvatarUpload({
       }
       if (file.size > MAX_BYTES) {
         setStatus("Image must be 5 MB or smaller.");
+        return;
+      }
+
+      try {
+        const { width, height } = await readImageFileDimensions(file);
+        if (width > MAX_EDGE_PX || height > MAX_EDGE_PX) {
+          setStatus(
+            `Image must be at most ${MAX_EDGE_PX}×${MAX_EDGE_PX} pixels (this file is ${width}×${height}). Resize and try again.`,
+          );
+          return;
+        }
+      } catch {
+        setStatus("Could not read that image. Try another file or format.");
         return;
       }
 
@@ -142,8 +158,8 @@ export function DjAvatarUpload({
           )}
         </div>
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          JPEG, PNG, WebP, or GIF. Max 5 MB. Shown on your DJ profile and when artists you’ve interacted with view your
-          profile.
+          JPEG, PNG, WebP, or GIF. Max 5 MB; longest side max {MAX_EDGE_PX} px. Square photos look best in the circle.
+          Shown on your DJ profile and when artists you’ve interacted with view your profile.
         </p>
         {status ? <p className="text-sm text-zinc-600 dark:text-zinc-400">{status}</p> : null}
       </div>

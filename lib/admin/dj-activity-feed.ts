@@ -10,8 +10,11 @@ export type AdminDjActivityItem = {
   djName: string;
 };
 
-const DEFAULT_PAGE_SIZE = 50;
-const MAX_PAGE_SIZE = 200;
+/** Default rows per page for admin DJ activity (`?pageSize=` overrides, max {@link MAX_ADMIN_DJ_ACTIVITY_PAGE_SIZE}). */
+export const ADMIN_DJ_ACTIVITY_DEFAULT_PAGE_SIZE = 50;
+const DEFAULT_PAGE_SIZE = ADMIN_DJ_ACTIVITY_DEFAULT_PAGE_SIZE;
+export const MAX_ADMIN_DJ_ACTIVITY_PAGE_SIZE = 200;
+const MAX_PAGE_SIZE = MAX_ADMIN_DJ_ACTIVITY_PAGE_SIZE;
 
 type RpcFeedRow = {
   activity_at: string;

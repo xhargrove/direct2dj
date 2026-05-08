@@ -2,12 +2,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdminDjActivityPagination } from "@/components/admin/admin-dj-activity-pagination";
 import { AdminDjActivityTable } from "@/components/admin/admin-dj-activity-table";
-import { fetchAdminDjActivityFeed } from "@/lib/admin/dj-activity-feed";
+import {
+  ADMIN_DJ_ACTIVITY_DEFAULT_PAGE_SIZE,
+  fetchAdminDjActivityFeed,
+  MAX_ADMIN_DJ_ACTIVITY_PAGE_SIZE,
+} from "@/lib/admin/dj-activity-feed";
 import { createClient } from "@/lib/supabase/server";
 
 type Props = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; pageSize?: string }>;
 };
 
 export default async function AdminSingleDjActivityPage({ params, searchParams }: Props) {
@@ -15,6 +19,9 @@ export default async function AdminSingleDjActivityPage({ params, searchParams }
   const sp = await searchParams;
   const rawPage = Number.parseInt(sp.page ?? "1", 10);
   const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
+  const rawPs = Number.parseInt(sp.pageSize ?? "", 10);
+  const pageSize =
+    Number.isFinite(rawPs) && rawPs > 0 ? Math.min(MAX_ADMIN_DJ_ACTIVITY_PAGE_SIZE, rawPs) : ADMIN_DJ_ACTIVITY_DEFAULT_PAGE_SIZE;
 
   const supabase = await createClient();
 
@@ -28,7 +35,7 @@ export default async function AdminSingleDjActivityPage({ params, searchParams }
     notFound();
   }
 
-  const result = await fetchAdminDjActivityFeed(supabase, { djId: id, page });
+  const result = await fetchAdminDjActivityFeed(supabase, { djId: id, page, pageSize });
 
   if (!result.ok) {
     return <p className="text-sm text-red-600">Could not load activity: {result.error}</p>;

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ADMIN_DJ_ACTIVITY_DEFAULT_PAGE_SIZE } from "@/lib/admin/dj-activity-feed";
 
 export function AdminDjActivityPagination({
   path,
@@ -18,7 +19,13 @@ export function AdminDjActivityPagination({
 
   const href = (p: number) => {
     const base = path.split("?")[0] ?? path;
-    return p <= 1 ? base : `${base}?page=${p}`;
+    const params = new URLSearchParams();
+    if (p > 1) params.set("page", String(p));
+    if (pageSize !== ADMIN_DJ_ACTIVITY_DEFAULT_PAGE_SIZE) {
+      params.set("pageSize", String(pageSize));
+    }
+    const q = params.toString();
+    return q ? `${base}?${q}` : base;
   };
 
   return (
