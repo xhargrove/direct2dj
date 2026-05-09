@@ -89,7 +89,7 @@ export default async function Home() {
               Digital Service Pack
             </h1>
 
-            <p className="dj-brand mt-5 max-w-xl text-xl font-semibold tracking-tight text-zinc-800 dark:text-zinc-100 sm:text-2xl">
+            <p className="dj-brand mt-5 max-w-xl text-xl font-semibold tracking-tight text-foreground sm:text-2xl">
               DJ-ready promos. Delivered clean. Played loud.
             </p>
 

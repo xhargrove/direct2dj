@@ -1,11 +1,24 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f3f5ff;
-  --foreground: #0a1230;
-  --dj-accent: #1da7ff;
-  --dj-accent-2: #5c4dff;
-  --dj-accent-3: #ff9f2f;
+  /* Light: warm booth / flyer paper — not cool gray SaaS */
+  --background: #f4f0e8;
+  --foreground: #0c0614;
+  --dj-accent: #00b4d8;
+  --dj-accent-2: #9333ea;
+  --dj-accent-3: #ff2d6b;
+  /* shadcn-style aliases — used when migrating off hardcoded zinc */
+  --card: #fffdf6;
+  --card-foreground: #0c0614;
+  --muted: #e8e2d6;
+  --muted-foreground: #5c5168;
+  --border: rgba(12, 6, 20, 0.12);
+  --input: rgba(12, 6, 20, 0.1);
+  --ring: #9333ea;
+  --primary: #0c0614;
+  --primary-foreground: #f4f0e8;
+  --secondary: #ded8cf;
+  --secondary-foreground: #0c0614;
 }
 
 @theme inline {
@@ -17,12 +30,52 @@
   --color-dj-accent: var(--dj-accent);
   --color-dj-accent-2: var(--dj-accent-2);
   --color-dj-accent-3: var(--dj-accent-3);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  /*
+   * Remap Tailwind zinc to booth / club neutrals so existing bg-zinc-*, text-zinc-*
+   * across dashboards pick up the DJ skin without editing every file.
+   */
+  --color-zinc-50: #faf6f0;
+  --color-zinc-100: #ede7de;
+  --color-zinc-200: #d9d0c4;
+  --color-zinc-300: #bfb5c4;
+  --color-zinc-400: #95899e;
+  --color-zinc-500: #736784;
+  --color-zinc-600: #5a4f68;
+  --color-zinc-700: #453b52;
+  --color-zinc-800: #2e2639;
+  --color-zinc-900: #1a1424;
+  --color-zinc-950: #0e0a14;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #040813;
-    --foreground: #eaf2ff;
+    --background: #030208;
+    --foreground: #f7f4ff;
+    --dj-accent: #22d3ee;
+    --dj-accent-2: #c084fc;
+    --dj-accent-3: #fb7185;
+    --card: rgba(18, 14, 32, 0.78);
+    --card-foreground: #f7f4ff;
+    --muted: rgba(255, 255, 255, 0.08);
+    --muted-foreground: #b0a8c8;
+    --border: rgba(255, 255, 255, 0.1);
+    --input: rgba(255, 255, 255, 0.12);
+    --ring: #c084fc;
+    --primary: #f7f4ff;
+    --primary-foreground: #0e0a14;
+    --secondary: rgba(255, 255, 255, 0.1);
+    --secondary-foreground: #f7f4ff;
   }
 }
 
@@ -42,11 +95,11 @@ body {
   .dj-glow-text {
     background: linear-gradient(
       118deg,
-      #66d6ff 0%,
-      #1da7ff 18%,
-      #5c4dff 48%,
-      #7f2fff 72%,
-      #ff9f2f 100%
+      #5ce1ff 0%,
+      #00b4d8 16%,
+      #a855f7 42%,
+      #e879f9 68%,
+      #ff2d6b 100%
     );
     background-size: 160% 160%;
     -webkit-background-clip: text;
@@ -81,7 +134,7 @@ body {
 
   @media (prefers-color-scheme: light) {
     .dj-lede {
-      color: rgb(63 63 70);
+      color: rgb(58 48 68);
     }
   }
 
@@ -102,7 +155,13 @@ body {
     display: block;
     height: 1px;
     width: 2.25rem;
-    background: linear-gradient(90deg, transparent, rgba(29, 167, 255, 0.85), transparent);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--dj-accent) 80%, transparent),
+      color-mix(in srgb, var(--dj-accent-3) 65%, transparent),
+      transparent
+    );
     opacity: 0.9;
   }
 
@@ -112,25 +171,25 @@ body {
 
   @media (prefers-color-scheme: light) {
     .dj-header {
-      border-bottom: 1px solid rgba(24, 24, 27, 0.08);
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(252, 250, 255, 0.88) 100%);
-      box-shadow: 0 1px 0 rgba(139, 92, 246, 0.06);
+      border-bottom: 1px solid rgba(12, 6, 20, 0.1);
+      background: linear-gradient(180deg, rgba(255, 252, 246, 0.92) 0%, rgba(244, 240, 232, 0.82) 100%);
+      box-shadow: 0 1px 0 color-mix(in srgb, var(--dj-accent-2) 12%, transparent);
     }
 
     .dj-footer {
-      border-top: 1px solid rgba(24, 24, 27, 0.08);
-      background: rgba(255, 255, 255, 0.62);
+      border-top: 1px solid rgba(12, 6, 20, 0.1);
+      background: rgba(255, 252, 246, 0.58);
       backdrop-filter: blur(12px);
     }
 
     .dj-nav-link {
-      color: rgb(63 63 70);
+      color: rgb(55 48 60);
       text-underline-offset: 4px;
       transition: color 150ms ease;
     }
 
     .dj-nav-link:hover {
-      color: rgb(14 116 255);
+      color: var(--dj-accent-2);
     }
   }
 
@@ -180,14 +239,21 @@ body {
       transform 180ms ease,
       box-shadow 180ms ease,
       filter 180ms ease;
-    background: linear-gradient(125deg, #2cc8ff 0%, #1da7ff 22%, #5c4dff 55%, #7f2fff 84%, #ff9f2f 100%);
+    background: linear-gradient(
+      125deg,
+      #5ce1ff 0%,
+      #00b4d8 18%,
+      #9333ea 48%,
+      #e879f9 72%,
+      #ff2d6b 100%
+    );
     background-size: 140% 140%;
     color: #09090b;
     box-shadow:
       0 0 0 1px rgba(255, 255, 255, 0.2) inset,
       0 2px 0 rgba(255, 255, 255, 0.14) inset,
-      0 8px 32px rgba(29, 167, 255, 0.28),
-      0 20px 48px rgba(70, 56, 200, 0.24);
+      0 8px 32px color-mix(in srgb, var(--dj-accent) 45%, transparent),
+      0 20px 48px color-mix(in srgb, var(--dj-accent-2) 38%, transparent);
   }
 
   .dj-btn-primary:hover {
@@ -196,8 +262,8 @@ body {
     box-shadow:
       0 0 0 1px rgba(255, 255, 255, 0.28) inset,
       0 2px 0 rgba(255, 255, 255, 0.18) inset,
-      0 12px 40px rgba(29, 167, 255, 0.38),
-      0 24px 56px rgba(92, 77, 255, 0.32);
+      0 12px 40px color-mix(in srgb, var(--dj-accent) 55%, transparent),
+      0 24px 56px color-mix(in srgb, var(--dj-accent-3) 28%, transparent);
   }
 
   .dj-btn-primary:active {
@@ -299,15 +365,15 @@ body {
 
   @media (prefers-color-scheme: light) {
     .dj-card {
-      border-color: rgba(24, 24, 27, 0.1);
+      border-color: rgba(12, 6, 20, 0.09);
       background: linear-gradient(
         165deg,
-        rgba(255, 255, 255, 0.88) 0%,
-        rgba(250, 248, 255, 0.78) 100%
+        rgba(255, 252, 246, 0.9) 0%,
+        rgba(244, 240, 232, 0.82) 100%
       );
       box-shadow:
-        0 0 0 1px rgba(88, 28, 135, 0.05),
-        0 20px 50px rgba(88, 28, 135, 0.1);
+        0 0 0 1px color-mix(in srgb, var(--dj-accent-2) 08%, transparent),
+        0 20px 50px rgba(12, 6, 20, 0.08);
     }
   }
 
@@ -329,12 +395,12 @@ body {
     font-weight: 600;
     letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: rgb(113 113 122);
+    color: rgb(90 78 102);
   }
 
   @media (prefers-color-scheme: dark) {
     .dj-eyebrow {
-      color: rgb(180 180 189);
+      color: rgb(196 190 214);
     }
   }
 
@@ -352,10 +418,10 @@ body {
     position: absolute;
     inset: -40%;
     background:
-      radial-gradient(ellipse 55% 48% at 50% -8%, rgba(92, 77, 255, 0.42), transparent 58%),
-      radial-gradient(ellipse 45% 38% at 95% 25%, rgba(29, 167, 255, 0.2), transparent 55%),
-      radial-gradient(ellipse 42% 36% at 5% 55%, rgba(255, 159, 47, 0.15), transparent 52%),
-      radial-gradient(ellipse 50% 42% at 70% 92%, rgba(74, 46, 220, 0.14), transparent 55%);
+      radial-gradient(ellipse 54% 46% at 50% -8%, rgba(192, 132, 252, 0.38), transparent 58%),
+      radial-gradient(ellipse 44% 36% at 94% 24%, rgba(34, 211, 238, 0.22), transparent 55%),
+      radial-gradient(ellipse 42% 34% at 6% 54%, rgba(251, 113, 133, 0.18), transparent 52%),
+      radial-gradient(ellipse 48% 40% at 68% 92%, rgba(147, 51, 234, 0.2), transparent 55%);
     animation: dj-mesh-shift 28s ease-in-out infinite alternate;
     opacity: 0.95;
   }
@@ -363,10 +429,10 @@ body {
   @media (prefers-color-scheme: light) {
     .dj-atmosphere__mesh {
       background:
-        radial-gradient(ellipse 60% 52% at 50% -5%, rgba(167, 139, 250, 0.35), transparent 58%),
-        radial-gradient(ellipse 48% 40% at 92% 22%, rgba(34, 211, 238, 0.12), transparent 52%),
-        radial-gradient(ellipse 44% 38% at 8% 58%, rgba(244, 114, 182, 0.14), transparent 52%),
-        radial-gradient(ellipse 52% 44% at 62% 95%, rgba(125, 211, 252, 0.1), transparent 52%);
+        radial-gradient(ellipse 58% 50% at 50% -4%, rgba(147, 51, 234, 0.22), transparent 58%),
+        radial-gradient(ellipse 46% 38% at 90% 20%, rgba(0, 180, 216, 0.14), transparent 52%),
+        radial-gradient(ellipse 42% 36% at 10% 56%, rgba(255, 45, 107, 0.12), transparent 52%),
+        radial-gradient(ellipse 50% 42% at 58% 96%, rgba(232, 121, 249, 0.1), transparent 52%);
       opacity: 1;
     }
   }
@@ -445,7 +511,7 @@ body {
 
   @media (prefers-color-scheme: light) {
     .dj-atmosphere__vignette {
-      background: radial-gradient(ellipse 90% 75% at 50% 42%, transparent 40%, rgba(88, 28, 135, 0.08) 100%);
+      background: radial-gradient(ellipse 90% 75% at 50% 42%, transparent 38%, rgba(12, 6, 20, 0.06) 100%);
       opacity: 1;
     }
   }
