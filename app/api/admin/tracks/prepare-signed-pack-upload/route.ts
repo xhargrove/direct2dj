@@ -28,10 +28,11 @@ export async function POST(req: Request) {
   if (!adminSr) {
     return NextResponse.json(
       {
+        code: "MISSING_SUPABASE_SERVICE_ROLE_KEY" as const,
         error:
-          "SUPABASE_SERVICE_ROLE_KEY is not set on the server. Admin pack uploads on behalf of an artist need it to mint signed Storage URLs, or use direct client upload only when promos admin storage policies exist.",
+          "SUPABASE_SERVICE_ROLE_KEY is not set on the server (add it under Vercel → Settings → Environment Variables for Production, then redeploy). Without it, admin DJ pack uploads cannot mint signed Storage URLs; the app will try a direct browser upload if your database has promos admin Storage policies.",
       },
-      { status: 503 },
+      { status: 422 },
     );
   }
 

@@ -139,7 +139,7 @@ export function DjPackUploader({
       const adminPrefix = artistProfileIdForStorage?.trim();
       if (adminPrefix) {
         setSlotPct((s) => ({ ...s, [slot]: 12 }));
-        let prepBody: { path?: string; token?: string; error?: string };
+        let prepBody: { path?: string; token?: string; error?: string; code?: string } = {};
         try {
           const prepRes = await fetch("/api/admin/tracks/prepare-signed-pack-upload", {
             method: "POST",
@@ -154,7 +154,16 @@ export function DjPackUploader({
               mimeType: file.type,
             }),
           });
-          prepBody = (await prepRes.json()) as { path?: string; token?: string; error?: string };
+          try {
+            prepBody = (await prepRes.json()) as {
+              path?: string;
+              token?: string;
+              error?: string;
+              code?: string;
+            };
+          } catch {
+            prepBody = {};
+          }
 
           if (prepRes.ok && prepBody.path && prepBody.token) {
             setSlotPct((s) => ({ ...s, [slot]: 35 }));
@@ -173,10 +182,11 @@ export function DjPackUploader({
           }
 
           const missingServiceRole =
-            prepRes.status === 503 &&
-            typeof prepBody.error === "string" &&
-            (prepBody.error.includes("SUPABASE_SERVICE_ROLE_KEY") ||
-              prepBody.error.toLowerCase().includes("service role"));
+            prepBody.code === "MISSING_SUPABASE_SERVICE_ROLE_KEY" ||
+            (prepRes.status === 503 &&
+              typeof prepBody.error === "string" &&
+              (prepBody.error.includes("SUPABASE_SERVICE_ROLE_KEY") ||
+                prepBody.error.toLowerCase().includes("service role")));
 
           if (!missingServiceRole) {
             setSlotPhase((s) => ({ ...s, [slot]: "error" }));

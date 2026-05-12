@@ -35,7 +35,7 @@ Use this for **Vercel** (or any host) **Preview** and **Production**. Values mus
 | Symptom | Likely cause |
 |---------|----------------|
 | Build OK, runtime 500 on webhook | Missing `STRIPE_WEBHOOK_SECRET` or wrong signing secret |
-| Auth works, admin DJ pack upload fails only on **deployed** site | Missing `SUPABASE_SERVICE_ROLE_KEY` on Vercel (signed upload route). Optional: apply `promos_insert_admin` migration if you want client-JWT Storage writes without the service role. |
+| Auth works, `prepare-signed-pack-upload` returns **422** with `MISSING_SUPABASE_SERVICE_ROLE_KEY` | `SUPABASE_SERVICE_ROLE_KEY` missing for that Vercel environment — add it and redeploy. The UI falls back to direct Storage upload when possible. |
 | Auth works, DB queries empty/wrong | Wrong project URL/key pair |
 | Redirect after Stripe goes to wrong host | Missing `NEXT_PUBLIC_SITE_URL` on non-Vercel or wrong value |
 | Cron 401 | `CRON_SECRET` mismatch or missing header |
