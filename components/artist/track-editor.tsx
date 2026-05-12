@@ -146,6 +146,11 @@ export function TrackEditor({
 
       <form onSubmit={onSaveDraft} className="space-y-4">
         <h2 className="text-lg font-semibold">Release metadata</h2>
+        <p className="text-xs text-zinc-600 dark:text-zinc-400">
+          DJs get pack files named from your <strong>song title</strong> and <strong>credited artist</strong> here
+          (for example <span className="font-mono">Make Way (Clean) - LJ Hellems.mp3</span>) — keep them accurate and match
+          what&apos;s on the record.
+        </p>
 
         <label className="block space-y-1">
           <span className="text-sm font-medium">Song title *</span>
@@ -310,6 +315,8 @@ export function TrackEditor({
             trackId={track.id}
             files={files}
             readOnly={packLocked}
+            releaseTitle={meta.title}
+            creditArtistName={meta.credit_artist_name}
             onUploaded={() => router.refresh()}
           />
         </section>

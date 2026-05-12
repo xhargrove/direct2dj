@@ -17,9 +17,9 @@ export function AppTopNav({
         <Image
           src="/site-logo.png"
           alt="Digital Service Pack logo"
-          width={28}
-          height={28}
-          className="h-7 w-7 shrink-0 rounded-md"
+          width={164}
+          height={205}
+          className="h-10 w-auto shrink-0 object-contain"
           priority
         />
         <div className="flex flex-col gap-0.5">

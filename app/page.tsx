@@ -104,7 +104,7 @@ export default async function Home() {
       <MarketingSiteHeader />
       <main className="relative flex flex-1 flex-col overflow-x-hidden">
         <div className="relative mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 pb-24 pt-8 sm:pt-12 md:pt-16">
-          <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(280px,420px)] lg:gap-10 xl:gap-16">
+          <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-10 xl:gap-16">
             <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
               <p className="dj-kicker-badge mb-5 justify-center lg:justify-start">
                 <span aria-hidden className="text-amber-300">
@@ -172,13 +172,13 @@ export default async function Home() {
 
             <div className="dj-hero-image-wrap relative z-[1]">
               <Image
-                src="/marketing/hero-badge.png"
-                alt="Digital Service Pack badge"
-                width={900}
-                height={900}
-                className="relative z-[1] w-full max-w-md rounded-2xl object-contain shadow-[0_0_60px_rgba(56,189,248,0.25)] ring-1 ring-white/20 lg:max-w-none"
+                src="/site-logo.png"
+                alt="Digital Service Pack logo"
+                width={819}
+                height={1024}
+                className="relative z-[1] h-auto w-full max-w-[min(92vw,520px)] object-contain sm:max-w-[580px] lg:max-h-[min(88vh,820px)] lg:max-w-[min(100%,640px)] xl:max-w-[min(100%,720px)]"
                 priority
-                sizes="(max-width: 1024px) 90vw, 420px"
+                sizes="(max-width: 1024px) 92vw, (max-width: 1280px) 50vw, 720px"
               />
             </div>
           </div>

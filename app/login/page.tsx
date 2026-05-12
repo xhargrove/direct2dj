@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
@@ -25,12 +26,14 @@ export default async function LoginPage({ searchParams }: Props) {
       <MarketingSiteHeader />
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-10">
         <div className="mb-8 flex flex-col items-center gap-2 text-center">
-          <div
-            className="dj-brand flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-400 via-violet-500 to-fuchsia-500 text-lg font-bold text-zinc-950 shadow-[0_12px_40px_rgba(34,211,238,0.35)] ring-2 ring-white/25"
-            aria-hidden
-          >
-            D2
-          </div>
+          <Image
+            src="/site-logo.png"
+            alt=""
+            width={120}
+            height={150}
+            className="h-24 w-auto object-contain"
+            priority
+          />
           <p className="dj-brand text-lg font-semibold tracking-tight text-zinc-50">Digital Service Pack</p>
           <p className="max-w-xs text-sm text-zinc-400">Sign in and step into your booth.</p>
         </div>

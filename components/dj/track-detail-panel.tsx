@@ -215,8 +215,10 @@ export function TrackDetailPanel({
       <section className="flex flex-col gap-3">
         <h2 className="text-sm font-semibold">DJ pack download</h2>
         <p className="text-xs text-zinc-500">
-          Logs this download to your account, then saves each pack file to your device. If your browser blocks multiple
-          downloads, use the links below.
+          Logs this download to your account, then saves each pack file to your device. File names use the
+          artist&apos;s <strong>release title</strong> and <strong>credited artist</strong> (e.g.{" "}
+          <span className="font-mono text-[11px]">Make Way (Clean) - Artist Name.mp3</span>) so they read clearly in your
+          library. If your browser blocks multiple downloads, use the links below.
         </p>
         {!downloadAllowed ? (
           <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">

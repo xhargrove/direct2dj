@@ -15,6 +15,7 @@ import {
   validateRatingScore,
 } from "@/lib/dj/catalog-validation";
 import type { CrowdReaction, PackSlotDb } from "@/lib/types/database";
+import { djPackDownloadFilename } from "@/lib/tracks/dj-download-filename";
 
 const PREVIEW_SLOTS: PackSlotDb[] = [
   "radio_edit",
@@ -24,11 +25,6 @@ const PREVIEW_SLOTS: PackSlotDb[] = [
   "intro_edit",
   "short_edit",
 ];
-
-function fileNameFromPath(path: string): string {
-  const seg = path.split("/").pop();
-  return seg && seg.length > 0 ? seg : "file";
-}
 
 export type DjRatingInput = {
   score: number;
@@ -125,6 +121,16 @@ export async function prepareDjPackDownload(trackId: string) {
   const files = loaded.files.filter((f) => f.storage_path);
   if (files.length === 0) return { error: "No files in this pack." };
 
+  const { data: trackMeta, error: metaErr } = await ctx.supabase
+    .from("tracks")
+    .select("title, credit_artist_name")
+    .eq("id", trackId)
+    .maybeSingle();
+
+  if (metaErr) return { error: metaErr.message };
+  const releaseTitle = (trackMeta?.title ?? "").trim() || "Track";
+  const creditArtist = (trackMeta?.credit_artist_name ?? "").trim() || "Artist";
+
   const package_manifest = files.map((f) => ({
     track_file_id: f.id,
     pack_slot: f.pack_slot,
@@ -149,7 +155,12 @@ export async function prepareDjPackDownload(trackId: string) {
     }
     out.push({
       pack_slot: f.pack_slot,
-      filename: fileNameFromPath(f.storage_path),
+      filename: djPackDownloadFilename({
+        pack_slot: f.pack_slot,
+        credit_artist_name: creditArtist,
+        title: releaseTitle,
+        storage_path: f.storage_path,
+      }),
       signedUrl: data.signedUrl,
     });
   }

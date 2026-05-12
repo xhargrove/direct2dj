@@ -13,6 +13,7 @@ import {
   type PackSlot,
 } from "@/lib/tracks/pack-slots";
 import { assertMimeForSlot, safeStorageFileName } from "@/lib/tracks/upload-rules";
+import { packFileDisplayName } from "@/lib/tracks/dj-download-filename";
 import type { TrackFile } from "@/lib/types/database";
 
 type SlotState = "idle" | "uploading" | "done" | "error";
@@ -24,12 +25,17 @@ export function DjPackUploader({
   onUploaded,
   /** When set (admin track review only), pack files are stored under this profile id’s prefix — the artist’s account, not the admin’s. */
   artistProfileIdForStorage,
+  /** Release metadata — used so legacy storage names (e.g. `radio_edit_CertifiedTexan.mp3`) show as DJ-friendly download names. */
+  releaseTitle,
+  creditArtistName,
 }: {
   trackId: string;
   files: TrackFile[];
   readOnly?: boolean;
   onUploaded?: () => void;
   artistProfileIdForStorage?: string;
+  releaseTitle?: string;
+  creditArtistName?: string;
 }) {
   const router = useRouter();
   const [files, setFiles] = useState<TrackFile[]>(initialFiles);
@@ -46,6 +52,17 @@ export function DjPackUploader({
     }
     return m;
   }, [files]);
+
+  const fileCaption = useCallback(
+    (f: TrackFile | undefined) => {
+      if (!f?.storage_path) return "";
+      return packFileDisplayName(
+        { pack_slot: f.pack_slot, storage_path: f.storage_path },
+        { title: releaseTitle, credit_artist_name: creditArtistName },
+      );
+    },
+    [releaseTitle, creditArtistName],
+  );
 
   const uploadSlot = useCallback(
     async (slot: PackSlot, file: File) => {
@@ -228,7 +245,7 @@ export function DjPackUploader({
               <span className="text-sm font-medium">{PACK_SLOT_LABELS.cover_art}</span>
               {bySlot.get(REQUIRED_COVER_SLOT) ? (
                 <p className="mt-1 truncate text-xs text-zinc-500">
-                  {bySlot.get(REQUIRED_COVER_SLOT)?.storage_path.split("/").pop()}
+                  {fileCaption(bySlot.get(REQUIRED_COVER_SLOT))}
                 </p>
               ) : (
                 <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">Missing</p>
@@ -260,7 +277,10 @@ export function DjPackUploader({
         <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
           Upload <strong>radio edit</strong> and/or <strong>dirty / full version</strong>. You must
           include at least one of these two before submitting for review (both are welcome).
-          Allowed: MP3, WAV, FLAC, M4A, AAC.
+          Allowed: MP3, WAV, FLAC, M4A, AAC. DJs see downloads like{" "}
+          <span className="font-mono text-[11px]">Make Way (Clean) - Artist.mp3</span> from your{" "}
+          <strong>release title</strong> and <strong>credited artist</strong> in the form above, not from these file
+          names.
         </p>
       </div>
 
@@ -276,7 +296,7 @@ export function DjPackUploader({
                 <span className="text-sm font-medium">{PACK_SLOT_LABELS[slot]}</span>
                 {bySlot.get(slot) ? (
                   <p className="mt-1 truncate text-xs text-zinc-500">
-                    {bySlot.get(slot)?.storage_path.split("/").pop()}
+                    {fileCaption(bySlot.get(slot))}
                   </p>
                 ) : (
                   <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
@@ -324,7 +344,7 @@ export function DjPackUploader({
                   <span className="text-sm font-medium">{PACK_SLOT_LABELS[slot]}</span>
                   {bySlot.get(slot) ? (
                     <p className="mt-1 truncate text-xs text-zinc-500">
-                      {bySlot.get(slot)?.storage_path.split("/").pop()}
+                      {fileCaption(bySlot.get(slot))}
                     </p>
                   ) : (
                     <p className="mt-1 text-xs text-zinc-500">Not uploaded</p>
@@ -366,7 +386,7 @@ export function DjPackUploader({
                   <span className="text-sm font-medium">{PACK_SLOT_LABELS[slot]}</span>
                   {bySlot.get(slot) ? (
                     <p className="mt-1 truncate text-xs text-zinc-500">
-                      {bySlot.get(slot)?.storage_path.split("/").pop()}
+                      {fileCaption(bySlot.get(slot))}
                     </p>
                   ) : (
                     <p className="mt-1 text-xs text-zinc-500">Not uploaded</p>

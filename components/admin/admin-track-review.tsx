@@ -7,6 +7,7 @@ import { PACK_SLOT_LABELS, type PackSlot } from "@/lib/tracks/pack-slots";
 import type { TrackReviewBundle } from "@/lib/admin/load-track-for-review";
 import { SignedAudio, SignedImage } from "@/components/admin/signed-storage-media";
 import { TrackReviewActions } from "@/components/admin/track-review-actions";
+import { packFileDisplayName } from "@/lib/tracks/dj-download-filename";
 
 function fileLabel(f: TrackFile): string {
   if (f.pack_slot && f.pack_slot in PACK_SLOT_LABELS) {
@@ -162,6 +163,8 @@ export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
             trackId={track.id}
             files={files}
             artistProfileIdForStorage={artist.profile_id ?? artist.managed_by_label_rep_id ?? undefined}
+            releaseTitle={track.title ?? ""}
+            creditArtistName={track.credit_artist_name ?? ""}
           />
         </div>
       </section>
@@ -172,7 +175,15 @@ export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
           {files.map((f) => (
             <li key={f.id} className="border-b border-zinc-100 pb-6 last:border-0 last:pb-0 dark:border-zinc-800">
               <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400">{fileLabel(f)}</p>
-              <p className="mt-0.5 font-mono text-xs text-zinc-500">{f.storage_path.split("/").pop()}</p>
+              <p className="mt-0.5 text-sm text-zinc-700 dark:text-zinc-300">
+                {packFileDisplayName(f, {
+                  title: track.title,
+                  credit_artist_name: track.credit_artist_name,
+                })}
+              </p>
+              <p className="mt-0.5 font-mono text-[10px] text-zinc-500">
+                Storage: {f.storage_path.split("/").pop()}
+              </p>
               {isImageFile(f) ? (
                 <div className="mt-2">
                   <SignedImage path={f.storage_path} alt={track.title} />

@@ -4,6 +4,7 @@ import { unstable_noStore as noStore } from "next/cache";
 import { DeleteTrackButton } from "@/components/artist/delete-track-button";
 import { TrackStatusBadges } from "@/components/artist/track-status";
 import { createClient } from "@/lib/supabase/server";
+import { packFileDisplayName } from "@/lib/tracks/dj-download-filename";
 import type { Track, TrackFile } from "@/lib/types/database";
 
 type Props = { params: Promise<{ id: string }> };
@@ -113,7 +114,10 @@ export default async function ArtistTrackDetailPage({ params }: Props) {
                   {(f.pack_slot ?? f.kind).replace(/_/g, " ")}
                 </span>
                 <span className="truncate text-zinc-500">
-                  {f.storage_path.split("/").pop()}
+                  {packFileDisplayName(f, {
+                    title: t.title,
+                    credit_artist_name: t.credit_artist_name,
+                  })}
                 </span>
               </li>
             ))

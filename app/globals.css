@@ -4,7 +4,7 @@
 
 :root {
   /* Figma mock: near-black + neon (forced dark via html.dark) */
-  --background: #030308;
+  --background: #000000;
   --foreground: #f4f4fb;
   --dj-accent: #38bdf8;
   --dj-accent-2: #8b5cf6;
@@ -85,7 +85,7 @@ body {
   }
 
   .dj-text-service-pack {
-    background: linear-gradient(95deg, #c084fc 0%, #818cf8 35%, #38bdf8 100%);
+    background: linear-gradient(100deg, #7c3aed 0%, #6366f1 42%, #2563eb 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -517,18 +517,12 @@ body {
 
   .dj-hero-image-wrap {
     position: relative;
-    width: min(100%, 440px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
     margin-inline: auto;
-  }
-
-  .dj-hero-image-wrap::before {
-    content: "";
-    position: absolute;
-    inset: -8%;
-    border-radius: 1.75rem;
-    background: radial-gradient(circle at 50% 40%, rgba(56, 189, 248, 0.45), rgba(139, 92, 246, 0.25) 45%, transparent 70%);
-    filter: blur(24px);
-    z-index: 0;
+    background: transparent;
   }
 
   .dj-feature-tile {
