@@ -87,6 +87,14 @@ Optional but common:
 
 Missing URL/key usually causes **runtime** errors in server logs or failed auth—not an empty Chrome tab by itself.
 
+## `refresh_token_not_found` / “Invalid Refresh Token” in the dev server log
+
+The Next middleware calls `supabase.auth.getUser()`, which can try to refresh the session from cookies. That fails when cookies still point at an old session (common after **`supabase db reset`**, switching **cloud vs local** Supabase URL in `.env.local`, or revoking sessions in the dashboard).
+
+**What we do in code:** invalid refresh responses clear the session via `signOut()` so the next request stops retrying a dead refresh token.
+
+**If it keeps happening:** in the browser, open DevTools → **Application** → **Cookies** → `http://localhost:3000` (or your dev port) and remove cookies whose names start with `sb-` for your Supabase host, then reload and sign in again.
+
 ## If `/api/dev/supabase-auth` fails (development only)
 
 This route is **dev-only** and checks that Supabase Auth accepts your anon key.
