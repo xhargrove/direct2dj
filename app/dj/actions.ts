@@ -149,18 +149,22 @@ export async function prepareDjPackDownload(trackId: string) {
 
   const out: PackDownloadFile[] = [];
   for (const f of files) {
-    const { data, error } = await ctx.supabase.storage.from("promos").createSignedUrl(f.storage_path, 3600);
+    const filename = djPackDownloadFilename({
+      pack_slot: f.pack_slot,
+      credit_artist_name: creditArtist,
+      title: releaseTitle,
+      storage_path: f.storage_path,
+    });
+    /* `download` → Storage Content-Disposition uses this name (cross-origin `<a download>` is ignored). */
+    const { data, error } = await ctx.supabase.storage
+      .from("promos")
+      .createSignedUrl(f.storage_path, 3600, { download: filename });
     if (error || !data?.signedUrl) {
       return { error: error?.message ?? "Could not sign pack file." };
     }
     out.push({
       pack_slot: f.pack_slot,
-      filename: djPackDownloadFilename({
-        pack_slot: f.pack_slot,
-        credit_artist_name: creditArtist,
-        title: releaseTitle,
-        storage_path: f.storage_path,
-      }),
+      filename,
       signedUrl: data.signedUrl,
     });
   }
