@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { packSlotToTrackFileKind } from "@/lib/tracks/file-kind";
 import { isPackSlot, type PackSlot } from "@/lib/tracks/pack-slots";
-import { assertMimeForSlot, safeStorageFileName } from "@/lib/tracks/upload-rules";
+import { packStorageObjectBasename } from "@/lib/tracks/pack-storage-basename";
+import { assertMimeForSlot } from "@/lib/tracks/upload-rules";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import type { TrackFile } from "@/lib/types/database";
 
@@ -49,7 +50,7 @@ export async function replaceAdminPackSlot(
 
   const { data: tr, error: trErr } = await userSupabase
     .from("tracks")
-    .select("id, artists ( profile_id, managed_by_label_rep_id )")
+    .select("id, title, credit_artist_name, artists ( profile_id, managed_by_label_rep_id )")
     .eq("id", trackId)
     .maybeSingle();
 
@@ -80,7 +81,10 @@ export async function replaceAdminPackSlot(
     await adminSr.from("track_files").delete().eq("id", existing.id);
   }
 
-  const path = `${profileId}/tracks/${trackId}/${slot}_${safeStorageFileName(file.name)}`;
+  const path = `${profileId}/tracks/${trackId}/${packStorageObjectBasename(slot, file, {
+    title: tr.title,
+    credit_artist_name: tr.credit_artist_name,
+  })}`;
   const buf = Buffer.from(await file.arrayBuffer());
 
   const { error: upErr } = await adminSr.storage.from("promos").upload(path, buf, {

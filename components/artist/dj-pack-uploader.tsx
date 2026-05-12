@@ -12,8 +12,9 @@ import {
   REQUIRED_COVER_SLOT,
   type PackSlot,
 } from "@/lib/tracks/pack-slots";
-import { assertMimeForSlot, safeStorageFileName } from "@/lib/tracks/upload-rules";
 import { packFileDisplayName } from "@/lib/tracks/dj-download-filename";
+import { packStorageObjectBasename } from "@/lib/tracks/pack-storage-basename";
+import { assertMimeForSlot } from "@/lib/tracks/upload-rules";
 import type { TrackFile } from "@/lib/types/database";
 
 type SlotState = "idle" | "uploading" | "done" | "error";
@@ -141,7 +142,10 @@ export function DjPackUploader({
         await supabase.from("track_files").delete().eq("id", existing.id);
       }
 
-      const path = `${storagePrefix}/tracks/${trackId}/${slot}_${safeStorageFileName(file.name)}`;
+      const path = `${storagePrefix}/tracks/${trackId}/${packStorageObjectBasename(slot, file, {
+        title: releaseTitle,
+        credit_artist_name: creditArtistName,
+      })}`;
       setSlotPct((s) => ({ ...s, [slot]: 35 }));
 
       const { error: upErr } = await supabase.storage

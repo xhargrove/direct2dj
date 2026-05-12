@@ -65,7 +65,7 @@ describe("artist pack upload — submit gate (matches submitTrackForReview)", ()
 
 describe("artist pack upload — storage object naming", () => {
   it("sanitizes unsafe file names for promos bucket paths", () => {
-    expect(safeStorageFileName("My Track (!).mp3")).toBe("My_Track____.mp3");
+    expect(safeStorageFileName("My Track (!).mp3")).toBe("My_Track_.mp3");
     /** Basename only — directory segments are dropped (see upload-rules). */
     expect(safeStorageFileName("../../evil.wav")).toBe("evil.wav");
   });

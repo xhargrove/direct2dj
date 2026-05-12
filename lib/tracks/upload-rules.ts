@@ -28,7 +28,11 @@ export function allowedMimeForSlot(slot: PackSlot, mime: string): boolean {
 
 export function safeStorageFileName(name: string): string {
   const base = name.split(/[/\\]/).pop() ?? "file";
-  return base.replace(/[^a-zA-Z0-9._-]/g, "_").slice(0, 120);
+  return base
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_|_$/g, "")
+    .slice(0, 120);
 }
 
 export function assertMimeForSlot(slot: PackSlot, mime: string): void {
