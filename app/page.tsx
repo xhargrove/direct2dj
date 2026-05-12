@@ -172,7 +172,7 @@ export default async function Home() {
 
             <div className="dj-hero-image-wrap relative z-[1]">
               <Image
-                src="/marketing/hero-mock.png"
+                src="/marketing/hero-badge.png"
                 alt="Digital Service Pack badge"
                 width={900}
                 height={900}
