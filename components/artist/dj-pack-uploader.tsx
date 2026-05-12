@@ -79,50 +79,6 @@ export function DjPackUploader({
       setSlotPhase((s) => ({ ...s, [slot]: "uploading" }));
       setSlotPct((s) => ({ ...s, [slot]: 8 }));
 
-      if (artistProfileIdForStorage?.trim()) {
-        setSlotPct((s) => ({ ...s, [slot]: 55 }));
-        const fd = new FormData();
-        fd.append("trackId", trackId);
-        fd.append("slot", slot);
-        fd.append("file", file);
-        const res = await fetch("/api/admin/tracks/pack-slot", {
-          method: "POST",
-          body: fd,
-        });
-        let r: { ok?: boolean; error?: string; file?: TrackFile };
-        try {
-          r = (await res.json()) as { ok?: boolean; error?: string; file?: TrackFile };
-        } catch {
-          setSlotPhase((s) => ({ ...s, [slot]: "error" }));
-          setError("Upload failed.");
-          return;
-        }
-        if (!res.ok || r.error) {
-          setSlotPhase((s) => ({ ...s, [slot]: "error" }));
-          setError(r.error ?? "Upload failed.");
-          return;
-        }
-        if (r.ok && r.file) {
-          setFiles((prev) => {
-            const rest = prev.filter((f) => f.pack_slot !== slot);
-            return [...rest, r.file as TrackFile];
-          });
-        }
-        setSlotPct((s) => ({ ...s, [slot]: 100 }));
-        setSlotPhase((s) => ({ ...s, [slot]: "done" }));
-        router.refresh();
-        onUploaded?.();
-        setTimeout(() => {
-          setSlotPhase((s) => ({ ...s, [slot]: "idle" }));
-          setSlotPct((s) => {
-            const n = { ...s };
-            delete n[slot];
-            return n;
-          });
-        }, 600);
-        return;
-      }
-
       const supabase = createClient();
       const {
         data: { user },
@@ -132,7 +88,8 @@ export function DjPackUploader({
         return;
       }
 
-      const storagePrefix = user.id;
+      /** Artist-owned prefix; admins uploading on behalf of an artist use `artistProfileIdForStorage` (avoids Vercel ~4.5MB limit on API Route bodies). */
+      const storagePrefix = artistProfileIdForStorage?.trim() || user.id;
 
       setSlotPct((s) => ({ ...s, [slot]: 12 }));
 
@@ -201,7 +158,16 @@ export function DjPackUploader({
         });
       }, 600);
     },
-    [artistProfileIdForStorage, bySlot, onUploaded, readOnly, router, trackId],
+    [
+      artistProfileIdForStorage,
+      bySlot,
+      creditArtistName,
+      onUploaded,
+      readOnly,
+      releaseTitle,
+      router,
+      trackId,
+    ],
   );
 
   function slotProgress(slot: PackSlot) {

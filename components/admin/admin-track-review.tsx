@@ -153,10 +153,10 @@ export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
         ) : null}
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
           These files are what approved DJs download from the catalog. Files are stored under this artist&apos;s
-          account ({artist.display_name}), not your admin login. Uploads use the service role so Storage RLS does not
-          block artist paths. Ensure <code className="font-mono text-[11px]">SUPABASE_SERVICE_ROLE_KEY</code> is set in{" "}
-          <code className="font-mono text-[11px]">.env.local</code> for local admin uploads, or apply the promos admin
-          storage migration if you prefer browser-only uploads.
+          account ({artist.display_name}), not your admin login. Large files upload from your browser straight to
+          Storage (requires the <code className="font-mono text-[11px]">promos_insert_admin</code> storage policies on
+          the linked Supabase project). The <code className="font-mono text-[11px]">/api/admin/tracks/pack-slot</code>{" "}
+          route remains for scripts; the UI no longer sends the file through Vercel&apos;s small serverless body limit.
         </p>
         <div className="mt-4">
           <DjPackUploader

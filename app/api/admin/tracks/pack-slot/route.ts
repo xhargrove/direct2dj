@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { getAdminContext } from "@/lib/admin/context";
 import { replaceAdminPackSlot } from "@/lib/admin/replace-admin-pack-slot";
 
-/** Large WAV uploads — align with `serverActions.bodySizeLimit` in next.config */
+/**
+ * Legacy/service-role upload path (multipart hits Vercel ~4.5MB body limits).
+ * Admin UI uses browser → Supabase Storage instead when `promos_insert_admin` is deployed.
+ */
 export const maxDuration = 120;
 
 export async function POST(req: Request) {
