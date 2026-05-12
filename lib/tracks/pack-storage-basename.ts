@@ -1,6 +1,9 @@
 import type { PackSlot } from "@/lib/tracks/pack-slots";
 import { safeStorageFileName } from "@/lib/tracks/upload-rules";
 
+/** Browser `File` or server-provided upload metadata — enough for basename generation. */
+export type UploadFileNameMime = Pick<File, "name" | "type">;
+
 const MIME_TO_EXT: Record<string, string> = {
   "audio/mpeg": ".mp3",
   "audio/mp3": ".mp3",
@@ -17,7 +20,7 @@ const MIME_TO_EXT: Record<string, string> = {
 };
 
 /** File extension for storage object keys, from filename or MIME. */
-export function extensionFromUploadFile(file: File): string {
+export function extensionFromUploadFile(file: UploadFileNameMime): string {
   const fromName = file.name.trim().match(/(\.[A-Za-z0-9]{1,8})$/);
   if (fromName) {
     const e = fromName[1].toLowerCase();
@@ -47,7 +50,7 @@ export function sanitizeStorageStemSegment(raw: string, maxLen: number): string 
  */
 export function packStorageObjectBasename(
   slot: PackSlot,
-  file: File,
+  file: UploadFileNameMime,
   meta: { title?: string | null; credit_artist_name?: string | null },
 ): string {
   const ext = extensionFromUploadFile(file);

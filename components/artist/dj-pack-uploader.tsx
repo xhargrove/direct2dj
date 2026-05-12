@@ -88,8 +88,111 @@ export function DjPackUploader({
         return;
       }
 
-      /** Artist-owned prefix; admins uploading on behalf of an artist use `artistProfileIdForStorage` (avoids Vercel ~4.5MB limit on API Route bodies). */
+      /** Artist-owned prefix; admins on behalf of an artist use `artistProfileIdForStorage`. */
       const storagePrefix = artistProfileIdForStorage?.trim() || user.id;
+
+      const finishAfterObjectUploaded = async (storagePath: string) => {
+        setSlotPct((s) => ({ ...s, [slot]: 72 }));
+
+        const kind = packSlotToTrackFileKind(slot);
+        const { data: inserted, error: insErr } = await supabase
+          .from("track_files")
+          .insert({
+            track_id: trackId,
+            pack_slot: slot,
+            storage_path: storagePath,
+            mime_type: file.type,
+            byte_size: file.size,
+            kind,
+            sort_order: 0,
+          })
+          .select("*")
+          .single();
+
+        if (insErr) {
+          setSlotPhase((s) => ({ ...s, [slot]: "error" }));
+          setError(insErr.message);
+          return;
+        }
+
+        if (inserted) {
+          setFiles((prev) => {
+            const rest = prev.filter((f) => f.pack_slot !== slot);
+            return [...rest, inserted as TrackFile];
+          });
+        }
+
+        setSlotPct((s) => ({ ...s, [slot]: 100 }));
+        setSlotPhase((s) => ({ ...s, [slot]: "done" }));
+        router.refresh();
+        onUploaded?.();
+        setTimeout(() => {
+          setSlotPhase((s) => ({ ...s, [slot]: "idle" }));
+          setSlotPct((s) => {
+            const n = { ...s };
+            delete n[slot];
+            return n;
+          });
+        }, 600);
+      };
+
+      const adminPrefix = artistProfileIdForStorage?.trim();
+      if (adminPrefix) {
+        setSlotPct((s) => ({ ...s, [slot]: 12 }));
+        let prepBody: { path?: string; token?: string; error?: string };
+        try {
+          const prepRes = await fetch("/api/admin/tracks/prepare-signed-pack-upload", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              trackId,
+              slot,
+              artistProfileId: adminPrefix,
+              releaseTitle: releaseTitle ?? "",
+              creditArtistName: creditArtistName ?? "",
+              fileName: file.name,
+              mimeType: file.type,
+            }),
+          });
+          prepBody = (await prepRes.json()) as { path?: string; token?: string; error?: string };
+
+          if (prepRes.ok && prepBody.path && prepBody.token) {
+            setSlotPct((s) => ({ ...s, [slot]: 35 }));
+            const { error: upErr } = await supabase.storage
+              .from("promos")
+              .uploadToSignedUrl(prepBody.path, prepBody.token, file, { cacheControl: "3600" });
+
+            if (upErr) {
+              setSlotPhase((s) => ({ ...s, [slot]: "error" }));
+              setError(upErr.message);
+              return;
+            }
+
+            await finishAfterObjectUploaded(prepBody.path);
+            return;
+          }
+
+          const missingServiceRole =
+            prepRes.status === 503 &&
+            typeof prepBody.error === "string" &&
+            (prepBody.error.includes("SUPABASE_SERVICE_ROLE_KEY") ||
+              prepBody.error.toLowerCase().includes("service role"));
+
+          if (!missingServiceRole) {
+            setSlotPhase((s) => ({ ...s, [slot]: "error" }));
+            setError(
+              typeof prepBody.error === "string" && prepBody.error.trim()
+                ? prepBody.error
+                : "Could not prepare admin upload.",
+            );
+            return;
+          }
+        } catch {
+          setSlotPhase((s) => ({ ...s, [slot]: "error" }));
+          setError("Could not prepare admin upload (network error).");
+          return;
+        }
+      }
 
       setSlotPct((s) => ({ ...s, [slot]: 12 }));
 
@@ -115,48 +218,7 @@ export function DjPackUploader({
         return;
       }
 
-      setSlotPct((s) => ({ ...s, [slot]: 72 }));
-
-      const kind = packSlotToTrackFileKind(slot);
-      const { data: inserted, error: insErr } = await supabase
-        .from("track_files")
-        .insert({
-          track_id: trackId,
-          pack_slot: slot,
-          storage_path: path,
-          mime_type: file.type,
-          byte_size: file.size,
-          kind,
-          sort_order: 0,
-        })
-        .select("*")
-        .single();
-
-      if (insErr) {
-        setSlotPhase((s) => ({ ...s, [slot]: "error" }));
-        setError(insErr.message);
-        return;
-      }
-
-      if (inserted) {
-        setFiles((prev) => {
-          const rest = prev.filter((f) => f.pack_slot !== slot);
-          return [...rest, inserted as TrackFile];
-        });
-      }
-
-      setSlotPct((s) => ({ ...s, [slot]: 100 }));
-      setSlotPhase((s) => ({ ...s, [slot]: "done" }));
-      router.refresh();
-      onUploaded?.();
-      setTimeout(() => {
-        setSlotPhase((s) => ({ ...s, [slot]: "idle" }));
-        setSlotPct((s) => {
-          const n = { ...s };
-          delete n[slot];
-          return n;
-        });
-      }, 600);
+      await finishAfterObjectUploaded(path);
     },
     [
       artistProfileIdForStorage,

@@ -153,10 +153,11 @@ export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
         ) : null}
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
           These files are what approved DJs download from the catalog. Files are stored under this artist&apos;s
-          account ({artist.display_name}), not your admin login. Large files upload from your browser straight to
-          Storage (requires the <code className="font-mono text-[11px]">promos_insert_admin</code> storage policies on
-          the linked Supabase project). The <code className="font-mono text-[11px]">/api/admin/tracks/pack-slot</code>{" "}
-          route remains for scripts; the UI no longer sends the file through Vercel&apos;s small serverless body limit.
+          account ({artist.display_name}), not your admin login. Production uploads use a small server request to mint a
+          signed Storage URL (needs <code className="font-mono text-[11px]">SUPABASE_SERVICE_ROLE_KEY</code> on the
+          host), then your browser sends the bytes straight to Supabase — no Vercel body limit and no dependency on
+          optional <code className="font-mono text-[11px]">promos_insert_admin</code> policies. Local-only fallback uses
+          direct client upload when the service role key is absent.
         </p>
         <div className="mt-4">
           <DjPackUploader

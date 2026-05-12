@@ -17,7 +17,7 @@ Use this for **Vercel** (or any host) **Preview** and **Production**. Values mus
 
 | Variable | Required | Used for |
 |----------|----------|----------|
-| `SUPABASE_SERVICE_ROLE_KEY` | **Yes** for webhooks / trusted jobs | `createServiceRoleClient()`, Stripe activation, notifications sweep |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Yes** for webhooks / trusted jobs **and admin DJ pack signed uploads** | `createServiceRoleClient()`, Stripe activation, notifications sweep, `POST /api/admin/tracks/prepare-signed-pack-upload` |
 | `STRIPE_SECRET_KEY` | **Yes** for billing | `lib/stripe/server.ts`, Checkout session creation |
 | `STRIPE_WEBHOOK_SECRET` | **Yes** for live payments | `app/api/webhooks/stripe/route.ts` — returns **500** if missing |
 
@@ -35,6 +35,7 @@ Use this for **Vercel** (or any host) **Preview** and **Production**. Values mus
 | Symptom | Likely cause |
 |---------|----------------|
 | Build OK, runtime 500 on webhook | Missing `STRIPE_WEBHOOK_SECRET` or wrong signing secret |
+| Auth works, admin DJ pack upload fails only on **deployed** site | Missing `SUPABASE_SERVICE_ROLE_KEY` on Vercel (signed upload route). Optional: apply `promos_insert_admin` migration if you want client-JWT Storage writes without the service role. |
 | Auth works, DB queries empty/wrong | Wrong project URL/key pair |
 | Redirect after Stripe goes to wrong host | Missing `NEXT_PUBLIC_SITE_URL` on non-Vercel or wrong value |
 | Cron 401 | `CRON_SECRET` mismatch or missing header |
