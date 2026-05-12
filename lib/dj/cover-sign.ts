@@ -7,7 +7,7 @@ function pathTailForLog(storagePath: string): string {
   return parts.length ? parts[parts.length - 1]! : "(empty)";
 }
 
-/** Map storage_path -> short-lived signed URL for catalog images. */
+/** Map storage_path -> short-lived signed URL for catalog images (`supabase` may be service role on logged-out pages). */
 export async function signCoverPaths(
   supabase: SupabaseClient,
   paths: (string | null | undefined)[],

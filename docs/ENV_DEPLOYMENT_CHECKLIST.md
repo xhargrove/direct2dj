@@ -35,6 +35,7 @@ Use this for **Vercel** (or any host) **Preview** and **Production**. Values mus
 | Symptom | Likely cause |
 |---------|----------------|
 | Build OK, runtime 500 on webhook | Missing `STRIPE_WEBHOOK_SECRET` or wrong signing secret |
+| Featured page shows initials, logs `[cover-sign] … Object not found` | Anon Storage policy could not read `track_files` (RLS). Apply migration `20260531190000_public_featured_cover_storage_definer.sql`, or set `SUPABASE_SERVICE_ROLE_KEY` so `/featured` can sign covers until the migration is applied. |
 | Auth works, `prepare-signed-pack-upload` returns **422** with `MISSING_SUPABASE_SERVICE_ROLE_KEY` | `SUPABASE_SERVICE_ROLE_KEY` missing for that Vercel environment — add it and redeploy. The UI falls back to direct Storage upload when possible. |
 | Auth works, DB queries empty/wrong | Wrong project URL/key pair |
 | Redirect after Stripe goes to wrong host | Missing `NEXT_PUBLIC_SITE_URL` on non-Vercel or wrong value |

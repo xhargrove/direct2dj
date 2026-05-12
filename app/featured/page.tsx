@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MarketingSiteHeader } from "@/components/shell/marketing-site-header";
 import { DjTrackCard } from "@/components/dj/track-card";
 import { signCoverPaths } from "@/lib/dj/cover-sign";
+import { createServiceRoleClientOrNull } from "@/lib/supabase/service-role";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -39,10 +40,10 @@ export default async function PublicFeaturedPage() {
       rpcError = error;
     } else {
       rows = (data ?? []) as FeaturedPublicRow[];
-      coverMap = await signCoverPaths(
-        supabase,
-        rows.map((r) => r.cover_storage_path),
-      );
+      const paths = rows.map((r) => r.cover_storage_path);
+      /** Anon cannot SELECT track_files, so Storage RLS cannot evaluate the old EXISTS without a definer helper migration. Until then, signing with the service role works when `SUPABASE_SERVICE_ROLE_KEY` is set. */
+      const sr = createServiceRoleClientOrNull();
+      coverMap = await signCoverPaths(sr ?? supabase, paths);
     }
   } catch (e) {
     console.error("[featured] load failed", e);
