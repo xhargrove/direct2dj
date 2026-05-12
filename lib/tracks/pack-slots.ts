@@ -33,7 +33,7 @@ export const PACK_SLOT_LABELS: Record<PackSlot, string> = {
   instrumental: "Instrumental",
   acapella: "Acapella",
   intro_edit: "Intro edit (optional)",
-  short_edit: "Short edit (optional)",
+  short_edit: "Intro Dirty (optional)",
 };
 
 export function isPackSlot(value: string): value is PackSlot {
