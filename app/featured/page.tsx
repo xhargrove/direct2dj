@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { MarketingSiteHeader } from "@/components/shell/marketing-site-header";
 import { DjTrackCard } from "@/components/dj/track-card";
 import { signCoverPaths } from "@/lib/dj/cover-sign";
 import { createClient } from "@/lib/supabase/server";
@@ -51,8 +52,13 @@ export default async function PublicFeaturedPage() {
   const error = rpcError;
 
   return (
-    <main className="relative flex flex-1 flex-col overflow-x-hidden">
-      <div className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 pb-24 pt-14 sm:pt-20 md:pt-24">
+    <div className="flex min-h-full flex-col">
+      <MarketingSiteHeader />
+      <main className="relative flex flex-1 flex-col overflow-x-hidden">
+        <div
+          id="features"
+          className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col scroll-mt-24 px-4 pb-24 pt-8 sm:pt-12 md:pt-16"
+        >
         <p className="dj-kicker dj-eyebrow mb-3 text-center">Discover</p>
         <h1 className="dj-brand dj-glow-text text-center text-balance text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
           Featured right now
@@ -125,7 +131,8 @@ export default async function PublicFeaturedPage() {
             </p>
           </section>
         )}
-      </div>
-    </main>
+        </div>
+      </main>
+    </div>
   );
 }

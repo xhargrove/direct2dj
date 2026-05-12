@@ -1,24 +1,25 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  /* Light: warm booth / flyer paper — not cool gray SaaS */
-  --background: #f4f0e8;
-  --foreground: #0c0614;
-  --dj-accent: #00b4d8;
-  --dj-accent-2: #9333ea;
-  --dj-accent-3: #ff2d6b;
-  /* shadcn-style aliases — used when migrating off hardcoded zinc */
-  --card: #fffdf6;
-  --card-foreground: #0c0614;
-  --muted: #e8e2d6;
-  --muted-foreground: #5c5168;
-  --border: rgba(12, 6, 20, 0.12);
-  --input: rgba(12, 6, 20, 0.1);
-  --ring: #9333ea;
-  --primary: #0c0614;
-  --primary-foreground: #f4f0e8;
-  --secondary: #ded8cf;
-  --secondary-foreground: #0c0614;
+  /* Figma mock: near-black + neon (forced dark via html.dark) */
+  --background: #030308;
+  --foreground: #f4f4fb;
+  --dj-accent: #38bdf8;
+  --dj-accent-2: #8b5cf6;
+  --dj-accent-3: #fbbf24;
+  --card: rgba(14, 11, 26, 0.88);
+  --card-foreground: #f4f4fb;
+  --muted: rgba(255, 255, 255, 0.07);
+  --muted-foreground: #a8a3bf;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.1);
+  --ring: #8b5cf6;
+  --primary: #f4f4fb;
+  --primary-foreground: #09090b;
+  --secondary: rgba(255, 255, 255, 0.08);
+  --secondary-foreground: #f4f4fb;
 }
 
 @theme inline {
@@ -41,42 +42,17 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  /*
-   * Remap Tailwind zinc to booth / club neutrals so existing bg-zinc-*, text-zinc-*
-   * across dashboards pick up the DJ skin without editing every file.
-   */
-  --color-zinc-50: #faf6f0;
-  --color-zinc-100: #ede7de;
-  --color-zinc-200: #d9d0c4;
-  --color-zinc-300: #bfb5c4;
-  --color-zinc-400: #95899e;
-  --color-zinc-500: #736784;
-  --color-zinc-600: #5a4f68;
-  --color-zinc-700: #453b52;
-  --color-zinc-800: #2e2639;
-  --color-zinc-900: #1a1424;
-  --color-zinc-950: #0e0a14;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #030208;
-    --foreground: #f7f4ff;
-    --dj-accent: #22d3ee;
-    --dj-accent-2: #c084fc;
-    --dj-accent-3: #fb7185;
-    --card: rgba(18, 14, 32, 0.78);
-    --card-foreground: #f7f4ff;
-    --muted: rgba(255, 255, 255, 0.08);
-    --muted-foreground: #b0a8c8;
-    --border: rgba(255, 255, 255, 0.1);
-    --input: rgba(255, 255, 255, 0.12);
-    --ring: #c084fc;
-    --primary: #f7f4ff;
-    --primary-foreground: #0e0a14;
-    --secondary: rgba(255, 255, 255, 0.1);
-    --secondary-foreground: #f7f4ff;
-  }
+  --color-zinc-50: #fafafa;
+  --color-zinc-100: #f4f4f5;
+  --color-zinc-200: #e4e4e7;
+  --color-zinc-300: #d4d4d8;
+  --color-zinc-400: #a1a1aa;
+  --color-zinc-500: #71717a;
+  --color-zinc-600: #52525b;
+  --color-zinc-700: #3f3f46;
+  --color-zinc-800: #27272a;
+  --color-zinc-900: #18181b;
+  --color-zinc-950: #09090b;
 }
 
 body {
@@ -96,10 +72,10 @@ body {
     background: linear-gradient(
       118deg,
       #5ce1ff 0%,
-      #00b4d8 16%,
+      #38bdf8 16%,
       #a855f7 42%,
-      #e879f9 68%,
-      #ff2d6b 100%
+      #c084fc 68%,
+      #fbbf24 100%
     );
     background-size: 160% 160%;
     -webkit-background-clip: text;
@@ -108,9 +84,16 @@ body {
     animation: dj-shimmer 14s ease-in-out infinite;
   }
 
-  /* If background-clip:text isn’t supported, transparent fill makes the headline invisible. */
+  .dj-text-service-pack {
+    background: linear-gradient(95deg, #c084fc 0%, #818cf8 35%, #38bdf8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
   @supports not (background-clip: text) {
-    .dj-glow-text {
+    .dj-glow-text,
+    .dj-text-service-pack {
       color: var(--foreground);
       background: none;
       -webkit-background-clip: unset;
@@ -123,24 +106,13 @@ body {
     font-size: 1.125rem;
     line-height: 1.75rem;
     letter-spacing: -0.01em;
+    color: rgb(161 161 170);
   }
 
   @media (min-width: 640px) {
     .dj-lede {
       font-size: 1.25rem;
       line-height: 1.75rem;
-    }
-  }
-
-  @media (prefers-color-scheme: light) {
-    .dj-lede {
-      color: rgb(58 48 68);
-    }
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .dj-lede {
-      color: rgb(212 212 216);
     }
   }
 
@@ -165,62 +137,44 @@ body {
     opacity: 0.9;
   }
 
+  .dj-kicker-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.35);
+    padding: 0.35rem 0.85rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgb(228 228 231);
+  }
+
   .dj-header {
     backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    background: linear-gradient(180deg, rgba(14, 11, 26, 0.94) 0%, rgba(8, 6, 16, 0.82) 100%);
+    box-shadow:
+      0 1px 0 rgba(34, 211, 238, 0.07),
+      inset 0 -1px 0 rgba(167, 139, 250, 0.04);
   }
 
-  @media (prefers-color-scheme: light) {
-    .dj-header {
-      border-bottom: 1px solid rgba(12, 6, 20, 0.1);
-      background: linear-gradient(180deg, rgba(255, 252, 246, 0.92) 0%, rgba(244, 240, 232, 0.82) 100%);
-      box-shadow: 0 1px 0 color-mix(in srgb, var(--dj-accent-2) 12%, transparent);
-    }
-
-    .dj-footer {
-      border-top: 1px solid rgba(12, 6, 20, 0.1);
-      background: rgba(255, 252, 246, 0.58);
-      backdrop-filter: blur(12px);
-    }
-
-    .dj-nav-link {
-      color: rgb(55 48 60);
-      text-underline-offset: 4px;
-      transition: color 150ms ease;
-    }
-
-    .dj-nav-link:hover {
-      color: var(--dj-accent-2);
-    }
+  .dj-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(5, 3, 12, 0.72);
+    backdrop-filter: blur(14px);
   }
 
-  @media (prefers-color-scheme: dark) {
-    .dj-header {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-      background: linear-gradient(
-        180deg,
-        rgba(14, 11, 26, 0.94) 0%,
-        rgba(8, 6, 16, 0.82) 100%
-      );
-      box-shadow:
-        0 1px 0 rgba(34, 211, 238, 0.07),
-        inset 0 -1px 0 rgba(167, 139, 250, 0.04);
-    }
+  .dj-nav-link {
+    color: rgb(212 212 216);
+    text-underline-offset: 4px;
+    transition: color 150ms ease;
+  }
 
-    .dj-footer {
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      background: rgba(5, 3, 12, 0.72);
-      backdrop-filter: blur(14px);
-    }
-
-    .dj-nav-link {
-      color: rgb(212 212 216);
-      text-underline-offset: 4px;
-      transition: color 150ms ease;
-    }
-
-    .dj-nav-link:hover {
-      color: rgb(126 192 255);
-    }
+  .dj-nav-link:hover {
+    color: rgb(147 197 253);
   }
 
   .dj-btn-primary {
@@ -228,6 +182,7 @@ body {
     min-height: 2.875rem;
     align-items: center;
     justify-content: center;
+    gap: 0.5rem;
     border-radius: 9999px;
     padding-left: 1.5rem;
     padding-right: 1.5rem;
@@ -239,14 +194,7 @@ body {
       transform 180ms ease,
       box-shadow 180ms ease,
       filter 180ms ease;
-    background: linear-gradient(
-      125deg,
-      #5ce1ff 0%,
-      #00b4d8 18%,
-      #9333ea 48%,
-      #e879f9 72%,
-      #ff2d6b 100%
-    );
+    background: linear-gradient(125deg, #a78bfa 0%, #6366f1 40%, #38bdf8 100%);
     background-size: 140% 140%;
     color: #09090b;
     box-shadow:
@@ -282,6 +230,7 @@ body {
     min-height: 2.875rem;
     align-items: center;
     justify-content: center;
+    gap: 0.5rem;
     border-radius: 9999px;
     border-width: 1px;
     padding-left: 1.5rem;
@@ -289,6 +238,10 @@ body {
     font-size: 0.9375rem;
     font-weight: 500;
     letter-spacing: -0.01em;
+    border-color: rgba(255, 255, 255, 0.14);
+    color: rgb(244 244 245);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
     transition:
       background-color 160ms ease,
       border-color 160ms ease,
@@ -297,36 +250,11 @@ body {
       transform 160ms ease;
   }
 
-  @media (prefers-color-scheme: light) {
-    .dj-btn-ghost {
-      border-color: rgba(63, 63, 70, 0.22);
-      color: rgb(24 24 27);
-      background: rgba(255, 255, 255, 0.72);
-      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.65) inset;
-    }
-
-    .dj-btn-ghost:hover {
-      background: rgba(255, 255, 255, 0.95);
-      border-color: rgba(8, 145, 178, 0.42);
-      box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.12);
-      transform: translateY(-1px);
-    }
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .dj-btn-ghost {
-      border-color: rgba(255, 255, 255, 0.14);
-      color: rgb(244 244 245);
-      background: rgba(255, 255, 255, 0.05);
-      box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
-    }
-
-    .dj-btn-ghost:hover {
-      border-color: rgba(103, 232, 249, 0.35);
-      background: rgba(255, 255, 255, 0.1);
-      box-shadow: 0 0 24px rgba(34, 211, 238, 0.12);
-      transform: translateY(-1px);
-    }
+  .dj-btn-ghost:hover {
+    border-color: rgba(103, 232, 249, 0.35);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 24px rgba(34, 211, 238, 0.12);
+    transform: translateY(-1px);
   }
 
   .dj-card {
@@ -334,9 +262,10 @@ body {
     border-radius: 1.25rem;
     border: 1px solid rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(20px);
+    background: linear-gradient(165deg, rgba(18, 14, 34, 0.72) 0%, rgba(8, 6, 18, 0.62) 100%);
     box-shadow:
-      0 0 0 1px rgba(167, 139, 250, 0.06),
-      0 24px 64px rgba(0, 0, 0, 0.35);
+      0 0 0 1px rgba(167, 139, 250, 0.09),
+      0 28px 72px rgba(0, 0, 0, 0.55);
   }
 
   .dj-card::before {
@@ -363,48 +292,14 @@ body {
     opacity: 0.55;
   }
 
-  @media (prefers-color-scheme: light) {
-    .dj-card {
-      border-color: rgba(12, 6, 20, 0.09);
-      background: linear-gradient(
-        165deg,
-        rgba(255, 252, 246, 0.9) 0%,
-        rgba(244, 240, 232, 0.82) 100%
-      );
-      box-shadow:
-        0 0 0 1px color-mix(in srgb, var(--dj-accent-2) 08%, transparent),
-        0 20px 50px rgba(12, 6, 20, 0.08);
-    }
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .dj-card {
-      background: linear-gradient(
-        165deg,
-        rgba(18, 14, 34, 0.72) 0%,
-        rgba(8, 6, 18, 0.62) 100%
-      );
-      box-shadow:
-        0 0 0 1px rgba(167, 139, 250, 0.09),
-        0 28px 72px rgba(0, 0, 0, 0.55);
-    }
-  }
-
   .dj-eyebrow {
     font-size: 0.6875rem;
     font-weight: 600;
     letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: rgb(90 78 102);
+    color: rgb(196 190 214);
   }
 
-  @media (prefers-color-scheme: dark) {
-    .dj-eyebrow {
-      color: rgb(196 190 214);
-    }
-  }
-
-  /* --- Full-screen atmosphere (replaces flat gradients on body) --- */
   .dj-atmosphere {
     pointer-events: none;
     position: fixed;
@@ -418,23 +313,13 @@ body {
     position: absolute;
     inset: -40%;
     background:
-      radial-gradient(ellipse 54% 46% at 50% -8%, rgba(192, 132, 252, 0.38), transparent 58%),
-      radial-gradient(ellipse 44% 36% at 94% 24%, rgba(34, 211, 238, 0.22), transparent 55%),
-      radial-gradient(ellipse 42% 34% at 6% 54%, rgba(251, 113, 133, 0.18), transparent 52%),
-      radial-gradient(ellipse 48% 40% at 68% 92%, rgba(147, 51, 234, 0.2), transparent 55%);
+      radial-gradient(ellipse 52% 48% at 78% 35%, rgba(139, 92, 246, 0.45), transparent 55%),
+      radial-gradient(ellipse 54% 46% at 50% -8%, rgba(192, 132, 252, 0.32), transparent 58%),
+      radial-gradient(ellipse 44% 36% at 94% 24%, rgba(34, 211, 238, 0.2), transparent 55%),
+      radial-gradient(ellipse 42% 34% at 6% 54%, rgba(251, 191, 36, 0.12), transparent 52%),
+      radial-gradient(ellipse 48% 40% at 68% 92%, rgba(147, 51, 234, 0.18), transparent 55%);
     animation: dj-mesh-shift 28s ease-in-out infinite alternate;
     opacity: 0.95;
-  }
-
-  @media (prefers-color-scheme: light) {
-    .dj-atmosphere__mesh {
-      background:
-        radial-gradient(ellipse 58% 50% at 50% -4%, rgba(147, 51, 234, 0.22), transparent 58%),
-        radial-gradient(ellipse 46% 38% at 90% 20%, rgba(0, 180, 216, 0.14), transparent 52%),
-        radial-gradient(ellipse 42% 36% at 10% 56%, rgba(255, 45, 107, 0.12), transparent 52%),
-        radial-gradient(ellipse 50% 42% at 58% 96%, rgba(232, 121, 249, 0.1), transparent 52%);
-      opacity: 1;
-    }
   }
 
   .dj-atmosphere__orb {
@@ -485,15 +370,6 @@ body {
     mask-image: radial-gradient(ellipse 75% 65% at 50% 40%, black 12%, transparent 72%);
   }
 
-  @media (prefers-color-scheme: light) {
-    .dj-atmosphere__grid {
-      opacity: 0.35;
-      background-image:
-        linear-gradient(rgba(24, 24, 27, 0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(24, 24, 27, 0.06) 1px, transparent 1px);
-    }
-  }
-
   .dj-atmosphere__noise {
     position: absolute;
     inset: 0;
@@ -509,14 +385,6 @@ body {
     opacity: 0.55;
   }
 
-  @media (prefers-color-scheme: light) {
-    .dj-atmosphere__vignette {
-      background: radial-gradient(ellipse 90% 75% at 50% 42%, transparent 38%, rgba(12, 6, 20, 0.06) 100%);
-      opacity: 1;
-    }
-  }
-
-  /* --- Marketing hero: deck illustration --- */
   .dj-visual-stage {
     position: relative;
     width: 100%;
@@ -605,11 +473,7 @@ body {
     margin-left: -11%;
     border-radius: 9999px;
     z-index: 2;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.16),
-      rgba(15, 23, 42, 0.65)
-    );
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(15, 23, 42, 0.65));
     box-shadow:
       0 0 0 1px rgba(255, 255, 255, 0.12),
       0 14px 28px rgba(0, 0, 0, 0.35);
@@ -628,11 +492,7 @@ body {
     z-index: 3;
     padding: 0.5rem 0.35rem;
     border-radius: 1rem;
-    background: linear-gradient(
-      180deg,
-      rgba(10, 8, 20, 0.22),
-        rgba(10, 8, 20, 0.55)
-    );
+    background: linear-gradient(180deg, rgba(10, 8, 20, 0.22), rgba(10, 8, 20, 0.55));
     box-shadow:
       inset 0 0 0 1px rgba(255, 255, 255, 0.08),
       0 18px 36px rgba(0, 0, 0, 0.35);
@@ -655,41 +515,51 @@ body {
     animation-delay: var(--dj-bar-delay, 0s);
   }
 
+  .dj-hero-image-wrap {
+    position: relative;
+    width: min(100%, 440px);
+    margin-inline: auto;
+  }
+
+  .dj-hero-image-wrap::before {
+    content: "";
+    position: absolute;
+    inset: -8%;
+    border-radius: 1.75rem;
+    background: radial-gradient(circle at 50% 40%, rgba(56, 189, 248, 0.45), rgba(139, 92, 246, 0.25) 45%, transparent 70%);
+    filter: blur(24px);
+    z-index: 0;
+  }
+
   .dj-feature-tile {
     border-radius: 1rem;
     padding: 1rem 1.125rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(12, 10, 24, 0.45);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
     transition:
       transform 200ms ease,
       border-color 200ms ease,
       box-shadow 200ms ease;
   }
 
-  @media (prefers-color-scheme: light) {
-    .dj-feature-tile {
-      border: 1px solid rgba(24, 24, 27, 0.08);
-      background: rgba(255, 255, 255, 0.55);
-      box-shadow: 0 12px 32px rgba(88, 28, 135, 0.06);
-    }
-
-    .dj-feature-tile:hover {
-      transform: translateY(-2px);
-      border-color: rgba(8, 145, 178, 0.22);
-      box-shadow: 0 16px 40px rgba(88, 28, 135, 0.1);
-    }
+  .dj-feature-tile:hover {
+    transform: translateY(-2px);
+    border-color: rgba(103, 232, 249, 0.2);
+    box-shadow: 0 20px 48px rgba(34, 211, 238, 0.08);
   }
 
-  @media (prefers-color-scheme: dark) {
-    .dj-feature-tile {
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: rgba(12, 10, 24, 0.45);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
-    }
-
-    .dj-feature-tile:hover {
-      transform: translateY(-2px);
-      border-color: rgba(103, 232, 249, 0.2);
-      box-shadow: 0 20px 48px rgba(34, 211, 238, 0.08);
-    }
+  .dj-trust-pill {
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.35);
+    padding: 0.4rem 0.85rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgb(212 212 216);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.08);
   }
 }
 

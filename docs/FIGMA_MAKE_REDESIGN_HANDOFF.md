@@ -35,12 +35,16 @@ Canonical site (confirm in deploy env): **https://digitalservicepack.com**
 
 ## Figma Make file (this project)
 
+**Canonical design source (current):** “Recreate Design Element” — use this file for tokens, layout reference, and MCP reads.
+
 | | |
 |--|--|
-| **Make URL** | `https://www.figma.com/make/y0txXZyFfbVK66idEaf3lI/User-greeting` |
-| **File key** | `y0txXZyFfbVK66idEaf3lI` |
+| **Make URL** | `https://www.figma.com/make/pU7DPNlSeo5tTZieZp5L0A/Recreate-Design-Element` |
+| **File key** | `pU7DPNlSeo5tTZieZp5L0A` |
 
-Cursor **Figma MCP** can read this file with `fileKey: "y0txXZyFfbVK66idEaf3lI"`. It does **not** auto-push designs into the Git repo.
+**Older exploration (optional):** `y0txXZyFfbVK66idEaf3lI` (“User greeting”) — superseded for handoff; keep only if you still need legacy frames.
+
+Cursor **Figma MCP** can read the canonical file with `fileKey: "pU7DPNlSeo5tTZieZp5L0A"`. It does **not** auto-push designs into the Git repo.
 
 ---
 

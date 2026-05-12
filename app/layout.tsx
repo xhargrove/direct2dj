@@ -58,7 +58,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#030208" }, { color: "#f4f0e8" }],
+  themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#030308" }, { color: "#030308" }],
 };
 
 export default function RootLayout({
@@ -69,7 +69,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${syne.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${syne.variable} dark h-full antialiased`}
     >
       <body className="relative min-h-full">
         <div className="dj-atmosphere" aria-hidden>

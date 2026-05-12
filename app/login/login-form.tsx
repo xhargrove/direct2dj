@@ -30,7 +30,13 @@ function workspaceFromNextParam(next: string | null): WorkspaceKey {
   return "artist";
 }
 
-export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: boolean }) {
+export function LoginForm({
+  showLoginRoleSelector,
+  initialMode = "signin",
+}: {
+  showLoginRoleSelector?: boolean;
+  initialMode?: "signin" | "signup";
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
@@ -39,7 +45,7 @@ export function LoginForm({ showLoginRoleSelector }: { showLoginRoleSelector?: b
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [mode, setMode] = useState<"signin" | "signup">(initialMode);
   const [feedback, setFeedback] = useState<{ text: string; variant: "error" | "info" } | null>(null);
   const [pending, setPending] = useState(false);
   const [workspace, setWorkspace] = useState<WorkspaceKey>(() => workspaceFromNextParam(nextParam));
