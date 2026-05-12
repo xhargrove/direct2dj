@@ -23,6 +23,20 @@ Canonical implementation lives in `app/admin/*`, `app/api/admin/sign-storage`, `
 
 **Access:** `app/admin/layout.tsx` calls `requireRoles(["admin"])`. Non-admins are redirected to their role home; unauthenticated users go to `/login`.
 
+### Production: granting the first admin
+
+The login UI **does not** set `profiles.role` in production unless `ENABLE_LOGIN_ROLE_SELECTOR=true` (trusted hosts only; requires `SUPABASE_SERVICE_ROLE_KEY`). By default, after sign-in the app reads **`profiles.role`** and routes to `/admin` only when that value is `admin`.
+
+To promote a user (must already exist in `auth.users` with a `profiles` row), run in the **Supabase SQL editor** as a privileged role, substituting their `auth.users.id`:
+
+```sql
+update public.profiles
+set role = 'admin'
+where id = 'PASTE-USER-UUID-HERE';
+```
+
+Only existing admins can change roles through the app API (guard trigger); the SQL editor bypasses that for bootstrap.
+
 **API:** `POST /api/admin/sign-storage` — signed URLs for pack previews (see [Storage preview security](#storage-preview-security)).
 
 ---

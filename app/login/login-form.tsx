@@ -177,45 +177,52 @@ export function LoginForm({
 
       {mode === "signin" ? (
         <div className="space-y-2">
-          <p className="text-center text-xs font-medium text-zinc-700 dark:text-zinc-300 sm:text-left">
-            {showLoginRoleSelector ? "Sign in as (dev/staging also sets account role)" : "Open after sign-in"}
-          </p>
-          <div className="flex gap-2 rounded-xl border border-white/10 bg-black/20 p-1 dark:border-white/10 dark:bg-black/30">
-            {(
-              [
-                { key: "artist" as const, label: "Artist" },
-                { key: "dj" as const, label: "DJ" },
-                { key: "admin" as const, label: "Admin" },
-              ] as const
-            ).map(({ key, label }) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setWorkspace(key)}
-                className={`min-h-11 flex-1 rounded-lg px-2 text-sm font-medium transition ${
-                  workspace === key
-                    ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-100 dark:text-zinc-950"
-                    : "text-zinc-600 dark:text-zinc-400"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            {showLoginRoleSelector ? (
-              <>
+          {showLoginRoleSelector ? (
+            <>
+              <p className="text-center text-xs font-medium text-zinc-700 dark:text-zinc-300 sm:text-left">
+                Sign in as (dev/staging also sets account role)
+              </p>
+              <div className="flex gap-2 rounded-xl border border-white/10 bg-black/20 p-1 dark:border-white/10 dark:bg-black/30">
+                {(
+                  [
+                    { key: "artist" as const, label: "Artist" },
+                    { key: "dj" as const, label: "DJ" },
+                    { key: "admin" as const, label: "Admin" },
+                  ] as const
+                ).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setWorkspace(key)}
+                    className={`min-h-11 flex-1 rounded-lg px-2 text-sm font-medium transition ${
+                      workspace === key
+                        ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-100 dark:text-zinc-950"
+                        : "text-zinc-600 dark:text-zinc-400"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
                 One choice for both destination and <code className="font-mono text-[11px]">profiles.role</code> on this
                 server (needs <code className="font-mono text-[11px]">SUPABASE_SERVICE_ROLE_KEY</code>). Do not expose
                 role switching on untrusted production.
-              </>
-            ) : (
-              <>
-                Picks your first screen when you didn&apos;t arrive via a deep link. Your real role in the database
-                still controls access — wrong picks redirect to your actual dashboard.
-              </>
-            )}
-          </p>
+              </p>
+            </>
+          ) : (
+            <p className="text-center text-xs text-zinc-500 dark:text-zinc-400 sm:text-left">
+              You are routed to the dashboard for your account&apos;s role in the database.{" "}
+              <strong className="font-medium text-zinc-700 dark:text-zinc-300">Admin (Backstage)</strong> requires{" "}
+              <code className="rounded bg-black/20 px-1 font-mono text-[11px] text-zinc-200">
+                profiles.role = &apos;admin&apos;
+              </code>{" "}
+              on your user in Supabase (run as postgres in the SQL editor, or use the service role from a trusted
+              script). This login page does not grant admin in production. Optional: set{" "}
+              <code className="font-mono text-[11px]">ENABLE_LOGIN_ROLE_SELECTOR=true</code> only on a trusted staging
+              host (needs <code className="font-mono text-[11px]">SUPABASE_SERVICE_ROLE_KEY</code> on the server).
+            </p>
+          )}
         </div>
       ) : null}
 
