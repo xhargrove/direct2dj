@@ -217,7 +217,7 @@ export function TrackDetailPanel({
         <p className="text-xs text-zinc-500">
           Logs this download to your account, then saves each pack file to your device. File names use the
           artist&apos;s <strong>release title</strong> and <strong>credited artist</strong> (e.g.{" "}
-          <span className="font-mono text-[11px]">Make Way (Clean) - Artist Name.mp3</span>) so they read clearly in your
+          <span className="font-mono text-[11px]">Artist Name - Make Way (Clean).mp3</span>) so they read clearly in your
           library. If your browser blocks multiple downloads, use the links below.
         </p>
         {!downloadAllowed ? (

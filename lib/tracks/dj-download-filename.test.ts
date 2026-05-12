@@ -38,7 +38,7 @@ describe("extensionFromStoragePath", () => {
 });
 
 describe("djPackDownloadFilename", () => {
-  it("uses Title (Clean) - Artist for radio edit", () => {
+  it("uses Artist - Title (Clean) for radio edit", () => {
     expect(
       djPackDownloadFilename({
         pack_slot: "radio_edit",
@@ -46,10 +46,10 @@ describe("djPackDownloadFilename", () => {
         title: "Make Way",
         storage_path: "p/t/tid/radio_edit_01_MAKE_WAY__Clean_.mp3",
       }),
-    ).toBe("Make Way (Clean) - LJ Hellems.mp3");
+    ).toBe("LJ Hellems - Make Way (Clean).mp3");
   });
 
-  it("uses Title (Dirty) - Artist for dirty / full", () => {
+  it("uses Artist - Title (Dirty) for dirty / full", () => {
     expect(
       djPackDownloadFilename({
         pack_slot: "dirty_full",
@@ -57,10 +57,10 @@ describe("djPackDownloadFilename", () => {
         title: "Make Way",
         storage_path: "p/t/tid/dirty_full_x.mp3",
       }),
-    ).toBe("Make Way (Dirty) - LJ Hellems.mp3");
+    ).toBe("LJ Hellems - Make Way (Dirty).mp3");
   });
 
-  it("uses Title - Artist - Cover for artwork", () => {
+  it("uses Artist - Title - Cover for artwork", () => {
     expect(
       djPackDownloadFilename({
         pack_slot: "cover_art",
@@ -68,10 +68,10 @@ describe("djPackDownloadFilename", () => {
         title: "Make Way",
         storage_path: "p/t/tid/cover_art_x.jpeg",
       }),
-    ).toBe("Make Way - LJ Hellems - Cover.jpeg");
+    ).toBe("LJ Hellems - Make Way - Cover.jpeg");
   });
 
-  it("uses Title - Artist for unknown slot", () => {
+  it("uses Artist - Title for unknown slot", () => {
     expect(
       djPackDownloadFilename({
         pack_slot: "legacy_slot",
@@ -79,7 +79,7 @@ describe("djPackDownloadFilename", () => {
         title: "B",
         storage_path: "x/y/z.dat",
       }),
-    ).toBe("B - A.dat");
+    ).toBe("A - B.dat");
   });
 });
 
@@ -99,6 +99,6 @@ describe("packFileDisplayName", () => {
         { pack_slot: "radio_edit", storage_path: "p/t/tid/radio_edit_CertifiedTexan.mp3" },
         { title: "Make Way", credit_artist_name: "LJ Hellems" },
       ),
-    ).toBe("Make Way (Clean) - LJ Hellems.mp3");
+    ).toBe("LJ Hellems - Make Way (Clean).mp3");
   });
 });

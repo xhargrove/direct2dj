@@ -148,7 +148,7 @@ export function TrackEditor({
         <h2 className="text-lg font-semibold">Release metadata</h2>
         <p className="text-xs text-zinc-600 dark:text-zinc-400">
           DJs get pack files named from your <strong>song title</strong> and <strong>credited artist</strong> here
-          (for example <span className="font-mono">Make Way (Clean) - LJ Hellems.mp3</span>) — keep them accurate and match
+          (for example <span className="font-mono">LJ Hellems - Make Way (Clean).mp3</span>) — keep them accurate and match
           what&apos;s on the record.
         </p>
 

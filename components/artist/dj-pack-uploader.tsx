@@ -320,7 +320,7 @@ export function DjPackUploader({
           Upload <strong>radio edit</strong> and/or <strong>dirty / full version</strong>. You must
           include at least one of these two before submitting for review (both are welcome).
           Allowed: MP3, WAV, FLAC, M4A, AAC. DJs see downloads like{" "}
-          <span className="font-mono text-[11px]">Make Way (Clean) - Artist.mp3</span> from your{" "}
+          <span className="font-mono text-[11px]">Artist Name - Make Way (Clean).mp3</span> from your{" "}
           <strong>release title</strong> and <strong>credited artist</strong> in the form above, not from these file
           names.
         </p>

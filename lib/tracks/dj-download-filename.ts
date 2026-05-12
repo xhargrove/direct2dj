@@ -55,7 +55,7 @@ function fitToMaxLength(base: string, ext: string): string {
 
 /**
  * Filename DJs see when saving pack files — human-readable, e.g.
- * `Make Way (Clean) - LJ Hellems.mp3` (not internal `radio_edit_01_…` storage names).
+ * `Greg Street - Hey Man Say Man (Clean).mp3` (not internal `radio_edit_…` storage keys).
  */
 export function djPackDownloadFilename(input: {
   pack_slot: string | null;
@@ -71,17 +71,17 @@ export function djPackDownloadFilename(input: {
   const title = sanitizeHumanFilenamePart(input.title || "Track", MAX_TITLE);
 
   if (!input.pack_slot || !isPackSlot(input.pack_slot)) {
-    return fitToMaxLength(`${title} - ${artist}`, ext);
+    return fitToMaxLength(`${artist} - ${title}`, ext);
   }
 
   const slot = input.pack_slot;
 
   let base: string;
   if (slot === "cover_art") {
-    base = `${title} - ${artist} - Cover`;
+    base = `${artist} - ${title} - Cover`;
   } else {
     const variant = djPackSlotVariantLabel(slot);
-    base = `${title} (${variant}) - ${artist}`;
+    base = `${artist} - ${title} (${variant})`;
   }
 
   return fitToMaxLength(base, ext);
@@ -89,7 +89,7 @@ export function djPackDownloadFilename(input: {
 
 /**
  * UI label for a pack row (matches download naming). Uses release metadata when present so
- * legacy storage keys like `radio_edit_CertifiedTexan.mp3` still read as `Title (Clean) - Artist.mp3`.
+ * legacy storage keys like `radio_edit_CertifiedTexan.mp3` still read as `Artist - Title (Clean).mp3`.
  */
 export function packFileDisplayName(
   file: { pack_slot: string | null; storage_path: string },
