@@ -180,7 +180,7 @@ export function LoginForm({
           {showLoginRoleSelector ? (
             <>
               <p className="text-center text-xs font-medium text-zinc-700 dark:text-zinc-300 sm:text-left">
-                Sign in as (dev/staging also sets account role)
+                Sign in as (this deployment sets your role after sign-in)
               </p>
               <div className="flex gap-2 rounded-xl border border-white/10 bg-black/20 p-1 dark:border-white/10 dark:bg-black/30">
                 {(
