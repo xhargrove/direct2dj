@@ -25,7 +25,7 @@ Canonical implementation lives in `app/admin/*`, `app/api/admin/sign-storage`, `
 
 ### Production: granting the first admin
 
-The login UI **does not** set `profiles.role` in production unless `ENABLE_LOGIN_ROLE_SELECTOR=true` (trusted hosts only; requires `SUPABASE_SERVICE_ROLE_KEY`). By default, after sign-in the app reads **`profiles.role`** and routes to `/admin` only when that value is `admin`.
+The login UI **does not** set `profiles.role` on Vercel **Production** unless `ENABLE_LOGIN_ROLE_SELECTOR` is truthy (`true` / `1` / `yes`) and the project was **redeployed** after setting it (trusted hosts only; requires `SUPABASE_SERVICE_ROLE_KEY`). `next dev` and Vercel **Preview** enable the picker without that flag. By default, after sign-in the app reads **`profiles.role`** and routes to `/admin` only when that value is `admin`.
 
 To promote a user (must already exist in `auth.users` with a `profiles` row), run in the **Supabase SQL editor** as a privileged role, substituting their `auth.users.id`:
 

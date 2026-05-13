@@ -212,15 +212,20 @@ export function LoginForm({
             </>
           ) : (
             <p className="text-center text-xs text-zinc-500 dark:text-zinc-400 sm:text-left">
-              You are routed to the dashboard for your account&apos;s role in the database.{" "}
-              <strong className="font-medium text-zinc-700 dark:text-zinc-300">Admin (Backstage)</strong> requires{" "}
+              <strong className="font-medium text-zinc-700 dark:text-zinc-300">Role picker.</strong> When enabled for
+              this deployment, Artist / DJ / Admin appears <em>above your email</em>—choose one{" "}
+              <em>before</em> you submit sign-in. This build has it off, so after sign-in you go to the dashboard for
+              your <code className="font-mono text-[11px]">profiles.role</code> in Supabase.{" "}
+              <strong className="font-medium text-zinc-700 dark:text-zinc-300">Admin (Backstage)</strong> needs{" "}
               <code className="rounded bg-black/20 px-1 font-mono text-[11px] text-zinc-200">
                 profiles.role = &apos;admin&apos;
               </code>{" "}
-              on your user in Supabase (run as postgres in the SQL editor, or use the service role from a trusted
-              script). This login page does not grant admin in production. Optional: set{" "}
-              <code className="font-mono text-[11px]">ENABLE_LOGIN_ROLE_SELECTOR=true</code> only on a trusted staging
-              host (needs <code className="font-mono text-[11px]">SUPABASE_SERVICE_ROLE_KEY</code> on the server).
+              (SQL editor as postgres, or service role from a trusted script). To show the picker here:{" "}
+              <code className="font-mono text-[11px]">npm run dev</code> locally; Vercel <strong>Preview</strong>{" "}
+              includes it; Vercel <strong>Production</strong> needs{" "}
+              <code className="font-mono text-[11px]">ENABLE_LOGIN_ROLE_SELECTOR=true</code> and{" "}
+              <code className="font-mono text-[11px]">SUPABASE_SERVICE_ROLE_KEY</code> in project env, then{" "}
+              <strong className="font-medium text-zinc-700 dark:text-zinc-300">redeploy</strong>.
             </p>
           )}
         </div>
