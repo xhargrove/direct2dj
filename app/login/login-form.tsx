@@ -212,20 +212,9 @@ export function LoginForm({
             </>
           ) : (
             <p className="text-center text-xs text-zinc-500 dark:text-zinc-400 sm:text-left">
-              <strong className="font-medium text-zinc-700 dark:text-zinc-300">Role picker.</strong> When enabled for
-              this deployment, Artist / DJ / Admin appears <em>above your email</em>—choose one{" "}
-              <em>before</em> you submit sign-in. This build has it off, so after sign-in you go to the dashboard for
-              your <code className="font-mono text-[11px]">profiles.role</code> in Supabase.{" "}
-              <strong className="font-medium text-zinc-700 dark:text-zinc-300">Admin (Backstage)</strong> needs{" "}
-              <code className="rounded bg-black/20 px-1 font-mono text-[11px] text-zinc-200">
-                profiles.role = &apos;admin&apos;
-              </code>{" "}
-              (SQL editor as postgres, or service role from a trusted script). To show the picker here:{" "}
-              <code className="font-mono text-[11px]">npm run dev</code> locally; Vercel <strong>Preview</strong>{" "}
-              includes it; Vercel <strong>Production</strong> needs{" "}
-              <code className="font-mono text-[11px]">ENABLE_LOGIN_ROLE_SELECTOR=true</code> and{" "}
-              <code className="font-mono text-[11px]">SUPABASE_SERVICE_ROLE_KEY</code> in project env, then{" "}
-              <strong className="font-medium text-zinc-700 dark:text-zinc-300">redeploy</strong>.
+              After sign-in we open the workspace for this account. New here? Use{" "}
+              <strong className="font-medium text-zinc-700 dark:text-zinc-300">Create account</strong> to register as
+              an artist or DJ.
             </p>
           )}
         </div>
