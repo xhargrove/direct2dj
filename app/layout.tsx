@@ -25,17 +25,17 @@ const syne = Syne({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://direct2dj.vercel.app"),
-  title: "Digital Service Pack — Promos built for the booth",
+  title: "Digital Service Pack — Get Your Music Directly To The DJ",
   description:
-    "A sleek promo lane from artists to DJs: discovery, downloads, and reporting — without the inbox chaos.",
+    "Get your music directly to DJs: discovery, clean packs, downloads, and reporting — without the inbox chaos.",
   icons: {
     icon: "/site-logo.png",
     apple: "/site-logo.png",
   },
   openGraph: {
-    title: "Digital Service Pack — Promos built for the booth",
+    title: "Digital Service Pack — Get Your Music Directly To The DJ",
     description:
-      "A sleek promo lane from artists to DJs: discovery, downloads, and reporting — without the inbox chaos.",
+      "Get your music directly to DJs: discovery, clean packs, downloads, and reporting — without the inbox chaos.",
     images: [
       {
         url: "/site-logo.png",
@@ -48,9 +48,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Digital Service Pack — Promos built for the booth",
+    title: "Digital Service Pack — Get Your Music Directly To The DJ",
     description:
-      "A sleek promo lane from artists to DJs: discovery, downloads, and reporting — without the inbox chaos.",
+      "Get your music directly to DJs: discovery, clean packs, downloads, and reporting — without the inbox chaos.",
     images: ["/site-logo.png"],
   },
 };
