@@ -20,6 +20,10 @@ function errorHint(code: string | undefined): string {
       return "This Stripe session is invalid or expired. Start again from New DJ pack.";
     case "payment_not_fulfilled":
       return "Payment did not complete. Check Billing; if you were charged, contact support with your receipt.";
+    case "service_role_not_configured":
+      return "Upload setup is not configured on this server (missing service role). Contact support — your payment may still be recorded in Billing.";
+    case "activation_failed":
+      return "We could not create your draft pack. Open Billing and use Continue upload, or contact support with your receipt.";
     default:
       return "Could not open your draft yet. Check Billing or start again from New DJ pack.";
   }
@@ -36,7 +40,16 @@ function CompleteSubmissionPoll({ sessionId }: { sessionId: string }) {
     const delayMs = 1500;
 
     async function tick() {
-      const r = await finalizeSubmissionFromStripeSession(sessionId);
+      let r: Awaited<ReturnType<typeof finalizeSubmissionFromStripeSession>>;
+      try {
+        r = await finalizeSubmissionFromStripeSession(sessionId);
+      } catch {
+        if (cancelled) return;
+        setMsg(
+          "Something went wrong while opening your pack. Open Billing and tap Continue upload, or try refreshing this page.",
+        );
+        return;
+      }
       if (cancelled) return;
 
       if (r.ok) {

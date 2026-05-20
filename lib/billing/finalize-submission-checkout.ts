@@ -13,6 +13,11 @@ export type FinalizeSubmissionResult =
  * Return URL after Stripe: ensures submission checkout is fulfilled (same logic as webhook).
  */
 export async function finalizeSubmissionCheckout(sessionId: string): Promise<FinalizeSubmissionResult> {
+  const trimmed = sessionId?.trim();
+  if (!trimmed) {
+    return { ok: false, error: "invalid_session" };
+  }
+
   let stripe: ReturnType<typeof getStripe>;
   try {
     stripe = getStripe();
@@ -22,19 +27,37 @@ export async function finalizeSubmissionCheckout(sessionId: string): Promise<Fin
 
   let session;
   try {
-    session = await stripe.checkout.sessions.retrieve(sessionId);
+    session = await stripe.checkout.sessions.retrieve(trimmed);
   } catch {
     return { ok: false, error: "invalid_session" };
   }
 
-  await activateFeaturedFromCheckoutSession(session, { trustPaymentComplete: true });
+  try {
+    await activateFeaturedFromCheckoutSession(session, { trustPaymentComplete: true });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (/SUPABASE_SERVICE_ROLE_KEY/i.test(msg)) {
+      return { ok: false, error: "service_role_not_configured" };
+    }
+    console.error("[billing] finalize submission activation failed", e);
+    return { ok: false, error: "activation_failed" };
+  }
 
   const paymentId = session.metadata?.payment_id;
   if (!paymentId || typeof paymentId !== "string") {
     return { ok: false, error: "missing_payment_metadata" };
   }
 
-  const admin = createServiceRoleClient();
+  let admin;
+  try {
+    admin = createServiceRoleClient();
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (/SUPABASE_SERVICE_ROLE_KEY/i.test(msg)) {
+      return { ok: false, error: "service_role_not_configured" };
+    }
+    throw e;
+  }
   let { data: payment } = await admin
     .from("payments")
     .select("track_id, status, pricing_plan_id")
@@ -47,7 +70,16 @@ export async function finalizeSubmissionCheckout(sessionId: string): Promise<Fin
 
   /** Rare race with webhook / first activation tick — second pass is idempotent. */
   if (!payment.track_id) {
-    await activateFeaturedFromCheckoutSession(session, { trustPaymentComplete: true });
+    try {
+      await activateFeaturedFromCheckoutSession(session, { trustPaymentComplete: true });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (/SUPABASE_SERVICE_ROLE_KEY/i.test(msg)) {
+        return { ok: false, error: "service_role_not_configured" };
+      }
+      console.error("[billing] finalize submission retry activation failed", e);
+      return { ok: false, error: "activation_failed" };
+    }
     const { data: paymentAgain } = await admin
       .from("payments")
       .select("track_id, status, pricing_plan_id")

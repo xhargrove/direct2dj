@@ -13,6 +13,8 @@ function revalidateFeaturedSurfaces() {
   revalidatePath("/artist/promote");
   revalidatePath("/artist/tracks");
   revalidatePath("/artist/tracks/new");
+  revalidatePath("/artist/tracks/new/complete");
+  revalidatePath("/artist/dashboard");
   revalidatePath("/admin/featured");
   revalidatePath("/admin/dashboard");
 }

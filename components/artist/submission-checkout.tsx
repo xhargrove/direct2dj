@@ -118,7 +118,8 @@ export function SubmissionCheckout({ tiers }: { tiers: SubmissionTierOption[] })
       {error ? <p className="text-sm text-red-600 dark:text-red-400">{error}</p> : null}
 
       <p className="text-xs text-zinc-500 dark:text-zinc-500">
-        You will complete checkout on Stripe, then return here to finish your draft.
+        After payment, Stripe returns you to an upload screen to add metadata and your pack files. If that page does
+        not open, go to Billing and tap <strong className="font-medium text-zinc-600 dark:text-zinc-400">Continue upload</strong>.
       </p>
     </div>
   );

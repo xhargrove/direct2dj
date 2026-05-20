@@ -8,6 +8,11 @@ import {
 import { StripePaymentsNotice } from "@/components/artist/stripe-payments-notice";
 import { loadFeaturedPricingPlans } from "@/lib/billing/load-featured-pricing-plans";
 import { loadSubmissionPricingPlans } from "@/lib/billing/load-submission-pricing-plans";
+import {
+  submissionNeedsUpload,
+  submissionUploadHref,
+  type SubmissionPaymentForUpload,
+} from "@/lib/billing/submission-upload-links";
 import { createClient } from "@/lib/supabase/server";
 
 type PaymentRow = {
@@ -16,6 +21,7 @@ type PaymentRow = {
   amount_cents: number;
   currency: string;
   created_at: string;
+  track_id: string | null;
   stripe_checkout_session_id: string | null;
   tracks: { title: string | null } | { title: string | null }[] | null;
   pricing_plans:
@@ -23,11 +29,13 @@ type PaymentRow = {
         label: string | null;
         duration_days: number | null;
         plan_kind: string | null;
+        slug?: string | null;
       }
     | {
         label: string | null;
         duration_days: number | null;
         plan_kind: string | null;
+        slug?: string | null;
       }[]
     | null;
 };
@@ -84,9 +92,10 @@ export default async function ArtistBillingPage({ searchParams }: Props) {
           amount_cents,
           currency,
           created_at,
+          track_id,
           stripe_checkout_session_id,
           tracks ( title ),
-          pricing_plans ( label, duration_days, plan_kind )
+          pricing_plans ( label, duration_days, plan_kind, slug )
         `,
         )
         .eq("artist_id", artist.id)
@@ -96,6 +105,15 @@ export default async function ArtistBillingPage({ searchParams }: Props) {
       rows = (payments ?? []) as PaymentRow[];
     }
   }
+
+  const uploadRecovery = rows
+    .filter((r) => submissionNeedsUpload(r as SubmissionPaymentForUpload))
+    .map((r) => ({
+      id: r.id,
+      href: submissionUploadHref(r as SubmissionPaymentForUpload),
+      hasTrack: Boolean(r.track_id),
+    }))
+    .find((x) => x.href != null);
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-10">
@@ -110,7 +128,22 @@ export default async function ArtistBillingPage({ searchParams }: Props) {
 
       <BillingPromoCards submissionTiers={submissionTiers} featuredTiers={featuredTiers} />
 
-      {checkoutOk ? (
+      {uploadRecovery?.href ? (
+        <div className="rounded-lg border border-cyan-200 bg-cyan-50 px-4 py-4 dark:border-cyan-900/60 dark:bg-cyan-950/40">
+          <p className="font-medium text-cyan-950 dark:text-cyan-100">
+            {uploadRecovery.hasTrack ? "Your paid upload is ready" : "Finish setting up your upload"}
+          </p>
+          <p className="mt-1 text-sm text-cyan-900/90 dark:text-cyan-200/90">
+            Add your track details and upload your DJ pack files (audio, artwork, and metadata).
+          </p>
+          <Link
+            href={uploadRecovery.href}
+            className="mt-4 inline-flex min-h-11 items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
+          >
+            Continue upload →
+          </Link>
+        </div>
+      ) : checkoutOk ? (
         <p className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-100">
           Thanks — when Stripe confirms payment, your purchase activates automatically (usually within seconds).
         </p>
@@ -138,6 +171,7 @@ export default async function ArtistBillingPage({ searchParams }: Props) {
               const tr = firstRel(r.tracks);
               const pl = firstRel(r.pricing_plans);
               const isSubmission = pl?.plan_kind === "submission";
+              const uploadHref = submissionUploadHref(r as SubmissionPaymentForUpload);
               const detail =
                 isSubmission || !pl?.duration_days
                   ? pl?.label ?? "Plan"
@@ -161,6 +195,14 @@ export default async function ArtistBillingPage({ searchParams }: Props) {
                     {formatDateTimeDisplay(r.created_at)}
                     {r.stripe_checkout_session_id ? ` · ${r.stripe_checkout_session_id.slice(0, 12)}…` : ""}
                   </div>
+                  {uploadHref ? (
+                    <Link
+                      href={uploadHref}
+                      className="mt-3 inline-flex min-h-9 items-center text-sm font-medium text-zinc-900 underline underline-offset-4 dark:text-zinc-100"
+                    >
+                      {r.track_id ? "Continue upload →" : "Set up upload →"}
+                    </Link>
+                  ) : null}
                 </li>
               );
             })}

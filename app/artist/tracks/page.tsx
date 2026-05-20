@@ -63,8 +63,21 @@ export default async function ArtistTracksPage() {
                     isDraft={t.is_draft}
                   />
                 </div>
+                {t.is_draft ? (
+                  <p className="mt-2 text-xs text-cyan-800 dark:text-cyan-300">
+                    Paid upload — finish metadata and pack files below.
+                  </p>
+                ) : null}
               </div>
               <div className="flex shrink-0 flex-wrap items-center gap-x-3 gap-y-2">
+                {t.is_draft ? (
+                  <Link
+                    href={`/artist/tracks/${t.id}/edit`}
+                    className="inline-flex min-h-9 items-center rounded-md bg-zinc-900 px-3 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
+                  >
+                    Continue upload
+                  </Link>
+                ) : null}
                 <Link
                   href={`/artist/tracks/${t.id}/analytics`}
                   className="text-sm font-medium text-zinc-900 underline dark:text-zinc-100"
