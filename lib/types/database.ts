@@ -270,3 +270,17 @@ export type Notification = {
   read_at: string | null;
   created_at: string;
 };
+
+export type AdminBroadcastAudience = "all_approved_djs" | "single_dj";
+
+export type AdminBroadcast = {
+  id: string;
+  created_by: string;
+  title: string;
+  body: string | null;
+  href: string | null;
+  audience: AdminBroadcastAudience;
+  target_dj_id: string | null;
+  recipient_count: number;
+  created_at: string;
+};

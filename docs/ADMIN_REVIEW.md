@@ -19,6 +19,7 @@ Canonical implementation lives in `app/admin/*`, `app/api/admin/sign-storage`, `
 | `/admin/artists` | Artist directory |
 | `/admin/artists/[id]` | Artist profile + stats |
 | `/admin/djs` | DJ directory |
+| `/admin/communications` | Send in-app announcements to all approved DJs or one DJ (audit log + notification fan-out) |
 | `/admin/featured` | Featured placements list + DJ-visible window |
 
 **Access:** `app/admin/layout.tsx` calls `requireRoles(["admin"])`. Non-admins are redirected to their role home; unauthenticated users go to `/login`.
@@ -38,6 +39,16 @@ where id = 'PASTE-USER-UUID-HERE';
 Only existing admins can change roles through the app API (guard trigger); the SQL editor bypasses that for bootstrap.
 
 **API:** `POST /api/admin/sign-storage` — signed URLs for pack previews (see [Storage preview security](#storage-preview-security)).
+
+### DJ in-app communications
+
+Backstage can message DJs without email (v1):
+
+- **Route:** `/admin/communications` — compose title, body, optional in-app link (`/dj/feed`, etc.).
+- **Audience:** all DJs with `djs.vetting_status = 'approved'`, or one DJ (shortcut from `/admin/djs` → “Message DJ”).
+- **Delivery:** [`lib/notifications/admin-broadcast.ts`](../lib/notifications/admin-broadcast.ts) inserts `admin_broadcasts` (audit) and fans out `notifications` with kind `admin_announcement` or `admin_message`. DJs see them in the existing notification bell.
+- **Requires:** `SUPABASE_SERVICE_ROLE_KEY` on the server (same as webhooks / submission activation). Apply migration `20260520193000_admin_broadcasts.sql`.
+- **RLS:** admins can `SELECT` `admin_broadcasts`; inserts use service role only.
 
 ---
 

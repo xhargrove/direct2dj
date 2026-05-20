@@ -85,6 +85,19 @@ export default async function AdminDashboardPage() {
         </Link>
       </div>
 
+      <section className="rounded-lg border border-zinc-200 px-4 py-4 dark:border-zinc-800">
+        <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">DJ communications</h2>
+        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+          Send in-app announcements to all approved DJs or one DJ. They appear in the DJ notification bell.
+        </p>
+        <Link
+          href="/admin/communications"
+          className="mt-3 inline-flex min-h-10 items-center justify-center rounded-md border border-zinc-300 px-4 text-sm font-medium dark:border-zinc-600"
+        >
+          Open DJ messages
+        </Link>
+      </section>
+
       <p className="text-xs text-zinc-500">
         Approved featured rows total: {featuredRows?.length ?? 0} (live window uses starts/ends).
       </p>

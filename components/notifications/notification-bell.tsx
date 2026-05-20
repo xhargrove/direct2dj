@@ -16,6 +16,13 @@ function hrefFromMeta(meta: Record<string, unknown>): string | null {
   return typeof h === "string" && h.length > 0 ? h : null;
 }
 
+function kindLabel(kind: string): string | null {
+  if (kind === "admin_announcement" || kind === "admin_message") {
+    return "From Digital Service Pack";
+  }
+  return null;
+}
+
 export function NotificationBell({ initialUnread }: { initialUnread: number }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -91,8 +98,14 @@ export function NotificationBell({ initialUnread }: { initialUnread: number }) {
               items.map((n) => {
                 const href = hrefFromMeta(n.metadata);
                 const unreadRow = !n.read_at;
+                const fromLabel = kindLabel(n.kind);
                 const inner = (
                   <>
+                    {fromLabel ? (
+                      <div className="text-[10px] font-medium uppercase tracking-wide text-cyan-800 dark:text-cyan-300">
+                        {fromLabel}
+                      </div>
+                    ) : null}
                     <div className="text-sm font-medium leading-snug">{n.title}</div>
                     {n.body ? (
                       <div className="mt-0.5 line-clamp-2 text-xs text-zinc-600 dark:text-zinc-400">

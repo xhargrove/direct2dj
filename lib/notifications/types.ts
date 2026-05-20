@@ -15,4 +15,6 @@ export type NotificationKind =
   | "rated_track_updated"
   | "dj_application_approved"
   | "dj_application_rejected"
-  | "catalog_new_track";
+  | "catalog_new_track"
+  | "admin_announcement"
+  | "admin_message";

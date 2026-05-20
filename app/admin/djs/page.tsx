@@ -50,12 +50,20 @@ export default async function AdminDjsPage() {
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="font-medium">{d.display_name}</div>
-              <Link
-                href={`/admin/djs/${d.id}/activity`}
-                className="text-xs font-medium text-zinc-700 underline-offset-4 hover:underline dark:text-zinc-300"
-              >
-                View activity →
-              </Link>
+              <div className="flex flex-wrap gap-3 text-xs font-medium">
+                <Link
+                  href={`/admin/communications?dj_id=${d.id}`}
+                  className="text-zinc-700 underline-offset-4 hover:underline dark:text-zinc-300"
+                >
+                  Message DJ
+                </Link>
+                <Link
+                  href={`/admin/djs/${d.id}/activity`}
+                  className="text-zinc-700 underline-offset-4 hover:underline dark:text-zinc-300"
+                >
+                  View activity →
+                </Link>
+              </div>
             </div>
             <div className="text-xs text-zinc-500">
               {d.profiles?.full_name ?? d.profiles?.email ?? "—"} · {d.status}
