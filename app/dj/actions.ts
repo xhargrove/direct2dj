@@ -11,8 +11,10 @@ import {
 import {
   feedbackQualifiesForDownload,
   validateFeedbackBody,
+  validateOptionalCrowdReaction,
   validateRatingComment,
   validateRatingScore,
+  validateYesNoAnswer,
 } from "@/lib/dj/catalog-validation";
 import type { CrowdReaction, PackSlotDb } from "@/lib/types/database";
 import { djPackDownloadFilename } from "@/lib/tracks/dj-download-filename";
@@ -188,6 +190,15 @@ export async function submitRating(trackId: string, input: DjRatingInput) {
   if (!commentCheck.ok) return { error: commentCheck.error };
   const comment = commentCheck.value;
 
+  const clubCheck = validateYesNoAnswer(input.club_ready, "club ready");
+  if (!clubCheck.ok) return { error: clubCheck.error };
+
+  const radioCheck = validateYesNoAnswer(input.radio_ready, "radio ready");
+  if (!radioCheck.ok) return { error: radioCheck.error };
+
+  const crowdCheck = validateOptionalCrowdReaction(input.crowd_reaction);
+  if (!crowdCheck.ok) return { error: crowdCheck.error };
+
   const { data: existingRating } = await ctx.supabase
     .from("ratings")
     .select("id")
@@ -200,10 +211,10 @@ export async function submitRating(trackId: string, input: DjRatingInput) {
       track_id: trackId,
       dj_id: ctx.djId,
       score: s,
-      club_ready: input.club_ready,
-      radio_ready: input.radio_ready,
+      club_ready: clubCheck.value,
+      radio_ready: radioCheck.value,
       rating_comment: comment,
-      crowd_reaction: input.crowd_reaction,
+      crowd_reaction: crowdCheck.value,
       updated_at: new Date().toISOString(),
     },
     { onConflict: "track_id,dj_id" },

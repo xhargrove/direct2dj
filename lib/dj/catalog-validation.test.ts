@@ -4,8 +4,10 @@ import {
   FEEDBACK_MAX_LEN,
   feedbackQualifiesForDownload,
   validateFeedbackBody,
+  validateOptionalCrowdReaction,
   validateRatingComment,
   validateRatingScore,
+  validateYesNoAnswer,
 } from "./catalog-validation";
 
 describe("validateRatingScore", () => {
@@ -29,6 +31,29 @@ describe("validateRatingComment", () => {
     const long = "x".repeat(4001);
     const r = validateRatingComment(long);
     expect(r.ok).toBe(false);
+  });
+});
+
+describe("validateYesNoAnswer", () => {
+  it("accepts true or false", () => {
+    expect(validateYesNoAnswer(true, "club ready")).toEqual({ ok: true, value: true });
+    expect(validateYesNoAnswer(false, "radio ready")).toEqual({ ok: true, value: false });
+  });
+  it("rejects unset", () => {
+    expect(validateYesNoAnswer(null, "club ready").ok).toBe(false);
+  });
+});
+
+describe("validateOptionalCrowdReaction", () => {
+  it("allows empty", () => {
+    expect(validateOptionalCrowdReaction("")).toEqual({ ok: true, value: null });
+    expect(validateOptionalCrowdReaction(null)).toEqual({ ok: true, value: null });
+  });
+  it("accepts valid reactions", () => {
+    expect(validateOptionalCrowdReaction("warm")).toEqual({ ok: true, value: "warm" });
+  });
+  it("rejects invalid", () => {
+    expect(validateOptionalCrowdReaction("lukewarm").ok).toBe(false);
   });
 });
 

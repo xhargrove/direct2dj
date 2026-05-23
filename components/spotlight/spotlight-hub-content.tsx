@@ -76,6 +76,7 @@ export function SpotlightHubContent({
   }
 
   const gapClass = variant === "home" ? "gap-10" : variant === "dj" ? "gap-8" : "gap-12";
+  const hideSponsoredPaidCopy = variant === "dj";
 
   return (
     <div className={`flex flex-col ${gapClass}`}
@@ -125,6 +126,7 @@ export function SpotlightHubContent({
           subtitle={SECTION_SUBTITLES[sec.id]}
           items={sec.items}
           linkMode={linkMode}
+          hideSponsoredPaidCopy={hideSponsoredPaidCopy}
           emptyMessage={
             showEmptyEditorialSections && sec.items.length === 0
               ? "No track assigned — use the form above to publish this slot."

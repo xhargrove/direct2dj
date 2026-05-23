@@ -11,6 +11,7 @@ import {
   type PackDownloadFile,
 } from "@/app/dj/actions";
 import { triggerPackDownloads } from "@/lib/dj/trigger-pack-downloads";
+import { validateOptionalCrowdReaction, validateYesNoAnswer } from "@/lib/dj/catalog-validation";
 import type { CrowdReaction } from "@/lib/types/database";
 
 function boolToSelect(v: boolean | null): "" | "yes" | "no" {
@@ -99,18 +100,26 @@ export function TrackDetailPanel({
     };
   }, [trackId]);
 
-  function buildRatingPayload(): DjRatingInput | null {
+  function buildRatingPayload(): DjRatingInput | { error: string } | null {
     if (score == null || score < 1 || score > 5) return null;
-    const cr: CrowdReaction | null =
-      crowd === "cold" || crowd === "warm" || crowd === "strong" || crowd === "hit_potential"
-        ? crowd
-        : null;
+
+    const clubReady = selectToBool(clubSel);
+    const clubCheck = validateYesNoAnswer(clubReady, "club ready");
+    if (!clubCheck.ok) return { error: clubCheck.error };
+
+    const radioReady = selectToBool(radioSel);
+    const radioCheck = validateYesNoAnswer(radioReady, "radio ready");
+    if (!radioCheck.ok) return { error: radioCheck.error };
+
+    const crowdCheck = validateOptionalCrowdReaction(crowd);
+    if (!crowdCheck.ok) return { error: crowdCheck.error };
+
     return {
       score,
-      club_ready: selectToBool(clubSel),
-      radio_ready: selectToBool(radioSel),
+      club_ready: clubCheck.value,
+      radio_ready: radioCheck.value,
       rating_comment: ratingComment.trim() || null,
-      crowd_reaction: cr,
+      crowd_reaction: crowdCheck.value,
     };
   }
 
@@ -287,7 +296,8 @@ export function TrackDetailPanel({
       <section className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
         <h2 className="text-sm font-semibold">Your rating</h2>
         <p className="text-xs text-zinc-500">
-          One rating per track (you can update anytime). Optional fields go with this rating row.
+          One rating per track (you can update anytime). Stars, club ready, and radio ready are required. Crowd reaction
+          and note are optional.
         </p>
 
         <div>
@@ -313,25 +323,25 @@ export function TrackDetailPanel({
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
-            Club ready
+            Club ready (required)
             <select
               value={clubSel}
               onChange={(e) => setClubSel(e.target.value)}
               className="rounded-md border border-zinc-300 px-2 py-2 text-sm dark:border-zinc-600"
             >
-              <option value="">No answer</option>
+              <option value="">Select</option>
               <option value="yes">Yes</option>
               <option value="no">No</option>
             </select>
           </label>
           <label className="flex flex-col gap-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
-            Radio ready
+            Radio ready (required)
             <select
               value={radioSel}
               onChange={(e) => setRadioSel(e.target.value)}
               className="rounded-md border border-zinc-300 px-2 py-2 text-sm dark:border-zinc-600"
             >
-              <option value="">No answer</option>
+              <option value="">Select</option>
               <option value="yes">Yes</option>
               <option value="no">No</option>
             </select>
@@ -372,8 +382,12 @@ export function TrackDetailPanel({
             startRatingTransition(async () => {
               setRatingMsg(null);
               const payload = buildRatingPayload();
-              if (!payload) {
+              if (payload == null) {
                 setRatingMsg("Pick a star rating (1–5) before saving.");
+                return;
+              }
+              if ("error" in payload) {
+                setRatingMsg(payload.error);
                 return;
               }
               const r = await submitRating(trackId, payload);

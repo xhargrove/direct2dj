@@ -34,11 +34,13 @@ export function SpotlightTrackCard({
   sectionId,
   linkMode,
   size = "default",
+  hideSponsoredPaidCopy = false,
 }: {
   item: SpotlightItem;
   sectionId: SpotlightSectionId;
   linkMode: "public" | "dj";
   size?: "default" | "compact";
+  hideSponsoredPaidCopy?: boolean;
 }) {
   const badge = SPOTLIGHT_SECTION_LABELS[sectionId];
   const isSponsored = sectionId === "sponsored";
@@ -57,7 +59,9 @@ export function SpotlightTrackCard({
         >
           {sectionId === "sponsored" ? "Featured" : badge.split(" ").slice(0, 2).join(" ")}
         </span>
-        {isSponsored ? <span className="text-[10px] text-zinc-500">Paid</span> : null}
+        {isSponsored && !hideSponsoredPaidCopy ? (
+          <span className="text-[10px] text-zinc-500">Paid</span>
+        ) : null}
       </div>
       <div className={innerLayout}>
         <div className={
@@ -81,7 +85,7 @@ export function SpotlightTrackCard({
               .filter(Boolean)
               .join(" · ")}
           </p>
-          {item.metricLabel && sectionId !== "most_downloaded" ? (
+          {item.metricLabel && sectionId !== "most_downloaded" && !(hideSponsoredPaidCopy && isSponsored) ? (
             <p className="mt-1 text-xs font-medium text-zinc-700 dark:text-zinc-300">{item.metricLabel}</p>
           ) : null}
         </div>
@@ -142,6 +146,7 @@ export function SpotlightRow({
   linkMode,
   subtitle,
   emptyMessage,
+  hideSponsoredPaidCopy = false,
 }: {
   sectionId: SpotlightSectionId;
   title: string;
@@ -149,6 +154,7 @@ export function SpotlightRow({
   linkMode: "public" | "dj";
   subtitle?: string;
   emptyMessage?: string;
+  hideSponsoredPaidCopy?: boolean;
 }) {
   if (items.length === 0) {
     if (!emptyMessage) return null;
@@ -170,7 +176,7 @@ export function SpotlightRow({
       <div>
         <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
         {subtitle ? <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{subtitle}</p> : null}
-        {sectionId === "sponsored" ? (
+        {sectionId === "sponsored" && !hideSponsoredPaidCopy ? (
           <p className="mt-1 text-xs text-zinc-500">Paid placement — clearly labeled for transparency.</p>
         ) : null}
       </div>
@@ -182,6 +188,7 @@ export function SpotlightRow({
             sectionId={sectionId}
             linkMode={linkMode}
             size="compact"
+            hideSponsoredPaidCopy={hideSponsoredPaidCopy}
           />
         ))}
       </div>

@@ -1,5 +1,7 @@
 /** Pure validators for DJ catalog mutations (unit-testable; no Supabase). */
 
+import type { CrowdReaction } from "@/lib/types/database";
+
 export const FEEDBACK_MIN_LEN = 3;
 export const FEEDBACK_MAX_LEN = 8000;
 export const RATING_COMMENT_MAX_LEN = 4000;
@@ -22,6 +24,26 @@ export function validateRatingComment(trimmed: string | null): ValidationResult<
     return { ok: false, error: `Rating note must be ${RATING_COMMENT_MAX_LEN} characters or less.` };
   }
   return { ok: true, value: trimmed };
+}
+
+const CROWD_REACTIONS: CrowdReaction[] = ["cold", "warm", "strong", "hit_potential"];
+
+export function validateYesNoAnswer(
+  value: boolean | null,
+  fieldLabel: string,
+): ValidationResult<boolean> {
+  if (value !== true && value !== false) {
+    return { ok: false, error: `Select ${fieldLabel} (yes or no) before saving.` };
+  }
+  return { ok: true, value };
+}
+
+export function validateOptionalCrowdReaction(raw: unknown): ValidationResult<CrowdReaction | null> {
+  if (raw == null || raw === "") return { ok: true, value: null };
+  if (typeof raw === "string" && CROWD_REACTIONS.includes(raw as CrowdReaction)) {
+    return { ok: true, value: raw as CrowdReaction };
+  }
+  return { ok: false, error: "Invalid crowd reaction." };
 }
 
 /** Returns trimmed body or error (min/max length). */
