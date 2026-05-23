@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { TrackStatusBadges } from "@/components/artist/track-status";
 import { formatDateDisplay } from "@/lib/format/datetime-display";
+import {
+  submissionUploadHref,
+  type SubmissionPaymentForUpload,
+} from "@/lib/billing/submission-upload-links";
 import { createClient } from "@/lib/supabase/server";
 import type { Track } from "@/lib/types/database";
 
@@ -35,6 +39,7 @@ export default async function ArtistDashboardPage() {
   let draftCount = 0;
   let pendingCount = 0;
   let firstDraftId: string | null = null;
+  let paidDraftUploadHref: string | null = null;
   let recentTracks: Track[] = [];
   let summary: SummaryRow | null = null;
   let engagement: EngagementRow | null = null;
@@ -42,7 +47,7 @@ export default async function ArtistDashboardPage() {
   if (user) {
     const { data: artist } = await supabase.from("artists").select("id").eq("profile_id", user.id).maybeSingle();
     if (artist) {
-      const [{ count: d }, { count: p }, firstDraftRes, tracksResult, summaryRes, engagementRes] =
+      const [{ count: d }, { count: p }, firstDraftRes, paymentsRes, tracksResult, summaryRes, engagementRes] =
         await Promise.all([
         supabase
           .from("tracks")
@@ -64,6 +69,20 @@ export default async function ArtistDashboardPage() {
           .limit(1)
           .maybeSingle(),
         supabase
+          .from("payments")
+          .select(
+            `
+            status,
+            track_id,
+            stripe_checkout_session_id,
+            pricing_plans ( plan_kind, slug )
+          `,
+          )
+          .eq("artist_id", artist.id)
+          .eq("status", "succeeded")
+          .order("updated_at", { ascending: false })
+          .limit(20),
+        supabase
           .from("tracks")
           .select("*")
           .eq("artist_id", artist.id)
@@ -76,6 +95,13 @@ export default async function ArtistDashboardPage() {
       draftCount = d ?? 0;
       pendingCount = p ?? 0;
       firstDraftId = firstDraftRes.data?.id ?? null;
+      for (const pay of paymentsRes.data ?? []) {
+        const href = submissionUploadHref(pay as SubmissionPaymentForUpload);
+        if (href) {
+          paidDraftUploadHref = href;
+          break;
+        }
+      }
       recentTracks = (tracksResult.data ?? []) as Track[];
 
       if (!summaryRes.error) {
@@ -102,16 +128,22 @@ export default async function ArtistDashboardPage() {
         </p>
       </div>
 
-      {draftCount > 0 && firstDraftId ? (
+      {draftCount > 0 && (paidDraftUploadHref || firstDraftId) ? (
         <div className="rounded-lg border border-cyan-200 bg-cyan-50 px-4 py-4 dark:border-cyan-900/60 dark:bg-cyan-950/40">
           <p className="font-medium text-cyan-950 dark:text-cyan-100">
-            You have {draftCount === 1 ? "a draft pack" : `${draftCount} draft packs`} waiting for upload
+            {paidDraftUploadHref
+              ? "Payment received — finish your upload"
+              : draftCount === 1
+                ? "You have a draft pack waiting for upload"
+                : `You have ${draftCount} draft packs waiting for upload`}
           </p>
           <p className="mt-1 text-sm text-cyan-900/90 dark:text-cyan-200/90">
-            Add track details and upload your audio, artwork, and pack files, then submit for review.
+            {paidDraftUploadHref
+              ? "Your submission fee is confirmed. Add audio, artwork, and pack details, then submit for review."
+              : "Add track details and upload your audio, artwork, and pack files, then submit for review."}
           </p>
           <Link
-            href={`/artist/tracks/${firstDraftId}/edit`}
+            href={paidDraftUploadHref ?? `/artist/tracks/${firstDraftId}/edit`}
             className="mt-4 inline-flex min-h-11 items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
           >
             Continue upload →

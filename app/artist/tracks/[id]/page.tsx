@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 import { DeleteTrackButton } from "@/components/artist/delete-track-button";
 import { TrackStatusBadges } from "@/components/artist/track-status";
+import { YoutubeLinkDisplay } from "@/components/tracks/youtube-link-display";
 import { createClient } from "@/lib/supabase/server";
 import { packFileDisplayName } from "@/lib/tracks/dj-download-filename";
 import type { Track, TrackFile } from "@/lib/types/database";
@@ -92,6 +93,8 @@ export default async function ArtistTrackDetailPage({ params }: Props) {
           {t.description || "—"}
         </p>
       </div>
+
+      <YoutubeLinkDisplay url={t.youtube_url} />
 
       <div>
         <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">

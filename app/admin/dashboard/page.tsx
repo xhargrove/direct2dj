@@ -1,7 +1,15 @@
 import Link from "next/link";
+import { CoAdminDashboard } from "@/app/admin/dashboard/co-admin-dashboard";
+import { isCoAdminRole } from "@/lib/auth/backstage-access";
+import { requireRoles } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AdminDashboardPage() {
+  const { profile } = await requireRoles(["admin", "co_admin"]);
+  if (isCoAdminRole(profile.role)) {
+    return <CoAdminDashboard />;
+  }
+
   const supabase = await createClient();
 
   const [{ count: pendingSubmissions }, { count: totalTracks }, { data: featuredRows }, { count: pendingDjApps }] =

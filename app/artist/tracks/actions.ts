@@ -7,6 +7,7 @@ import { finalizeSubmissionCheckout } from "@/lib/billing/finalize-submission-ch
 import { createClient } from "@/lib/supabase/server";
 import { notifyRatedTrackUpdated } from "@/lib/notifications/events";
 import { validateMetadataForSubmit, validatePackSlotsPresent } from "@/lib/tracks/submit-validation";
+import { parseYoutubeUrlField } from "@/lib/tracks/youtube-url";
 import type { PackSlot } from "@/lib/tracks/pack-slots";
 
 async function getArtistContext() {
@@ -67,11 +68,15 @@ export type TrackMetadataPayload = {
   release_date: string | null;
   description: string;
   campaign_notes: string;
+  youtube_url: string;
 };
 
 export async function updateTrackMetadata(trackId: string, payload: TrackMetadataPayload) {
   const ctx = await getArtistContext();
   if ("error" in ctx) return { error: ctx.error };
+
+  const yt = parseYoutubeUrlField(payload.youtube_url ?? "");
+  if (!yt.ok) return { error: yt.error };
 
   const { error } = await ctx.supabase
     .from("tracks")
@@ -87,6 +92,7 @@ export async function updateTrackMetadata(trackId: string, payload: TrackMetadat
       release_date: payload.release_date || null,
       description: payload.description.trim() || null,
       campaign_notes: payload.campaign_notes.trim() || null,
+      youtube_url: yt.url,
     })
     .eq("id", trackId)
     .eq("artist_id", ctx.artistId);
@@ -124,8 +130,12 @@ export async function submitTrackForReview(trackId: string, meta: TrackMetadataP
     release_date: meta.release_date,
     description: meta.description,
     campaign_notes: meta.campaign_notes,
+    youtube_url: meta.youtube_url,
   });
   if (metaErr) return { error: metaErr };
+
+  const yt = parseYoutubeUrlField(meta.youtube_url ?? "");
+  if (!yt.ok) return { error: yt.error };
 
   const { data: files, error: filesErr } = await ctx.supabase
     .from("track_files")
@@ -154,6 +164,7 @@ export async function submitTrackForReview(trackId: string, meta: TrackMetadataP
       release_date: meta.release_date || null,
       description: meta.description.trim() || null,
       campaign_notes: meta.campaign_notes.trim() || null,
+      youtube_url: yt.url,
       is_draft: false,
       moderation_status: "pending",
     })

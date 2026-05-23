@@ -6,7 +6,10 @@ import type { TrackFile } from "@/lib/types/database";
 import { PACK_SLOT_LABELS, type PackSlot } from "@/lib/tracks/pack-slots";
 import type { TrackReviewBundle } from "@/lib/admin/load-track-for-review";
 import { SignedAudio, SignedImage } from "@/components/admin/signed-storage-media";
+import { PackUploadReadinessBanner } from "@/components/admin/pack-upload-readiness-banner";
+import { YoutubeLinkDisplay } from "@/components/tracks/youtube-link-display";
 import { TrackReviewActions } from "@/components/admin/track-review-actions";
+import { assessPackUploadReadiness } from "@/lib/admin/pack-upload-readiness";
 import { packFileDisplayName } from "@/lib/tracks/dj-download-filename";
 
 function fileLabel(f: TrackFile): string {
@@ -22,8 +25,16 @@ function isImageFile(f: TrackFile): boolean {
   return f.kind === "cover" || f.pack_slot === "cover_art";
 }
 
-export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
+export function AdminTrackReview({
+  bundle,
+  uploadOnly = false,
+}: {
+  bundle: TrackReviewBundle;
+  /** Co-admin: upload + QA only — no approve/reject/featured/analytics. */
+  uploadOnly?: boolean;
+}) {
   const { track, files, artist, profile, featuredRows, engagement } = bundle;
+  const packReadiness = assessPackUploadReadiness(files);
 
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
@@ -50,6 +61,8 @@ export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
 
       <AdminTrackBasicsForm track={track} />
 
+      <YoutubeLinkDisplay url={track.youtube_url} className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800" />
+
       <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
         <h2 className="text-sm font-semibold">Release & account</h2>
         <dl className="mt-3 space-y-3 text-sm">
@@ -71,16 +84,28 @@ export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
             </dd>
           </div>
         </dl>
-        <Link
-          href={`/admin/artists/${artist.id}`}
-          className="mt-3 inline-block text-sm font-medium text-zinc-700 underline underline-offset-4 dark:text-zinc-300"
-        >
-          View artist profile
-        </Link>
+        {!uploadOnly ? (
+          <Link
+            href={`/admin/artists/${artist.id}`}
+            className="mt-3 inline-block text-sm font-medium text-zinc-700 underline underline-offset-4 dark:text-zinc-300"
+          >
+            View artist profile
+          </Link>
+        ) : null}
       </section>
 
       <AdminTrackMetadataForm track={track} />
 
+      {uploadOnly ? (
+        <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+          <h2 className="text-sm font-semibold">Upload checklist</h2>
+          <div className="mt-3">
+            <PackUploadReadinessBanner readiness={packReadiness} />
+          </div>
+        </section>
+      ) : null}
+
+      {!uploadOnly ? (
       <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-semibold">DJ engagement</h2>
@@ -139,6 +164,7 @@ export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
           <p className="mt-4 text-sm text-zinc-500">No per-DJ engagement yet.</p>
         )}
       </section>
+      ) : null}
 
       <section className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
         <h2 className="text-sm font-semibold">DJ pack (for DJs)</h2>
@@ -202,12 +228,18 @@ export function AdminTrackReview({ bundle }: { bundle: TrackReviewBundle }) {
         {files.length === 0 ? <p className="mt-2 text-sm text-zinc-500">No files uploaded.</p> : null}
       </section>
 
-      <TrackReviewActions
-        trackId={track.id}
-        moderationStatus={track.moderation_status}
-        catalogActive={track.catalog_active !== false}
-        featuredRows={featuredRows}
-      />
+      {!uploadOnly ? (
+        <TrackReviewActions
+          trackId={track.id}
+          moderationStatus={track.moderation_status}
+          catalogActive={track.catalog_active !== false}
+          featuredRows={featuredRows}
+        />
+      ) : (
+        <p className="text-sm text-zinc-500">
+          Catalog approval and featured placement are handled by a full admin after upload is complete.
+        </p>
+      )}
     </div>
   );
 }

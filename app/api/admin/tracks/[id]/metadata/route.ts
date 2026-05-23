@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { getAdminContext } from "@/lib/admin/context";
+import { getBackstageUploadContext } from "@/lib/admin/context";
+import { parseYoutubeUrlField } from "@/lib/tracks/youtube-url";
 
 function parseTags(raw: string): string[] {
   return raw
@@ -12,7 +13,7 @@ function parseTags(raw: string): string[] {
 export async function PATCH(req: Request, context: { params: Promise<{ id: string }> }) {
   const { id: trackId } = await context.params;
 
-  const ctx = await getAdminContext();
+  const ctx = await getBackstageUploadContext();
   if ("error" in ctx) {
     return NextResponse.json({ error: ctx.error }, { status: 403 });
   }
@@ -74,6 +75,12 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
       ? raw.campaign_notes.trim()
       : null;
 
+  const youtubeRaw = typeof raw.youtube_url === "string" ? raw.youtube_url : "";
+  const yt = parseYoutubeUrlField(youtubeRaw);
+  if (!yt.ok) {
+    return NextResponse.json({ error: yt.error }, { status: 400 });
+  }
+
   const admin_tags_csv = typeof raw.admin_tags === "string" ? raw.admin_tags : "";
   const admin_tags = parseTags(admin_tags_csv);
 
@@ -95,6 +102,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
       producer,
       description,
       campaign_notes,
+      youtube_url: yt.url,
       admin_tags,
       updated_at: new Date().toISOString(),
     })

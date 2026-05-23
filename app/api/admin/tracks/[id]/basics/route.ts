@@ -1,11 +1,11 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { getAdminContext } from "@/lib/admin/context";
+import { getBackstageUploadContext } from "@/lib/admin/context";
 
 export async function PATCH(req: Request, context: { params: Promise<{ id: string }> }) {
   const { id: trackId } = await context.params;
 
-  const ctx = await getAdminContext();
+  const ctx = await getBackstageUploadContext();
   if ("error" in ctx) {
     return NextResponse.json({ error: ctx.error }, { status: 403 });
   }

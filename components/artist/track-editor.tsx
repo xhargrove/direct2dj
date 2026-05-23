@@ -33,6 +33,7 @@ function toPayload(state: MetaState): TrackMetadataPayload {
     release_date: state.release_date || null,
     description: state.description,
     campaign_notes: state.campaign_notes,
+    youtube_url: state.youtube_url,
   };
 }
 
@@ -48,6 +49,7 @@ type MetaState = {
   release_date: string;
   description: string;
   campaign_notes: string;
+  youtube_url: string;
 };
 
 export function TrackEditor({
@@ -77,6 +79,7 @@ export function TrackEditor({
       release_date: track.release_date?.slice(0, 10) ?? "",
       description: track.description ?? "",
       campaign_notes: track.campaign_notes ?? "",
+      youtube_url: track.youtube_url ?? "",
     }),
     [track],
   );
@@ -280,6 +283,24 @@ export function TrackEditor({
             }
             className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
           />
+        </label>
+
+        <label className="block space-y-1">
+          <span className="text-sm font-medium">
+            YouTube video link{" "}
+            <span className="font-normal text-zinc-500 dark:text-zinc-400">(optional)</span>
+          </span>
+          <input
+            type="url"
+            inputMode="url"
+            placeholder="https://www.youtube.com/watch?v=… or youtu.be/…"
+            value={meta.youtube_url}
+            onChange={(e) => setMeta((m) => ({ ...m, youtube_url: e.target.value }))}
+            className="min-h-11 w-full rounded-md border border-zinc-300 bg-white px-3 dark:border-zinc-700 dark:bg-zinc-950"
+          />
+          <span className="text-xs text-zinc-500 dark:text-zinc-400">
+            Official video for this song — saved with this upload and shown to DJs after approval.
+          </span>
         </label>
 
         <label className="block space-y-1">

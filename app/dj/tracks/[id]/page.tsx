@@ -92,6 +92,7 @@ export default async function DjTrackDetailPage({ params }: Props) {
         explicitLabel={track.explicit_rating === "explicit" ? "Explicit" : "Clean"}
         releaseDate={track.release_date}
         description={track.description}
+        youtubeUrl={track.youtube_url}
         coverSignedUrl={coverSignedUrl}
         initialRating={initialRating}
         initialFeedbackBody={typeof myFeedbackRow?.body === "string" ? myFeedbackRow.body : ""}

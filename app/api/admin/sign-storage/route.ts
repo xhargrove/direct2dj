@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminContext } from "@/lib/admin/context";
+import { getBackstageUploadContext } from "@/lib/admin/context";
 
 const ALLOWED_BUCKET = "promos" as const;
 const MAX_PATH_LEN = 2048;
@@ -11,7 +11,7 @@ function isSafePathSegment(path: string): boolean {
 }
 
 export async function POST(req: Request) {
-  const ctx = await getAdminContext();
+  const ctx = await getBackstageUploadContext();
   if ("error" in ctx) {
     return NextResponse.json({ error: ctx.error }, { status: 403 });
   }

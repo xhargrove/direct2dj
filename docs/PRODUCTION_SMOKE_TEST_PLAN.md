@@ -25,6 +25,16 @@ Execute after deploy to **production** (or production-like Preview with producti
 - [ ] **New DJ pack** → Stripe checkout (test card in test mode) → return URL → draft opens or billing shows payment
 - [ ] Webhook delivery **200** in Stripe Dashboard for checkout session
 
+### 3b. Paid submission path (reliability)
+
+- [ ] **Backstage → System** (`/admin/system`): `SUPABASE_SERVICE_ROLE_KEY` and `NEXT_PUBLIC_SITE_URL` show **OK** (or expected warn only for optional cron/email)
+- [ ] Complete checkout → lands on `/artist/tracks/new/complete?session_id=…` **or** Billing shows **Continue upload**
+- [ ] Artist dashboard shows **Payment received — finish your upload** (or draft banner with Continue upload)
+- [ ] Upload at least one pack file on draft edit → **Submit for review**
+- [ ] **Backstage → Submissions → Pending submissions** lists the track (non-draft)
+- [ ] **Backstage → Submissions → Paid — awaiting upload** does **not** still list that track after submit
+- [ ] (Optional) Artist receives in-app notification / email when provider configured
+
 ## 4. DJ
 
 - [ ] Sign in as approved DJ (or complete apply flow per product)
@@ -36,6 +46,9 @@ Execute after deploy to **production** (or production-like Preview with producti
 - [ ] Sign in as admin
 - [ ] **`/admin/tracks`** → open a track review
 - [ ] **New track (no fee)** → creates draft → lands on admin track page
+- [ ] **`/admin/submissions`** — **Paid — awaiting upload** and **Pending submissions** sections load
+- [ ] **`/admin/payments`** — reconciliation table loads (no service-role error)
+- [ ] **`/admin/system`** — health checks visible
 
 ## 6. Storage / covers
 

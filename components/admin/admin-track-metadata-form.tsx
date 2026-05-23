@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition, type FormEvent } from "react";
+import { parseYoutubeUrlField } from "@/lib/tracks/youtube-url";
 import type { Track } from "@/lib/types/database";
 
 export function AdminTrackMetadataForm({ track }: { track: Track }) {
@@ -20,6 +21,7 @@ export function AdminTrackMetadataForm({ track }: { track: Track }) {
   const [producer, setProducer] = useState(track.producer ?? "");
   const [description, setDescription] = useState(track.description ?? "");
   const [campaignNotes, setCampaignNotes] = useState(track.campaign_notes ?? "");
+  const [youtubeUrl, setYoutubeUrl] = useState(track.youtube_url ?? "");
   const [adminTags, setAdminTags] = useState(tagsInitial);
 
   function onSubmit(e: FormEvent) {
@@ -37,6 +39,12 @@ export function AdminTrackMetadataForm({ track }: { track: Track }) {
         bpmPayload = n;
       }
 
+      const yt = parseYoutubeUrlField(youtubeUrl);
+      if (!yt.ok) {
+        setError(yt.error);
+        return;
+      }
+
       const res = await fetch(`/api/admin/tracks/${track.id}/metadata`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -49,6 +57,7 @@ export function AdminTrackMetadataForm({ track }: { track: Track }) {
           producer: producer.trim() || null,
           description: description.trim() || null,
           campaign_notes: campaignNotes.trim() || null,
+          youtube_url: youtubeUrl,
           admin_tags: adminTags,
         }),
       });
@@ -164,6 +173,20 @@ export function AdminTrackMetadataForm({ track }: { track: Track }) {
           value={description}
           onChange={(ev) => setDescription(ev.target.value)}
           className="rounded-md border border-zinc-300 bg-white px-3 py-2 dark:border-zinc-700 dark:bg-zinc-950"
+        />
+      </label>
+
+      <label className="flex flex-col gap-1 text-sm">
+        <span className="font-medium text-zinc-900 dark:text-zinc-100">
+          YouTube video link{" "}
+          <span className="font-normal text-zinc-500">(optional)</span>
+        </span>
+        <input
+          type="url"
+          value={youtubeUrl}
+          onChange={(ev) => setYoutubeUrl(ev.target.value)}
+          placeholder="https://www.youtube.com/watch?v=…"
+          className="min-h-11 rounded-md border border-zinc-300 bg-white px-3 dark:border-zinc-700 dark:bg-zinc-950"
         />
       </label>
 

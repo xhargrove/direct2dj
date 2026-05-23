@@ -1,5 +1,6 @@
 import type { PackSlot } from "@/lib/tracks/pack-slots";
 import { ESSENTIAL_AUDIO_SLOTS, REQUIRED_COVER_SLOT } from "@/lib/tracks/pack-slots";
+import { parseYoutubeUrlField } from "@/lib/tracks/youtube-url";
 
 export type TrackMetadataInput = {
   title: string;
@@ -13,6 +14,7 @@ export type TrackMetadataInput = {
   release_date: string | null;
   description: string;
   campaign_notes: string;
+  youtube_url: string;
 };
 
 export function validateMetadataForSubmit(meta: TrackMetadataInput): string | null {
@@ -25,6 +27,8 @@ export function validateMetadataForSubmit(meta: TrackMetadataInput): string | nu
   }
   if (!meta.release_date?.trim()) return "Release date is required.";
   if (!meta.description?.trim()) return "Description is required.";
+  const yt = parseYoutubeUrlField(meta.youtube_url ?? "");
+  if (!yt.ok) return yt.error;
   /* campaign_notes optional */
   return null;
 }

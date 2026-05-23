@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminContext } from "@/lib/admin/context";
+import { getBackstageUploadContext } from "@/lib/admin/context";
 import { replaceAdminPackSlot } from "@/lib/admin/replace-admin-pack-slot";
 
 /**
@@ -9,7 +9,7 @@ import { replaceAdminPackSlot } from "@/lib/admin/replace-admin-pack-slot";
 export const maxDuration = 120;
 
 export async function POST(req: Request) {
-  const ctx = await getAdminContext();
+  const ctx = await getBackstageUploadContext();
   if ("error" in ctx) {
     return NextResponse.json({ error: ctx.error }, { status: 403 });
   }

@@ -304,6 +304,38 @@ export async function notifyRatedTrackUpdated(trackId: string, trackTitle: strin
   );
 }
 
+/** After submission checkout activates a draft — nudge artist to finish upload (in-app + email when configured). */
+export async function notifySubmissionCheckoutActivated(trackId: string): Promise<void> {
+  const admin = createServiceRoleClientOrNull();
+  if (!admin) return;
+
+  const { data: row } = await admin
+    .from("tracks")
+    .select(
+      `
+      title,
+      artists ( profile_id )
+    `,
+    )
+    .eq("id", trackId)
+    .maybeSingle();
+
+  const artists = row?.artists as { profile_id?: string } | null;
+  const userId = artists?.profile_id;
+  if (!userId) return;
+
+  const title = typeof row?.title === "string" ? row.title : "Your pack";
+  const editHref = `/artist/tracks/${trackId}/edit`;
+
+  await emitNotification({
+    userId,
+    kind: "submission_upload_ready",
+    title: "Payment received — finish your upload",
+    body: `Your submission fee was confirmed. Open your draft pack (“${title}”) to add audio, artwork, and details, then submit for review.`,
+    metadata: { track_id: trackId, href: editHref },
+  });
+}
+
 export async function notifyDjApplicationResult(djProfileId: string, approved: boolean): Promise<void> {
   await emitNotification({
     userId: djProfileId,

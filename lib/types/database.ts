@@ -109,6 +109,8 @@ export type Track = {
   explicit_rating: ExplicitRating;
   release_date: string | null;
   campaign_notes: string | null;
+  /** Canonical YouTube watch URL for the official video, when provided. */
+  youtube_url: string | null;
   is_draft: boolean;
   rejection_reason: string | null;
   catalog_active: boolean;

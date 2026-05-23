@@ -2,6 +2,18 @@
 
 Use this for **Vercel** (or any host) **Preview** and **Production**. Values must come from **one** Supabase project and **one** Stripe account (test vs live consistent).
 
+## Pre-deploy gate (Production)
+
+Do **not** promote a Production deploy until:
+
+| Check | Variable |
+|-------|----------|
+| Submission checkout can create draft tracks after pay | `SUPABASE_SERVICE_ROLE_KEY` |
+| Stripe return/cancel URLs use your public domain | `NEXT_PUBLIC_SITE_URL` (e.g. `https://digitalservicepack.com`) |
+| Webhooks verify | `STRIPE_WEBHOOK_SECRET` |
+
+After deploy, open **Backstage → System** (`/admin/system`) or run `docs/PRODUCTION_SMOKE_TEST_PLAN.md` section 3b (paid submission path).
+
 ## Public (browser-safe)
 
 | Variable | Required | Used for |

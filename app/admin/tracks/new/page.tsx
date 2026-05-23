@@ -2,9 +2,13 @@ import Link from "next/link";
 import { AdminAddArtistForm } from "@/components/admin/admin-add-artist-form";
 import { AdminHouseDraftButton } from "@/components/admin/admin-house-draft-button";
 import { AdminNewTrackForm } from "@/components/admin/admin-new-track-form";
+import { isCoAdminRole } from "@/lib/auth/backstage-access";
+import { requireRoles } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AdminNewTrackPage() {
+  const { profile } = await requireRoles(["admin", "co_admin"]);
+  const uploadOnly = isCoAdminRole(profile.role);
   const supabase = await createClient();
   const { data: artists, error } = await supabase
     .from("artists")
@@ -24,11 +28,13 @@ export default async function AdminNewTrackPage() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">New DJ pack (admin)</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">
+          {uploadOnly ? "New DJ pack (upload)" : "New DJ pack (admin)"}
+        </h1>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          Start a free draft for internal promos, DJ service drops, comps, or waived-fee releases — no artist submission
-          checkout. Use the quick path to upload under your own login, or assign the pack to another artist account
-          below.
+          {uploadOnly
+            ? "Create a draft and upload cover + main audio on the next screen. Ask a full admin to approve for the DJ catalog when the pack is ready."
+            : "Start a free draft for internal promos, DJ service drops, comps, or waived-fee releases — no artist submission checkout. Use the quick path to upload under your own login, or assign the pack to another artist account below."}
         </p>
       </div>
 
@@ -44,20 +50,22 @@ export default async function AdminNewTrackPage() {
         <AdminHouseDraftButton />
       </section>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-          1. Artist account (if they are not in the database yet)
-        </h2>
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Use the same email/display name you want on promos. After saving, the page refreshes so you can select them in
-          step 2.
-        </p>
-        <AdminAddArtistForm />
-      </section>
+      {!uploadOnly ? (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+            1. Artist account (if they are not in the database yet)
+          </h2>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            Use the same email/display name you want on promos. After saving, the page refreshes so you can select them in
+            step 2.
+          </p>
+          <AdminAddArtistForm />
+        </section>
+      ) : null}
 
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
-          2. Create draft for that artist
+          {uploadOnly ? "Or assign to an existing artist" : "2. Create draft for that artist"}
         </h2>
         <AdminNewTrackForm key={rows.map((r) => r.id).join(",") || "no-artists"} artists={rows} />
       </section>

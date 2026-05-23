@@ -6,6 +6,7 @@ import type { TrackMetadataPayload } from "@/app/artist/tracks/actions";
 import { createClient } from "@/lib/supabase/server";
 import { notifyRatedTrackUpdated } from "@/lib/notifications/events";
 import { validateMetadataForSubmit, validatePackSlotsPresent } from "@/lib/tracks/submit-validation";
+import { parseYoutubeUrlField } from "@/lib/tracks/youtube-url";
 import type { PackSlot } from "@/lib/tracks/pack-slots";
 import { requireRoles } from "@/lib/auth/require-role";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -87,6 +88,9 @@ export async function labelRepUpdateTrackMetadata(trackId: string, payload: Trac
   const gate = await assertManagesArtist(supabase, track.artist_id);
   if ("error" in gate) return { error: gate.error };
 
+  const yt = parseYoutubeUrlField(payload.youtube_url ?? "");
+  if (!yt.ok) return { error: yt.error };
+
   const { error } = await supabase
     .from("tracks")
     .update({
@@ -101,6 +105,7 @@ export async function labelRepUpdateTrackMetadata(trackId: string, payload: Trac
       release_date: payload.release_date || null,
       description: payload.description.trim() || null,
       campaign_notes: payload.campaign_notes.trim() || null,
+      youtube_url: yt.url,
     })
     .eq("id", trackId)
     .eq("artist_id", track.artist_id);
@@ -143,8 +148,12 @@ export async function labelRepSubmitTrackForReview(trackId: string, meta: TrackM
     release_date: meta.release_date,
     description: meta.description,
     campaign_notes: meta.campaign_notes,
+    youtube_url: meta.youtube_url,
   });
   if (metaErr) return { error: metaErr };
+
+  const yt = parseYoutubeUrlField(meta.youtube_url ?? "");
+  if (!yt.ok) return { error: yt.error };
 
   const { data: files, error: filesErr } = await supabase
     .from("track_files")
@@ -171,6 +180,7 @@ export async function labelRepSubmitTrackForReview(trackId: string, meta: TrackM
       release_date: meta.release_date || null,
       description: meta.description.trim() || null,
       campaign_notes: meta.campaign_notes.trim() || null,
+      youtube_url: yt.url,
       is_draft: false,
       moderation_status: "pending",
     })

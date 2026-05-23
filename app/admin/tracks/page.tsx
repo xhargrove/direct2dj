@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { AdminDeleteTrackButton } from "@/components/admin/admin-delete-track-button";
 import { primaryReleaseArtistLabel, workspaceArtistNote } from "@/lib/admin/track-artist-labels";
+import { isCoAdminRole } from "@/lib/auth/backstage-access";
+import { requireRoles } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
 
 type Row = {
@@ -26,6 +28,9 @@ type RollupRow = {
 };
 
 export default async function AdminTracksPage() {
+  const { profile } = await requireRoles(["admin", "co_admin"]);
+  const uploadOnly = isCoAdminRole(profile.role);
+
   const supabase = await createClient();
 
   const { data: rows, error } = await supabase
@@ -44,7 +49,11 @@ export default async function AdminTracksPage() {
     )
     .order("updated_at", { ascending: false });
 
-  const { data: rollupData, error: rollupErr } = await supabase.rpc("admin_tracks_engagement_rollups");
+  const rollupRes = uploadOnly
+    ? { data: null, error: null }
+    : await supabase.rpc("admin_tracks_engagement_rollups");
+  const rollupData = rollupRes.data;
+  const rollupErr = rollupRes.error;
 
   if (error) {
     return <div className="text-sm text-red-600">Could not load tracks: {error.message}</div>;
@@ -62,11 +71,9 @@ export default async function AdminTracksPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Tracks</h1>
           <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            Full catalog — open a track to review, moderate, feature, or hide. <strong>Artist (release)</strong> uses
-            release credit metadata; if you uploaded for someone else, <span className="text-zinc-500">Account</span>{" "}
-            shows the owning workspace. Engagement columns summarize downloads and ratings; open{" "}
-            <strong>Analytics</strong> for timelines, featured overlap, feedback, and DJ lists. For internal promos and
-            DJ service packs, use New DJ pack (no submission fee), then upload the full pack on the track page.
+            {uploadOnly
+              ? "Open a draft to upload files and confirm cover + main audio. You cannot approve tracks or change catalog settings."
+              : "Full catalog — open a track to review, moderate, feature, or hide. For internal promos, use New DJ pack, then upload the full pack on the track page."}
           </p>
         </div>
         <Link
@@ -95,10 +102,14 @@ export default async function AdminTracksPage() {
               <th className="px-3 py-2 font-medium">Artist (release)</th>
               <th className="px-3 py-2 font-medium">Status</th>
               <th className="px-3 py-2 font-medium">Catalog</th>
-              <th className="px-3 py-2 font-medium text-right tabular-nums">DL</th>
-              <th className="px-3 py-2 font-medium text-right tabular-nums">Avg ★</th>
-              <th className="px-3 py-2 font-medium text-right tabular-nums"># ★</th>
-              <th className="px-3 py-2 font-medium text-right">Actions</th>
+              {!uploadOnly ? (
+                <>
+                  <th className="px-3 py-2 font-medium text-right tabular-nums">DL</th>
+                  <th className="px-3 py-2 font-medium text-right tabular-nums">Avg ★</th>
+                  <th className="px-3 py-2 font-medium text-right tabular-nums"># ★</th>
+                </>
+              ) : null}
+              {!uploadOnly ? <th className="px-3 py-2 font-medium text-right">Actions</th> : null}
             </tr>
           </thead>
           <tbody>
@@ -113,14 +124,16 @@ export default async function AdminTracksPage() {
                   {r.is_draft ? (
                     <span className="ml-2 text-xs text-zinc-500">draft</span>
                   ) : null}
-                  <div className="mt-1">
-                    <Link
-                      href={`/admin/tracks/${r.id}/analytics`}
-                      className="text-xs font-medium text-zinc-600 underline underline-offset-4 dark:text-zinc-400"
-                    >
-                      Analytics
-                    </Link>
-                  </div>
+                  {!uploadOnly ? (
+                    <div className="mt-1">
+                      <Link
+                        href={`/admin/tracks/${r.id}/analytics`}
+                        className="text-xs font-medium text-zinc-600 underline underline-offset-4 dark:text-zinc-400"
+                      >
+                        Analytics
+                      </Link>
+                    </div>
+                  ) : null}
                 </td>
                 <td className="px-3 py-2 text-zinc-700 dark:text-zinc-300">
                   <div className="font-medium">
@@ -132,20 +145,24 @@ export default async function AdminTracksPage() {
                 </td>
                 <td className="px-3 py-2">{r.moderation_status}</td>
                 <td className="px-3 py-2">{r.catalog_active === false ? "hidden" : "live"}</td>
-                <td className="px-3 py-2 text-right tabular-nums text-zinc-700 dark:text-zinc-300">
-                  {rollupByTrack.get(r.id)?.downloads_total ?? "—"}
-                </td>
-                <td className="px-3 py-2 text-right tabular-nums text-zinc-700 dark:text-zinc-300">
-                  {rollupByTrack.get(r.id)?.avg_rating != null
-                    ? Number(rollupByTrack.get(r.id)!.avg_rating).toFixed(1)
-                    : "—"}
-                </td>
-                <td className="px-3 py-2 text-right tabular-nums text-zinc-700 dark:text-zinc-300">
-                  {rollupByTrack.get(r.id)?.ratings_count ?? "—"}
-                </td>
-                <td className="px-3 py-2 text-right align-top">
-                  <AdminDeleteTrackButton trackId={r.id} trackTitle={r.title} />
-                </td>
+                {!uploadOnly ? (
+                  <>
+                    <td className="px-3 py-2 text-right tabular-nums text-zinc-700 dark:text-zinc-300">
+                      {rollupByTrack.get(r.id)?.downloads_total ?? "—"}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums text-zinc-700 dark:text-zinc-300">
+                      {rollupByTrack.get(r.id)?.avg_rating != null
+                        ? Number(rollupByTrack.get(r.id)!.avg_rating).toFixed(1)
+                        : "—"}
+                    </td>
+                    <td className="px-3 py-2 text-right tabular-nums text-zinc-700 dark:text-zinc-300">
+                      {rollupByTrack.get(r.id)?.ratings_count ?? "—"}
+                    </td>
+                    <td className="px-3 py-2 text-right align-top">
+                      <AdminDeleteTrackButton trackId={r.id} trackTitle={r.title} />
+                    </td>
+                  </>
+                ) : null}
               </tr>
             );
             })}

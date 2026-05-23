@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/env";
+import { coAdminRedirectPath } from "@/lib/auth/backstage-access";
 import { updateSession } from "@/lib/supabase/middleware";
 
 const AUTH_REFRESH_TIMEOUT_MS = 4000;
@@ -35,6 +36,51 @@ async function runProxy(request: NextRequest) {
   const sessionResponse = await updateSession(request);
 
   const pathname = request.nextUrl.pathname;
+
+  if (pathname.startsWith("/admin")) {
+    let url: string;
+    let key: string;
+    try {
+      url = getSupabaseUrl();
+      key = getSupabaseAnonKey();
+    } catch {
+      return sessionResponse;
+    }
+
+    const supabase = createServerClient(url, key, {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll() {},
+      },
+    });
+
+    const {
+      data: { user },
+    } = await Promise.race([
+      supabase.auth.getUser(),
+      new Promise<{ data: { user: null } }>((resolve) =>
+        setTimeout(() => resolve({ data: { user: null } }), AUTH_REFRESH_TIMEOUT_MS),
+      ),
+    ]);
+
+    if (user) {
+      const { data: profile } = await raceMaybeSingleRow(
+        supabase.from("profiles").select("role").eq("id", user.id).maybeSingle(),
+        ROW_QUERY_TIMEOUT_MS,
+      );
+      if (profile?.role === "co_admin") {
+        const redirectTo = coAdminRedirectPath(pathname);
+        if (redirectTo) {
+          const redirectResponse = NextResponse.redirect(new URL(redirectTo, request.url));
+          copyCookies(sessionResponse, redirectResponse);
+          return redirectResponse;
+        }
+      }
+    }
+  }
+
   if (!pathname.startsWith("/dj")) {
     return sessionResponse;
   }

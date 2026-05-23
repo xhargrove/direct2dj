@@ -4,6 +4,7 @@ const ROLE_HOME: Record<UserRole, string> = {
   artist: "/artist",
   dj: "/dj/dashboard",
   admin: "/admin",
+  co_admin: "/admin/tracks",
   label_rep: "/label/dashboard",
 };
 

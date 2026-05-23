@@ -1,6 +1,7 @@
 import "server-only";
 
 import type Stripe from "stripe";
+import { notifySubmissionCheckoutActivated } from "@/lib/notifications/events";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 
 type PaymentRow = {
@@ -53,6 +54,7 @@ export async function activateSubmissionFromCheckoutSession(
       .from("payments")
       .update({ status: "failed", updated_at: new Date().toISOString() })
       .eq("id", payment.id);
+    console.info("[billing] submission activation skipped", { reason: "invalid_plan", paymentId: payment.id });
     return { ok: true, skipped: true, reason: "invalid_plan" };
   }
 
@@ -120,6 +122,11 @@ export async function activateSubmissionFromCheckoutSession(
       .from("payments")
       .update({ status: "failed", updated_at: new Date().toISOString() })
       .eq("id", payment.id);
+    console.error("[billing] submission activation skipped", {
+      reason: "track_insert_failed",
+      paymentId: payment.id,
+      error: insErr?.message,
+    });
     return { ok: true, skipped: true, reason: "track_insert_failed" };
   }
 
@@ -141,6 +148,8 @@ export async function activateSubmissionFromCheckoutSession(
     await admin.from("tracks").delete().eq("id", inserted.id);
     return { ok: true, skipped: true, reason: "race_lost" };
   }
+
+  await notifySubmissionCheckoutActivated(inserted.id);
 
   return { ok: true };
 }

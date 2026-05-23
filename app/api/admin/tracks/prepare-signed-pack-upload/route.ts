@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminContext } from "@/lib/admin/context";
+import { getBackstageUploadContext } from "@/lib/admin/context";
 import { packStorageObjectBasename } from "@/lib/tracks/pack-storage-basename";
 import { isPackSlot, type PackSlot } from "@/lib/tracks/pack-slots";
 import { createServiceRoleClientOrNull } from "@/lib/supabase/service-role";
@@ -19,7 +19,7 @@ type Body = {
 };
 
 export async function POST(req: Request) {
-  const ctx = await getAdminContext();
+  const ctx = await getBackstageUploadContext();
   if ("error" in ctx) {
     return NextResponse.json({ error: ctx.error }, { status: 403 });
   }

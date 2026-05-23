@@ -17,4 +17,5 @@ export type NotificationKind =
   | "dj_application_rejected"
   | "catalog_new_track"
   | "admin_announcement"
-  | "admin_message";
+  | "admin_message"
+  | "submission_upload_ready";

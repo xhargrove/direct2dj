@@ -43,6 +43,7 @@ export function TrackDetailPanel({
   explicitLabel,
   releaseDate,
   description,
+  youtubeUrl,
   coverSignedUrl,
   initialRating,
   initialFeedbackBody,
@@ -58,6 +59,7 @@ export function TrackDetailPanel({
   explicitLabel: string;
   releaseDate: string | null;
   description: string | null;
+  youtubeUrl?: string | null;
   coverSignedUrl: string | null;
   initialRating: InitialDjRating;
   initialFeedbackBody: string;
@@ -154,6 +156,16 @@ export function TrackDetailPanel({
           </dl>
           {description ? (
             <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">{description}</p>
+          ) : null}
+          {youtubeUrl ? (
+            <a
+              href={youtubeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex text-sm font-medium underline underline-offset-4"
+            >
+              Watch on YouTube →
+            </a>
           ) : null}
         </div>
       </div>

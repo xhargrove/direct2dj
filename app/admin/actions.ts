@@ -2,7 +2,7 @@
 
 import { randomBytes } from "crypto";
 import { revalidatePath } from "next/cache";
-import { getAdminContext } from "@/lib/admin/context";
+import { getAdminContext, getBackstageUploadContext } from "@/lib/admin/context";
 import { getSiteUrl } from "@/lib/billing/site-url";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import {
@@ -171,7 +171,7 @@ const UUID_RE =
 
 /** Opens a new draft for an artist without a submission checkout (admin tooling only). */
 export async function adminCreateFreeDraftTrack(artistId: string) {
-  const ctx = await getAdminContext();
+  const ctx = await getBackstageUploadContext();
   if ("error" in ctx) return { error: ctx.error };
 
   const trimmed = artistId.trim();
@@ -199,7 +199,7 @@ export async function adminCreateFreeDraftTrack(artistId: string) {
  * Pack files use the admin's storage prefix — no separate artist login or invite.
  */
 export async function adminCreateHouseDraftTrack() {
-  const ctx = await getAdminContext();
+  const ctx = await getBackstageUploadContext();
   if ("error" in ctx) return { error: ctx.error };
 
   const { data: artistId, error: ensureErr } = await ctx.supabase.rpc("admin_ensure_house_artist");
