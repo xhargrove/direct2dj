@@ -32,7 +32,7 @@ export const PACK_SLOT_LABELS: Record<PackSlot, string> = {
   dirty_full: "Dirty / full version",
   instrumental: "Instrumental",
   acapella: "Acapella",
-  intro_edit: "Intro edit (optional)",
+  intro_edit: "Intro Clean (optional)",
   short_edit: "Intro Dirty (optional)",
 };
 

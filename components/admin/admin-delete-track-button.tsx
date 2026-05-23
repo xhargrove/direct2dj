@@ -4,7 +4,16 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { adminDeleteTrack } from "@/app/admin/actions";
 
-export function AdminDeleteTrackButton({ trackId, trackTitle }: { trackId: string; trackTitle: string }) {
+export function AdminDeleteTrackButton({
+  trackId,
+  trackTitle,
+  redirectTo,
+}: {
+  trackId: string;
+  trackTitle: string;
+  /** After a successful delete, navigate here instead of refreshing in place. */
+  redirectTo?: string;
+}) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +33,11 @@ export function AdminDeleteTrackButton({ trackId, trackTitle }: { trackId: strin
     setPending(false);
     if ("error" in r && r.error) {
       setError(r.error);
+      return;
+    }
+    if (redirectTo) {
+      router.push(redirectTo);
+      router.refresh();
       return;
     }
     router.refresh();

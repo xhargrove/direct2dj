@@ -35,7 +35,7 @@ export function djPackSlotVariantLabel(slot: PackSlot): string {
     case "acapella":
       return "Acapella";
     case "intro_edit":
-      return "Intro Edit";
+      return "Intro Clean";
     case "short_edit":
       return "Intro Dirty";
     case "cover_art":

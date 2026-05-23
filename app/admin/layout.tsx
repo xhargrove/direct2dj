@@ -1,36 +1,15 @@
+import Image from "next/image";
 import Link from "next/link";
 import { adminWorkspaceTestEnabled, getAdminWorkspaceTestSecret } from "@/lib/auth/admin-workspace-test";
 import { isCoAdminRole } from "@/lib/auth/backstage-access";
 import { requireRoles } from "@/lib/auth/require-role";
+import { AdminSidebarNav } from "@/components/admin/admin-sidebar-nav";
+import { AdminSidebarNavMobile } from "@/components/admin/admin-sidebar-nav-mobile";
 import { AdminWorkspaceTestMenu } from "@/components/admin/admin-workspace-test-menu";
 import { getUnreadNotificationCount } from "@/app/notifications/actions";
 import { NotificationBell } from "@/components/notifications/notification-bell";
-import { AppTopNav } from "@/components/shell/app-top-nav";
+import { coAdminNav, fullAdminNav } from "@/lib/admin/nav";
 import { createClient } from "@/lib/supabase/server";
-
-const fullAdminNav = [
-  { href: "/admin/dashboard", label: "Dashboard" },
-  { href: "/admin/submissions", label: "Submissions" },
-  { href: "/admin/payments", label: "Payments" },
-  { href: "/admin/tracks", label: "Tracks" },
-  { href: "/admin/tracks/new", label: "New DJ pack" },
-  { href: "/admin/spotlights", label: "Spotlights" },
-  { href: "/admin/featured", label: "Featured" },
-  { href: "/admin/artists", label: "Artists" },
-  { href: "/admin/djs", label: "DJs" },
-  { href: "/admin/communications", label: "DJ messages" },
-  { href: "/admin/dj-activity", label: "DJ activity" },
-  { href: "/admin/dj-applications", label: "DJ applications" },
-  { href: "/admin/dj-organizations", label: "DJ organizations" },
-  { href: "/admin/play-reports", label: "Play reports" },
-  { href: "/admin/system", label: "System" },
-] as const;
-
-const coAdminNav = [
-  { href: "/admin/dashboard", label: "Dashboard" },
-  { href: "/admin/tracks", label: "Tracks" },
-  { href: "/admin/tracks/new", label: "New DJ pack" },
-] as const;
 
 export default async function AdminLayout({
   children,
@@ -49,16 +28,7 @@ export default async function AdminLayout({
   const showWorkspaceTest = adminWorkspaceTestEnabled() && Boolean(getAdminWorkspaceTestSecret());
 
   const nav = uploadOnly ? coAdminNav : fullAdminNav;
-
-  const navLinks = (
-    <>
-      {nav.map((item) => (
-        <Link key={item.href} href={item.href} className="dj-nav-link underline-offset-4 hover:underline">
-          {item.label}
-        </Link>
-      ))}
-    </>
-  );
+  const kicker = uploadOnly ? "Backstage · Upload" : "Backstage";
 
   const trailing = (
     <>
@@ -73,18 +43,43 @@ export default async function AdminLayout({
   );
 
   return (
-    <div className="flex min-h-full flex-col">
-      <AppTopNav
-        kicker={uploadOnly ? "Backstage · Upload" : "Backstage"}
-        nav={navLinks}
-        trailing={trailing}
-      />
-      <main className="flex flex-1 flex-col px-4 py-6">{children}</main>
-      <footer className="dj-footer px-4 py-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
-        <Link href="/" className="dj-nav-link underline underline-offset-4 hover:underline">
-          Home
-        </Link>
-      </footer>
+    <div className="flex min-h-full flex-col lg:flex-row">
+      <aside className="dj-sidebar flex w-full shrink-0 flex-col border-b border-white/7 lg:sticky lg:top-0 lg:h-screen lg:w-56 lg:border-b-0 lg:border-r">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 lg:flex-col lg:items-stretch lg:gap-2">
+          <Link href="/" className="flex min-w-0 items-center gap-2 no-underline">
+            <Image
+              src="/site-logo.png"
+              alt="Digital Service Pack logo"
+              width={164}
+              height={205}
+              className="h-9 w-auto shrink-0 object-contain"
+              priority
+            />
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <span className="dj-brand truncate text-sm font-semibold leading-none tracking-tight text-foreground">
+                Digital Service Pack
+              </span>
+              <span className="truncate text-xs text-zinc-400">{kicker}</span>
+            </div>
+          </Link>
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 lg:hidden">{trailing}</div>
+        </div>
+        <div className="hidden lg:block lg:flex-1 lg:overflow-y-auto">
+          <AdminSidebarNav items={nav} />
+        </div>
+        <AdminSidebarNavMobile items={nav} />
+        <div className="hidden border-t border-white/7 px-3 py-3 lg:block">
+          <div className="flex flex-col gap-2">{trailing}</div>
+        </div>
+      </aside>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <main className="flex flex-1 flex-col px-4 py-6">{children}</main>
+        <footer className="dj-footer px-4 py-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
+          <Link href="/" className="dj-nav-link underline underline-offset-4 hover:underline">
+            Home
+          </Link>
+        </footer>
+      </div>
     </div>
   );
 }

@@ -8,6 +8,7 @@ import type { TrackReviewBundle } from "@/lib/admin/load-track-for-review";
 import { SignedAudio, SignedImage } from "@/components/admin/signed-storage-media";
 import { PackUploadReadinessBanner } from "@/components/admin/pack-upload-readiness-banner";
 import { YoutubeLinkDisplay } from "@/components/tracks/youtube-link-display";
+import { AdminDeleteTrackButton } from "@/components/admin/admin-delete-track-button";
 import { TrackReviewActions } from "@/components/admin/track-review-actions";
 import { assessPackUploadReadiness } from "@/lib/admin/pack-upload-readiness";
 import { packFileDisplayName } from "@/lib/tracks/dj-download-filename";
@@ -240,6 +241,23 @@ export function AdminTrackReview({
           Catalog approval and featured placement are handled by a full admin after upload is complete.
         </p>
       )}
+
+      {!uploadOnly ? (
+        <section className="border-t border-red-200 pt-8 dark:border-red-900/40">
+          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Delete track</h2>
+          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+            Permanently remove this track, all pack files in storage, and related data (submissions,
+            engagement, featured placements, etc.). This cannot be undone.
+          </p>
+          <div className="mt-4">
+            <AdminDeleteTrackButton
+              trackId={track.id}
+              trackTitle={track.title ?? "Untitled"}
+              redirectTo="/admin/tracks"
+            />
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

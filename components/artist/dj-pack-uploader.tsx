@@ -137,6 +137,12 @@ export function DjPackUploader({
       };
 
       const adminPrefix = artistProfileIdForStorage?.trim();
+      const existing = bySlot.get(slot);
+      if (existing?.storage_path) {
+        await supabase.storage.from("promos").remove([existing.storage_path]);
+        await supabase.from("track_files").delete().eq("id", existing.id);
+      }
+
       if (adminPrefix) {
         setSlotPct((s) => ({ ...s, [slot]: 12 }));
         let prepBody: { path?: string; token?: string; error?: string; code?: string } = {};
@@ -205,12 +211,6 @@ export function DjPackUploader({
       }
 
       setSlotPct((s) => ({ ...s, [slot]: 12 }));
-
-      const existing = bySlot.get(slot);
-      if (existing?.storage_path) {
-        await supabase.storage.from("promos").remove([existing.storage_path]);
-        await supabase.from("track_files").delete().eq("id", existing.id);
-      }
 
       const path = `${storagePrefix}/tracks/${trackId}/${packStorageObjectBasename(slot, file, {
         title: releaseTitle,
