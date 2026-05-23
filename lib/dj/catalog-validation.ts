@@ -63,3 +63,24 @@ export function feedbackQualifiesForDownload(body: string | null | undefined): b
   if (body == null || typeof body !== "string") return false;
   return validateFeedbackBody(body).ok;
 }
+
+export type SavedRatingForDownload = {
+  score: number | null | undefined;
+  club_ready: boolean | null | undefined;
+  radio_ready: boolean | null | undefined;
+};
+
+/** Saved rating row has the required fields (stars, club ready, radio ready). */
+export function ratingQualifiesForDownload(rating: SavedRatingForDownload | null | undefined): boolean {
+  if (rating == null) return false;
+  if (!validateRatingScore(rating.score).ok) return false;
+  if (!validateYesNoAnswer(rating.club_ready ?? null, "club ready").ok) return false;
+  return validateYesNoAnswer(rating.radio_ready ?? null, "radio ready").ok;
+}
+
+export function packDownloadQualifies(input: {
+  feedbackBody: string | null | undefined;
+  rating: SavedRatingForDownload | null | undefined;
+}): boolean {
+  return feedbackQualifiesForDownload(input.feedbackBody) && ratingQualifiesForDownload(input.rating);
+}

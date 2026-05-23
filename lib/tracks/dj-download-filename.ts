@@ -87,6 +87,16 @@ export function djPackDownloadFilename(input: {
   return fitToMaxLength(base, ext);
 }
 
+/** ZIP archive name for a full DJ pack download. */
+export function djPackDownloadZipFilename(input: {
+  credit_artist_name: string;
+  title: string;
+}): string {
+  const artist = sanitizeHumanFilenamePart(input.credit_artist_name || "Artist", MAX_ARTIST);
+  const title = sanitizeHumanFilenamePart(input.title || "Track", MAX_TITLE);
+  return fitToMaxLength(`${artist} - ${title}`, ".zip");
+}
+
 /**
  * UI label for a pack row (matches download naming). Uses release metadata when present so
  * legacy storage keys like `radio_edit_CertifiedTexan.mp3` still read as `Artist - Title (Clean).mp3`.

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   djPackDownloadFilename,
+  djPackDownloadZipFilename,
   djPackSlotVariantLabel,
   extensionFromStoragePath,
   packFileDisplayName,
@@ -80,6 +81,17 @@ describe("djPackDownloadFilename", () => {
         storage_path: "x/y/z.dat",
       }),
     ).toBe("A - B.dat");
+  });
+});
+
+describe("djPackDownloadZipFilename", () => {
+  it("uses Artist - Title.zip", () => {
+    expect(
+      djPackDownloadZipFilename({
+        credit_artist_name: "LJ Hellems",
+        title: "Make Way",
+      }),
+    ).toBe("LJ Hellems - Make Way.zip");
   });
 });
 

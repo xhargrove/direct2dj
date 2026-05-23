@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   FEEDBACK_MAX_LEN,
   feedbackQualifiesForDownload,
+  packDownloadQualifies,
+  ratingQualifiesForDownload,
   validateFeedbackBody,
   validateOptionalCrowdReaction,
   validateRatingComment,
@@ -76,5 +78,31 @@ describe("feedbackQualifiesForDownload", () => {
     expect(feedbackQualifiesForDownload("")).toBe(false);
     expect(feedbackQualifiesForDownload("ab")).toBe(false);
     expect(feedbackQualifiesForDownload("abc")).toBe(true);
+  });
+});
+
+describe("ratingQualifiesForDownload", () => {
+  it("requires stars, club ready, and radio ready", () => {
+    expect(ratingQualifiesForDownload(null)).toBe(false);
+    expect(ratingQualifiesForDownload({ score: 4, club_ready: true, radio_ready: null })).toBe(false);
+    expect(ratingQualifiesForDownload({ score: 4, club_ready: true, radio_ready: false })).toBe(true);
+  });
+});
+
+describe("packDownloadQualifies", () => {
+  it("requires both feedback and complete rating", () => {
+    expect(packDownloadQualifies({ feedbackBody: "abc", rating: null })).toBe(false);
+    expect(
+      packDownloadQualifies({
+        feedbackBody: "ab",
+        rating: { score: 5, club_ready: true, radio_ready: true },
+      }),
+    ).toBe(false);
+    expect(
+      packDownloadQualifies({
+        feedbackBody: "abc",
+        rating: { score: 5, club_ready: true, radio_ready: true },
+      }),
+    ).toBe(true);
   });
 });

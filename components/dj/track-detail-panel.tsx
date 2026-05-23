@@ -8,9 +8,8 @@ import {
   submitFeedback,
   submitRating,
   type DjRatingInput,
-  type PackDownloadFile,
 } from "@/app/dj/actions";
-import { triggerPackDownloads } from "@/lib/dj/trigger-pack-downloads";
+import { triggerPackZipDownload } from "@/lib/dj/trigger-pack-downloads";
 import { validateOptionalCrowdReaction, validateYesNoAnswer } from "@/lib/dj/catalog-validation";
 import type { CrowdReaction } from "@/lib/types/database";
 
@@ -65,13 +64,12 @@ export function TrackDetailPanel({
   initialRating: InitialDjRating;
   initialFeedbackBody: string;
   feedbackModerationStatus: string | null;
-  /** Saved feedback meets minimum length — required before pack download. */
+  /** Saved feedback and rating meet requirements — required before pack download. */
   downloadAllowed: boolean;
 }) {
   const router = useRouter();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewErr, setPreviewErr] = useState<string | null>(null);
-  const [packFiles, setPackFiles] = useState<PackDownloadFile[] | null>(null);
   const [packErr, setPackErr] = useState<string | null>(null);
   const [ratingMsg, setRatingMsg] = useState<string | null>(null);
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
@@ -193,8 +191,8 @@ export function TrackDetailPanel({
       <section className="rounded-lg border border-amber-200/80 bg-amber-50/50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
         <h2 className="text-sm font-semibold">Feedback for the artist (required before download)</h2>
         <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
-          Write at least a few characters of feedback, then save. After that you can download the full DJ pack below.
-          Separate from your star rating — you can update this later.
+          Write at least a few characters of feedback, then save. You also need a complete rating (stars, club ready, and
+          radio ready) before the DJ pack unlocks. You can update both later.
         </p>
         {feedbackModerationStatus ? (
           <p className="mt-2 text-xs text-zinc-500">
@@ -218,7 +216,7 @@ export function TrackDetailPanel({
               const r = await submitFeedback(trackId, feedback);
               if ("error" in r && r.error) setFeedbackMsg(r.error);
               else {
-                setFeedbackMsg("Feedback saved. You can download the pack below.");
+                setFeedbackMsg("Feedback saved.");
                 router.refresh();
               }
             })
@@ -233,71 +231,11 @@ export function TrackDetailPanel({
         ) : null}
       </section>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-semibold">DJ pack download</h2>
-        <p className="text-xs text-zinc-500">
-          Logs this download to your account, then saves each pack file to your device. File names use the
-          artist&apos;s <strong>release title</strong> and <strong>credited artist</strong> (e.g.{" "}
-          <span className="font-mono text-[11px]">Artist Name - Make Way (Clean).mp3</span>) so they read clearly in your
-          library. If your browser blocks multiple downloads, use the links below.
-        </p>
-        {!downloadAllowed ? (
-          <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
-            Save feedback above first — then the download button unlocks.
-          </p>
-        ) : null}
-        <button
-          type="button"
-          disabled={pendingPack || !downloadAllowed}
-          className="min-h-11 max-w-xs rounded-md bg-zinc-900 px-4 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-          onClick={() =>
-            startPackTransition(async () => {
-              setPackErr(null);
-              setPackSuccessMsg(null);
-              const r = await prepareDjPackDownload(trackId);
-              if ("error" in r && r.error) {
-                setPackErr(r.error);
-                return;
-              }
-              if ("files" in r && r.files?.length) {
-                setPackFiles(r.files);
-                setPackSuccessMsg("Saving files…");
-                await triggerPackDownloads(r.files);
-                setPackSuccessMsg(`${r.files.length} file${r.files.length === 1 ? "" : "s"} — check your downloads folder.`);
-              }
-            })
-          }
-        >
-          {pendingPack ? "Preparing…" : "Download DJ pack"}
-        </button>
-        {packErr ? <p className="text-sm text-red-600">{packErr}</p> : null}
-        {packSuccessMsg && !packErr ? (
-          <p className="text-sm text-emerald-700 dark:text-emerald-400">{packSuccessMsg}</p>
-        ) : null}
-        {packFiles && packFiles.length > 0 ? (
-          <div className="flex flex-col gap-2">
-            <p className="text-xs text-zinc-500">Didn&apos;t save automatically? Open each link:</p>
-            <ul className="flex flex-col gap-2 text-sm">
-              {packFiles.map((f, i) => (
-                <li key={`${f.filename}-${i}`}>
-                  <a href={f.signedUrl} className="font-medium underline underline-offset-4" download={f.filename}>
-                    {f.filename}
-                  </a>
-                  {f.pack_slot ? (
-                    <span className="ml-2 text-xs text-zinc-500">({f.pack_slot})</span>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-      </section>
-
       <section className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
         <h2 className="text-sm font-semibold">Your rating</h2>
         <p className="text-xs text-zinc-500">
-          One rating per track (you can update anytime). Stars, club ready, and radio ready are required. Crowd reaction
-          and note are optional.
+          Required before download. One rating per track (you can update anytime). Stars, club ready, and radio ready are
+          required. Crowd reaction and note are optional.
         </p>
 
         <div>
@@ -392,7 +330,10 @@ export function TrackDetailPanel({
               }
               const r = await submitRating(trackId, payload);
               if ("error" in r && r.error) setRatingMsg(r.error);
-              else setRatingMsg("Rating saved.");
+              else {
+                setRatingMsg("Rating saved.");
+                router.refresh();
+              }
             })
           }
         >
@@ -402,6 +343,49 @@ export function TrackDetailPanel({
           <p className="text-sm text-zinc-700 dark:text-zinc-300" role="status">
             {ratingMsg}
           </p>
+        ) : null}
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-sm font-semibold">DJ pack download</h2>
+        <p className="text-xs text-zinc-500">
+          Logs this download to your account, then saves the full pack as one ZIP (cover art and all uploaded versions).
+          Files inside use the artist&apos;s <strong>release title</strong> and <strong>credited artist</strong> (e.g.{" "}
+          <span className="font-mono text-[11px]">Artist Name - Make Way (Clean).mp3</span>).
+        </p>
+        {!downloadAllowed ? (
+          <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
+            Save feedback and complete your rating (stars, club ready, radio ready) above — then the download button unlocks.
+          </p>
+        ) : null}
+        <button
+          type="button"
+          disabled={pendingPack || !downloadAllowed}
+          className="min-h-11 max-w-xs rounded-md bg-zinc-900 px-4 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
+          onClick={() =>
+            startPackTransition(async () => {
+              setPackErr(null);
+              setPackSuccessMsg(null);
+              const r = await prepareDjPackDownload(trackId);
+              if ("error" in r && r.error) {
+                setPackErr(r.error);
+                return;
+              }
+              if ("zipUrl" in r && r.zipUrl) {
+                setPackSuccessMsg("Downloading pack…");
+                triggerPackZipDownload(r.zipUrl);
+                setPackSuccessMsg(
+                  `${r.fileCount} file${r.fileCount === 1 ? "" : "s"} in your ZIP — check your downloads folder.`,
+                );
+              }
+            })
+          }
+        >
+          {pendingPack ? "Preparing…" : "Download DJ pack"}
+        </button>
+        {packErr ? <p className="text-sm text-red-600">{packErr}</p> : null}
+        {packSuccessMsg && !packErr ? (
+          <p className="text-sm text-emerald-700 dark:text-emerald-400">{packSuccessMsg}</p>
         ) : null}
       </section>
     </div>

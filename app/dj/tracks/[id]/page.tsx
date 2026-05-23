@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { unstable_noStore as noStore } from "next/cache";
 import { TrackDetailPanel } from "@/components/dj/track-detail-panel";
-import { feedbackQualifiesForDownload } from "@/lib/dj/catalog-validation";
+import { packDownloadQualifies } from "@/lib/dj/catalog-validation";
 import { signCoverPaths } from "@/lib/dj/cover-sign";
 import { createClient } from "@/lib/supabase/server";
 import type { CrowdReaction, Track } from "@/lib/types/database";
@@ -76,9 +76,10 @@ export default async function DjTrackDetailPage({ params }: Props) {
     crowd_reaction: (myRatingRow?.crowd_reaction as CrowdReaction | null) ?? null,
   };
 
-  const downloadAllowed = feedbackQualifiesForDownload(
-    typeof myFeedbackRow?.body === "string" ? myFeedbackRow.body : null,
-  );
+  const downloadAllowed = packDownloadQualifies({
+    feedbackBody: typeof myFeedbackRow?.body === "string" ? myFeedbackRow.body : null,
+    rating: initialRating,
+  });
 
   return (
     <div className="mx-auto w-full max-w-2xl">

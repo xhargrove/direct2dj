@@ -1,6 +1,5 @@
 "use server";
 
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { getApprovedDjCatalogContext, getDjContext } from "@/lib/dj/context";
 import {
@@ -9,15 +8,14 @@ import {
   notifyTrackRated,
 } from "@/lib/notifications/events";
 import {
-  feedbackQualifiesForDownload,
   validateFeedbackBody,
   validateOptionalCrowdReaction,
   validateRatingComment,
   validateRatingScore,
   validateYesNoAnswer,
 } from "@/lib/dj/catalog-validation";
+import { loadVisibleTrackFiles, resolvePackDownload } from "@/lib/dj/pack-download-server";
 import type { CrowdReaction, PackSlotDb } from "@/lib/types/database";
-import { djPackDownloadFilename } from "@/lib/tracks/dj-download-filename";
 
 const PREVIEW_SLOTS: PackSlotDb[] = [
   "radio_edit",
@@ -35,37 +33,6 @@ export type DjRatingInput = {
   rating_comment: string | null;
   crowd_reaction: CrowdReaction | null;
 };
-
-async function loadVisibleTrackFiles(
-  supabase: SupabaseClient,
-  trackId: string,
-): Promise<
-  | {
-      files: {
-        id: string;
-        storage_path: string;
-        pack_slot: string | null;
-        kind: string;
-        mime_type: string | null;
-      }[];
-    }
-  | { error: string }
-> {
-  const { data: track, error: tErr } = await supabase.from("tracks").select("id").eq("id", trackId).maybeSingle();
-  if (tErr || !track) {
-    return {
-      error:
-        "Track not found or not visible in the DJ catalog (wrong ID, not approved, or catalog inactive).",
-    };
-  }
-  const { data: files, error: fErr } = await supabase
-    .from("track_files")
-    .select("id, storage_path, pack_slot, kind, mime_type")
-    .eq("track_id", trackId)
-    .order("sort_order", { ascending: true });
-  if (fErr) return { error: fErr.message };
-  return { files: files ?? [] };
-}
 
 export async function signTrackPreview(trackId: string) {
   const ctx = await getApprovedDjCatalogContext();
@@ -95,86 +62,37 @@ export async function signTrackPreview(trackId: string) {
   return { signedUrl: data.signedUrl };
 }
 
-export type PackDownloadFile = { pack_slot: string | null; filename: string; signedUrl: string };
+export type PackDownloadResult = { zipUrl: string; fileCount: number };
 
-/** Logs a download with package manifest and returns signed URLs for each pack file (authenticated DJ only). */
-export async function prepareDjPackDownload(trackId: string) {
+/** Logs a download and returns the ZIP pack URL (authenticated DJ only). */
+export async function prepareDjPackDownload(trackId: string): Promise<
+  PackDownloadResult | { error: string }
+> {
   const ctx = await getApprovedDjCatalogContext();
   if ("error" in ctx) return { error: ctx.error };
 
-  const { data: feedbackRow } = await ctx.supabase
-    .from("feedback")
-    .select("body")
-    .eq("track_id", trackId)
-    .eq("dj_id", ctx.djId)
-    .maybeSingle();
-
-  if (!feedbackQualifiesForDownload(feedbackRow?.body ?? null)) {
-    return {
-      error:
-        "Submit feedback for this track before downloading the DJ pack (at least a few characters). This helps artists improve their promos.",
-    };
-  }
-
-  const loaded = await loadVisibleTrackFiles(ctx.supabase, trackId);
-  if ("error" in loaded) return { error: loaded.error };
-  if (!("files" in loaded)) return { error: "Could not load files." };
-
-  const files = loaded.files.filter((f) => f.storage_path);
-  if (files.length === 0) return { error: "No files in this pack." };
-
-  const { data: trackMeta, error: metaErr } = await ctx.supabase
-    .from("tracks")
-    .select("title, credit_artist_name")
-    .eq("id", trackId)
-    .maybeSingle();
-
-  if (metaErr) return { error: metaErr.message };
-  const releaseTitle = (trackMeta?.title ?? "").trim() || "Track";
-  const creditArtist = (trackMeta?.credit_artist_name ?? "").trim() || "Artist";
-
-  const package_manifest = files.map((f) => ({
-    track_file_id: f.id,
-    pack_slot: f.pack_slot,
-    storage_path: f.storage_path,
-  }));
+  const resolved = await resolvePackDownload(ctx.supabase, trackId, ctx.djId);
+  if ("error" in resolved) return { error: resolved.error };
 
   const { error: dlErr } = await ctx.supabase.from("downloads").insert({
     track_id: trackId,
     dj_id: ctx.djId,
     status: "active",
-    package_manifest,
+    package_manifest: resolved.packageManifest,
   });
   if (dlErr) return { error: dlErr.message };
 
   await notifyTrackDownloaded(trackId);
 
-  const out: PackDownloadFile[] = [];
-  for (const f of files) {
-    const filename = djPackDownloadFilename({
-      pack_slot: f.pack_slot,
-      credit_artist_name: creditArtist,
-      title: releaseTitle,
-      storage_path: f.storage_path,
-    });
-    /* `download` → Storage Content-Disposition uses this name (cross-origin `<a download>` is ignored). */
-    const { data, error } = await ctx.supabase.storage
-      .from("promos")
-      .createSignedUrl(f.storage_path, 3600, { download: filename });
-    if (error || !data?.signedUrl) {
-      return { error: error?.message ?? "Could not sign pack file." };
-    }
-    out.push({
-      pack_slot: f.pack_slot,
-      filename,
-      signedUrl: data.signedUrl,
-    });
-  }
-
   revalidatePath("/dj/downloads");
   revalidatePath("/dj/history");
   revalidatePath("/artist/analytics");
-  return { files: out };
+  revalidatePath(`/dj/tracks/${trackId}`);
+
+  return {
+    zipUrl: `/api/dj/tracks/${trackId}/pack`,
+    fileCount: resolved.files.length,
+  };
 }
 
 export async function submitRating(trackId: string, input: DjRatingInput) {
