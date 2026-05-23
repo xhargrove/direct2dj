@@ -4,7 +4,7 @@
 
 ## 1. Final status
 
-**DEPLOY WITH CAUTION** — Codebase and docs are **aligned for deployment**, but **production GO** requires **manual** migration apply, env verification, Stripe webhook smoke, and **`PRODUCTION_SMOKE_TEST_PLAN.md`**.
+**DEPLOY WITH CAUTION** — Codebase and docs are **aligned for deployment**. Run **`npm run verify:launch`** before every deploy. Production **GO** requires migration apply, env verification, Stripe webhook smoke, and **`PRODUCTION_SMOKE_TEST_PLAN.md`** (see **`LAUNCH_VERIFIED.md`**).
 
 ## 2. Code quality
 
@@ -52,11 +52,13 @@
 
 ## 11. Middleware / proxy
 
-- **`docs/NEXT16_PROXY_MIGRATION_NOTE.md`** — no `proxy.ts` migration in this pass.
+- Entry point is **`proxy.ts`** at repo root (exports `middleware` for Next.js). Session helper: `lib/supabase/middleware.ts`.
+- See **`docs/NEXT16_PROXY_MIGRATION_NOTE.md`** for historical context.
 
 ## 12. Manual smoke
 
-- **`PRODUCTION_SMOKE_TEST_PLAN.md`** — **required** before declaring GO.
+- **`PRODUCTION_SMOKE_TEST_PLAN.md`** — **required** before declaring production GO.
+- **`LAUNCH_VERIFIED.md`** — repo + production launch gate summary.
 
 ## 13. Active blockers (external)
 

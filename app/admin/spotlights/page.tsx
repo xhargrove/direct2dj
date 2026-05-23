@@ -52,7 +52,7 @@ export default async function AdminSpotlightsPage() {
     };
   });
 
-  const now = Date.now();
+  const now = Date.now(); // eslint-disable-line react-hooks/purity -- server-only page snapshot
   const activeEditorial = (editorial ?? []).filter((e) => {
     const start = e.starts_at ? new Date(e.starts_at as string).getTime() : 0;
     const end = e.ends_at ? new Date(e.ends_at as string).getTime() : Number.POSITIVE_INFINITY;

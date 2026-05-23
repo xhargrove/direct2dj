@@ -134,7 +134,7 @@ Leave **Actual result** empty and **Status** as **`Pending`** until that row is 
 | Search / filter | Same | Set search `q`, genre, BPM, explicit, sort, paginate | List updates; empty state says “No tracks match” when filters exclude all; without filters and empty DB says no approved tracks yet | | Pending | Same |
 | Open track detail | Same | Click a track card | `/dj/tracks/{id}` loads; metadata, preview section, pack download, rating, feedback | | Pending | Same |
 | Preview | Same | Wait for preview (or use preview area) | Audio element plays signed preview URL; no raw storage path shown | | Pending | Same |
-| Download pack | Same | Click “Download DJ pack” | Download row inserted; signed links listed; no paths leaked | | Pending | Same |
+| Download pack | Same | Save feedback + rating, click “Download DJ pack” | Download row inserted; **one ZIP** saves with all pack files; human-readable names inside | | Pending | Updated 2026-06: ZIP replaces per-file downloads. |
 | Submit rating | Same | Pick stars 1–5, optional fields, Save | Success message; refresh persists rating | | Pending | Same |
 | Edit rating | Same | Change stars/save again | Still one rating row (upsert); message ok | | Pending | Same |
 | Submit feedback | Same | Enter ≥3 chars, Send | Success; moderation pending if new | | Pending | Same |
@@ -147,7 +147,7 @@ Leave **Actual result** empty and **Status** as **`Pending`** until that row is 
 
 | Scenario | Account type | Steps | Expected result | Actual result | Status | Notes |
 |----------|--------------|-------|-----------------|---------------|--------|-------|
-| Feed redirect | Pending DJ | Open `/dj/feed` | Redirect to `/dj/application-status` (middleware) | | Pending | 2026-05-04: Not executed — auth blocker; default seed has no pending-vetting DJ user (see Smoke run log). |
+| Feed redirect | Pending DJ | Open `/dj/feed` | Redirect to `/dj/application-status` (`proxy.ts`) | | Pending | 2026-05-04: Not executed — auth blocker; default seed has no pending-vetting DJ user (see Smoke run log). |
 | Direct track URL | Pending DJ | Open `/dj/tracks/{valid-uuid}` | Redirect away from catalog route | | Pending | Same |
 | Forged `submitRating` | Pending DJ | Trigger rating from UI if reachable or devtools | Error from `getApprovedDjCatalogContext` (pending message) or redirect prevents UI | | Pending | Same |
 | Forged `submitFeedback` | Pending DJ | Same | Same | | Pending | Same |
@@ -211,7 +211,8 @@ Leave **Actual result** empty and **Status** as **`Pending`** until that row is 
 | Hidden track ID | Approved DJ | UUID of draft/non-catalog track | notFound or empty track fetch | | Pending | Same |
 | Preview no audio | Approved DJ | Track with no audio-like files | Message: no preview audio | | Pending | Same |
 | Storage signing failure | Approved DJ | Simulate broken storage config | User-visible error string; no silent success | | Pending | Same |
-| Download insert fails | Approved DJ | RLS error / constraint | Error returned; **note:** if insert succeeds then signing fails mid-loop, download row may exist without all URLs — known limitation | | Pending | Same |
+| Download blocked | Approved DJ | Open track without feedback/rating saved | Download button disabled; server rejects ZIP until feedback + complete rating | | Pending | |
+| Download insert fails | Approved DJ | RLS error / constraint | Error returned; no partial ZIP | | Pending | |
 | Rating invalid | Approved DJ | Score 0 or 6 | Validation error | | Pending | Covered partially by `npm test`; browser row not run (auth). |
 | Feedback too short | Approved DJ | 1–2 chars | Validation error | | Pending | Unit tests; browser row not run (auth). |
 | Feedback too long | Approved DJ | >8000 chars | Validation error | | Pending | Unit tests; browser row not run (auth). |
@@ -221,4 +222,4 @@ Leave **Actual result** empty and **Status** as **`Pending`** until that row is 
 ## Post-run
 
 - Attach failures to tickets with **track id**, **DJ vetting status**, and **browser/network** notes.
-- Re-run after any change to `middleware.ts`, `lib/dj/context.ts`, `app/dj/actions.ts`, or catalog RLS migrations.
+- Re-run after any change to `proxy.ts`, `lib/dj/context.ts`, `app/dj/actions.ts`, `app/api/dj/tracks/[id]/pack/route.ts`, or catalog RLS migrations.

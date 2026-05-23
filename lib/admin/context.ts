@@ -3,8 +3,6 @@ import { createClient } from "@/lib/supabase/server";
 import { isBackstageRole, isFullAdminRole } from "@/lib/auth/backstage-access";
 import type { UserRole } from "@/lib/types/roles";
 
-type BackstageProfile = { id: string; role: UserRole };
-
 async function loadBackstageProfile() {
   const supabase = await createClient();
   const {

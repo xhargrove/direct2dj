@@ -24,6 +24,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript |
 | `npm test` | Vitest (catalog validation helpers) |
+| `npm run verify:launch` | **Launch gate:** lint + typecheck + test + build |
 | `npm run db:start` / `db:reset` / `db:push` | Supabase CLI |
 | `npm run types:supabase` | Generate `lib/types/database.generated.ts` (local Supabase; see [docs/SUPABASE_TYPES_GENERATION.md](./docs/SUPABASE_TYPES_GENERATION.md)) |
 
@@ -41,12 +42,13 @@ Open [http://localhost:3000](http://localhost:3000).
 | [docs/SUPABASE_MIGRATION_PARITY_CHECKLIST.md](./docs/SUPABASE_MIGRATION_PARITY_CHECKLIST.md) | DB + RPC verification |
 | [docs/STRIPE_DEPLOYMENT_CHECKLIST.md](./docs/STRIPE_DEPLOYMENT_CHECKLIST.md) | Webhooks + smoke |
 | [docs/PRODUCTION_SMOKE_TEST_PLAN.md](./docs/PRODUCTION_SMOKE_TEST_PLAN.md) | Post-deploy smoke |
+| [docs/LAUNCH_VERIFIED.md](./docs/LAUNCH_VERIFIED.md) | **Launch verification gate** |
 | [docs/PHASE_4_5_DJ_CATALOG_SMOKE.md](./docs/PHASE_4_5_DJ_CATALOG_SMOKE.md) | DJ catalog manual smoke (Phase 4.5) |
 
 ## Architecture (high level)
 
-- **Auth**: Supabase Auth; `profiles.role` is `artist` \| `dj` \| `admin`.
-- **Route protection**: Route groups under `app/artist`, `app/dj`, `app/admin` use `requireRoles()`; `/dj/*` middleware additionally restricts non-approved DJs to apply/status/settings.
+- **Auth**: Supabase Auth; `profiles.role` is `artist` \| `dj` \| `admin` \| `label_rep` \| `co_admin`.
+- **Route protection**: Route groups under `app/artist`, `app/dj`, `app/admin`, `app/label` use `requireRoles()`; `/dj/*` **proxy** additionally restricts non-approved DJs to apply/status/settings.
 - **Data access**: Browser uses anon key + RLS; server actions use user-scoped Supabase client; Stripe webhook + bulk notifications use **service role** only in trusted server code.
 - **Storage**: Private `promos` bucket; artists upload under `{user_id}/…`; DJs read via policies tied to visible `track_files`.
 

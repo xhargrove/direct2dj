@@ -2,26 +2,22 @@
 
 ## Current state (this repo)
 
-- **File:** `middleware.ts` at project root.
+- **File:** `proxy.ts` at project root (exports `middleware` for Next.js compatibility).
 - **Behavior:** `updateSession` for all matched routes; additional **DJ vetting** gate for `/dj/*` (non-approved DJs redirected to application status / allowed paths).
-- **`proxy.ts`:** **Does not exist** — no duplicate.
+- **Session helper:** `lib/supabase/middleware.ts`.
 
-## Build warning
+## Build output
 
-Next.js 16 may log:
+Next.js 16 build may show:
 
-> The "middleware" file convention is deprecated. Please use "proxy" instead.
+> ƒ Proxy (Middleware)
 
-This is a **framework migration path** notice. **`middleware` still runs** in current Next 16.2.x.
+This reflects the **`proxy.ts`** entry point while retaining the middleware export name Next expects.
 
-## This pass
+## Historical note
 
-- **No migration** to `proxy.ts` — not required for deployment readiness; **test all redirects and cookie behavior** if you rename in a follow-up.
-- **Document only:** when Next documents stabilize, migrate using official guide and re-test:
-  - Session refresh
-  - `/dj` vetting redirects
-  - Supabase cookie copy on redirect
+Earlier passes used `middleware.ts` at project root. The project has migrated to **`proxy.ts`** per Next 16 guidance. Re-test after any rename:
 
-## Risk if ignored
-
-- Future Next major may remove `middleware` filename — **medium-term** tech debt, **not** a current production blocker.
+- Session refresh
+- `/dj` vetting redirects
+- Supabase cookie copy on redirect

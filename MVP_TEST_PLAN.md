@@ -39,9 +39,9 @@ Run these flows in **staging** before production launch. Mark pass/fail and note
 
 | # | Case | Steps | Expected |
 |---|------|-------|----------|
-| DJ1 | Feed | Approved DJ opens feed | Cards load; **featured strip excludes expired windows** |
-| DJ2 | Download | Download pack | Row in downloads; artist notified |
-| DJ3 | Rating/feedback | Submit rating + feedback | Artist notified |
+| DJ1 | Feed | Approved DJ opens feed | Cards load; **Spotlight hub** at top (page 1) when data exists |
+| DJ2 | Download | Save feedback + rating, download pack | Row in downloads; **single ZIP** with all files; artist notified |
+| DJ3 | Rating/feedback | Submit rating (stars, club ready, radio ready) + feedback | Artist notified; download unlocks after both |
 
 ## Featured billing
 
@@ -49,7 +49,7 @@ Run these flows in **staging** before production launch. Mark pass/fail and note
 |---|------|-------|----------|
 | FP1 | Checkout | Complete test Stripe checkout | Placement active; sweep/cron can notify |
 | FP2 | Webhook | Replay bad signature | 400 |
-| FP3 | Expiry | After `ends_at`, DJ feed featured strip | Track no longer featured |
+| FP3 | Expiry | After `ends_at`, DJ feed Featured Spotlight row | Track no longer in **Featured Spotlight** hub section |
 
 ## Notifications
 

@@ -38,8 +38,19 @@ Execute after deploy to **production** (or production-like Preview with producti
 ## 4. DJ
 
 - [ ] Sign in as approved DJ (or complete apply flow per product)
-- [ ] **`/dj/feed`** loads
-- [ ] **Spotlight hub** sections show when editorial, Featured Spotlight, or leaderboard data exists (Record of the Week, DJ Pick, Featured Spotlight, Trending, etc.)
+- [ ] **`/dj/feed`** loads; **Spotlight hub** at top on page 1 when editorial, Featured Spotlight, or leaderboard data exists
+- [ ] Open a track → save **feedback** + **rating** (stars, club ready, radio ready)
+- [ ] **Download DJ pack** → single **ZIP** with all pack files (not one file / not cover-only)
+- [ ] ZIP filenames readable (`Artist - Title (Clean).mp3`, etc.)
+
+## 4b. Spotlight hub (public + editorial)
+
+- [ ] Admin assigns **Record of the Week** at `/admin/spotlights`
+- [ ] **Home** `/` shows assigned editorial content (or hub hidden when empty — no 500)
+- [ ] **`/featured`** logged out shows hub or empty state
+- [ ] **Featured Spotlight** (paid) appears in separate row from editorial slots
+- [ ] Trending / Most Downloaded / Most Feedback hidden until ≥3 qualifying tracks
+- [ ] Track without cover art still renders (placeholder)
 
 ## 5. Admin
 
@@ -71,3 +82,5 @@ Execute after deploy to **production** (or production-like Preview with producti
 |--------|-----------|
 | **PASS** | All **critical** checks (sections 1–5, 8) pass |
 | **FAIL** | Any 500 on core routes or webhook never delivers |
+
+After PASS, mark production **GO** in [LAUNCH_VERIFIED.md](./LAUNCH_VERIFIED.md).
