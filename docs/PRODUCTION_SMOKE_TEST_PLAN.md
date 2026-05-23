@@ -10,8 +10,8 @@ Execute after deploy to **production** (or production-like Preview with producti
 
 ## 1. Public / static behavior
 
-- [ ] **Home** `/` loads **without** RSC digest error (browser + Vercel logs)
-- [ ] **`/featured`** loads **logged out** (list or empty state, not 500)
+- [ ] **Home** `/` loads **without** RSC digest error; **Spotlight hub** section renders (or hides when empty)
+- [ ] **`/featured`** loads **logged out** — spotlight hub sections or empty state, not 500
 - [ ] **`/login`** loads
 
 ## 2. Dev route safety
@@ -39,7 +39,7 @@ Execute after deploy to **production** (or production-like Preview with producti
 
 - [ ] Sign in as approved DJ (or complete apply flow per product)
 - [ ] **`/dj/feed`** loads
-- [ ] **Featured** section shows when placements exist
+- [ ] **Spotlight hub** sections show when editorial, Featured Spotlight, or leaderboard data exists (Record of the Week, DJ Pick, Featured Spotlight, Trending, etc.)
 
 ## 5. Admin
 
@@ -48,6 +48,7 @@ Execute after deploy to **production** (or production-like Preview with producti
 - [ ] **New track (no fee)** → creates draft → lands on admin track page
 - [ ] **`/admin/submissions`** — **Paid — awaiting upload** and **Pending submissions** sections load
 - [ ] **`/admin/payments`** — reconciliation table loads (no service-role error)
+- [ ] **`/admin/spotlights`** — assign Record of the Week / DJ Pick; live preview loads
 - [ ] **`/admin/system`** — health checks visible
 
 ## 6. Storage / covers

@@ -72,8 +72,8 @@ export default async function ArtistPromoteTrackPage({ params }: Props) {
         <h1 className="text-2xl font-semibold tracking-tight">{track.title?.trim() || "Untitled"}</h1>
         <p className="mt-1 text-sm text-zinc-500">{track.genre || "—"}</p>
         <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
-          Pick a window. After Stripe confirms payment, your placement goes live immediately for the selected duration.
-          Unpaid checkouts never activate a feature.
+          Pick a window. After Stripe confirms payment, your Featured Spotlight goes live immediately for the selected
+          duration. Unpaid checkouts never activate a placement.
         </p>
       </div>
 

@@ -27,10 +27,10 @@ export default async function ArtistPromoteIndexPage() {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Promote on DJ feed</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Featured Spotlight</h1>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          Paid placements pin your track to the top of Discover after checkout completes. Only approved,
-          catalog-visible packs can be promoted.
+          Paid Featured Spotlight placements in the Discover hub after checkout completes. Only approved, catalog-visible
+          packs can be promoted.
         </p>
       </div>
 

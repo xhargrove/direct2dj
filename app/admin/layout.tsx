@@ -14,6 +14,7 @@ const fullAdminNav = [
   { href: "/admin/payments", label: "Payments" },
   { href: "/admin/tracks", label: "Tracks" },
   { href: "/admin/tracks/new", label: "New DJ pack" },
+  { href: "/admin/spotlights", label: "Spotlights" },
   { href: "/admin/featured", label: "Featured" },
   { href: "/admin/artists", label: "Artists" },
   { href: "/admin/djs", label: "DJs" },

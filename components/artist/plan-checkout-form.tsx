@@ -41,7 +41,7 @@ function PlanRow({ trackId, plan }: { trackId: string; plan: Plan }) {
       <input type="hidden" name="pricingPlanId" value={plan.id} />
       <div className="min-w-0 flex-1">
         <div className="font-medium">{plan.label}</div>
-        <div className="text-xs text-zinc-500">{plan.duration_days} days at the top of the DJ feed</div>
+        <div className="text-xs text-zinc-500">{plan.duration_days} days in the Discover spotlight hub</div>
       </div>
       <button
         type="submit"

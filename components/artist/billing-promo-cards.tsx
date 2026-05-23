@@ -116,11 +116,12 @@ export function BillingPromoCards({
 
         <article className="group relative flex flex-col overflow-hidden rounded-xl border border-zinc-200 bg-gradient-to-br from-violet-50/90 to-white p-5 shadow-sm transition hover:border-violet-200 hover:shadow-md dark:border-zinc-800 dark:from-violet-950/40 dark:to-zinc-900 dark:hover:border-violet-900/60">
           <span className="text-xs font-medium uppercase tracking-wide text-violet-700 dark:text-violet-300">
-            Discover feed
+            Featured Spotlight
           </span>
-          <h3 className="mt-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">Featured placement</h3>
+          <h3 className="mt-2 text-lg font-semibold text-zinc-900 dark:text-zinc-50">Discover placement</h3>
           <p className="mt-2 flex-1 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-            Pin an approved, catalog-active track to the top of the DJ Discover feed for a fixed window.
+            Pin an approved, catalog-active track in the Featured Spotlight section of the DJ Discover hub for a fixed
+            window.
           </p>
           {heroFeaturedPrice ? (
             <div className="mt-4">
@@ -128,17 +129,17 @@ export function BillingPromoCards({
                 From {heroFeaturedPrice}
               </p>
               <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-                Longer windows available — choose when you promote an eligible track.
+                Longer windows available — choose when you buy a Featured Spotlight for an eligible track.
               </p>
             </div>
           ) : (
-            <p className="mt-4 text-sm text-zinc-500">No featured plans configured yet.</p>
+            <p className="mt-4 text-sm text-zinc-500">No Featured Spotlight plans configured yet.</p>
           )}
           <Link
             href="/artist/promote"
             className="mt-4 inline-flex min-h-10 items-center justify-center rounded-lg border border-violet-200 bg-white/80 px-4 text-sm font-medium text-violet-900 backdrop-blur transition hover:bg-white dark:border-violet-800 dark:bg-zinc-950/80 dark:text-violet-100 dark:hover:bg-zinc-900"
           >
-            Promote a track
+            Buy Featured Spotlight
           </Link>
         </article>
       </div>
@@ -173,7 +174,7 @@ export function BillingPromoCards({
 
       {featuredTiers.length > 1 ? (
         <div>
-          <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Featured windows</h3>
+          <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Featured Spotlight windows</h3>
           <ul className="mt-3 flex flex-wrap gap-2">
             {featuredTiers.map((t) => (
               <li key={t.id}>

@@ -39,7 +39,7 @@ export default async function ArtistLayout({
         Play reports
       </Link>
       <Link className="dj-nav-link hover:underline" href="/artist/promote">
-        Promote
+        Featured Spotlight
       </Link>
       <Link className="dj-nav-link hover:underline" href="/artist/billing">
         Billing

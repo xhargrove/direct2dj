@@ -7,6 +7,7 @@ import { withTimeout } from "@/lib/supabase/with-timeout";
 import { dashboardPathForRole } from "@/lib/auth/paths";
 import { isUserRole } from "@/lib/types/roles";
 import { MarketingSiteHeader } from "@/components/shell/marketing-site-header";
+import { SpotlightHub } from "@/components/spotlight/spotlight-hub";
 
 /** `cookies()` via Supabase client — must not be statically prerendered. */
 export const dynamic = "force-dynamic";
@@ -165,7 +166,7 @@ export default async function Home() {
 
               <p className="mt-6 text-center lg:text-left">
                 <Link href="/featured" className="dj-nav-link text-sm font-semibold underline-offset-4 hover:underline">
-                  What&apos;s featured on Discover →
+                  Spotlight hub on Discover →
                 </Link>
               </p>
             </div>
@@ -182,6 +183,10 @@ export default async function Home() {
               />
             </div>
           </div>
+
+          <section id="spotlights" className="mt-20 scroll-mt-24">
+            <SpotlightHub variant="home" linkMode="public" />
+          </section>
 
           <div id="features" className="mt-20 scroll-mt-24 grid gap-4 sm:grid-cols-3">
             <div className="dj-feature-tile flex flex-col gap-3 text-left">

@@ -37,7 +37,7 @@ export function DjFeedFilters({ genreOptions }: { genreOptions: string[] }) {
   const sort = (searchParams.get("sort") ?? "newest") as SortValue;
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
+    <div className="flex flex-col gap-3 rounded-lg border-0 bg-transparent p-0 dark:border-0">
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
           Search (press Enter)
