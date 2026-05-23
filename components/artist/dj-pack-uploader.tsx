@@ -17,7 +17,7 @@ import { packStorageObjectBasename } from "@/lib/tracks/pack-storage-basename";
 import { assertMimeForSlot } from "@/lib/tracks/upload-rules";
 import type { TrackFile } from "@/lib/types/database";
 
-type SlotState = "idle" | "uploading" | "done" | "error";
+type SlotState = "idle" | "uploading" | "deleting" | "done" | "error";
 
 export function DjPackUploader({
   trackId,
@@ -242,6 +242,85 @@ export function DjPackUploader({
     ],
   );
 
+  const deleteSlot = useCallback(
+    async (slot: PackSlot) => {
+      if (readOnly) return;
+      const existing = bySlot.get(slot);
+      if (!existing) return;
+
+      const label = PACK_SLOT_LABELS[slot];
+      if (
+        !window.confirm(
+          `Remove ${label}? This deletes the uploaded file from this slot so you can upload the correct one.`,
+        )
+      ) {
+        return;
+      }
+
+      setError(null);
+      setSlotPhase((s) => ({ ...s, [slot]: "deleting" }));
+
+      const supabase = createClient();
+      if (existing.storage_path) {
+        const { error: rmErr } = await supabase.storage.from("promos").remove([existing.storage_path]);
+        if (rmErr) {
+          setSlotPhase((s) => ({ ...s, [slot]: "error" }));
+          setError(rmErr.message);
+          return;
+        }
+      }
+
+      const { error: delErr } = await supabase.from("track_files").delete().eq("id", existing.id);
+      if (delErr) {
+        setSlotPhase((s) => ({ ...s, [slot]: "error" }));
+        setError(delErr.message);
+        return;
+      }
+
+      setFiles((prev) => prev.filter((f) => f.id !== existing.id));
+      setSlotPhase((s) => ({ ...s, [slot]: "idle" }));
+      router.refresh();
+      onUploaded?.();
+    },
+    [bySlot, onUploaded, readOnly, router],
+  );
+
+  function slotBusy(slot: PackSlot) {
+    const phase = slotPhase[slot];
+    return phase === "uploading" || phase === "deleting";
+  }
+
+  function slotActions(slot: PackSlot, accept: string) {
+    return (
+      <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+        {bySlot.get(slot) && !readOnly ? (
+          <button
+            type="button"
+            disabled={slotBusy(slot)}
+            onClick={() => void deleteSlot(slot)}
+            className="min-h-10 rounded-md border border-red-300 px-3 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-950/40"
+          >
+            {slotPhase[slot] === "deleting" ? "Removing…" : "Remove"}
+          </button>
+        ) : null}
+        <label className="shrink-0">
+          <span className="sr-only">Upload {PACK_SLOT_LABELS[slot]}</span>
+          <input
+            type="file"
+            disabled={readOnly || slotBusy(slot)}
+            accept={accept}
+            className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium dark:file:bg-zinc-800"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              e.target.value = "";
+              if (f) void uploadSlot(slot, f);
+            }}
+          />
+        </label>
+      </div>
+    );
+  }
+
   function slotProgress(slot: PackSlot) {
     const phase = slotPhase[slot];
     const pct = slotPct[slot];
@@ -293,20 +372,7 @@ export function DjPackUploader({
                 <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">Missing</p>
               )}
             </div>
-            <label className="shrink-0">
-              <span className="sr-only">Upload cover artwork</span>
-              <input
-                type="file"
-                disabled={readOnly || slotPhase[REQUIRED_COVER_SLOT] === "uploading"}
-                accept="image/jpeg,image/png,image/webp"
-                className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium dark:file:bg-zinc-800"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  e.target.value = "";
-                  if (f) void uploadSlot(REQUIRED_COVER_SLOT, f);
-                }}
-              />
-            </label>
+            {slotActions(REQUIRED_COVER_SLOT, "image/jpeg,image/png,image/webp")}
           </div>
           {slotProgress(REQUIRED_COVER_SLOT)}
         </li>
@@ -319,6 +385,7 @@ export function DjPackUploader({
         <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
           Upload <strong>radio edit</strong> and/or <strong>dirty / full version</strong>. You must
           include at least one of these two before submitting for review (both are welcome).
+          Uploaded to the wrong slot? Use <strong>Remove</strong> on that row, then upload again.
           Allowed: MP3, WAV, FLAC, M4A, AAC. DJs see downloads like{" "}
           <span className="font-mono text-[11px]">Artist Name - Make Way (Clean).mp3</span> from your{" "}
           <strong>release title</strong> and <strong>credited artist</strong> in the form above, not from these file
@@ -348,20 +415,7 @@ export function DjPackUploader({
                   </p>
                 )}
               </div>
-              <label className="shrink-0">
-                <span className="sr-only">Upload {PACK_SLOT_LABELS[slot]}</span>
-                <input
-                  type="file"
-                  disabled={readOnly || slotPhase[slot] === "uploading"}
-                  accept="audio/*"
-                  className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium dark:file:bg-zinc-800"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    e.target.value = "";
-                    if (f) void uploadSlot(slot, f);
-                  }}
-                />
-              </label>
+              {slotActions(slot, "audio/*")}
             </div>
             {slotProgress(slot)}
           </li>
@@ -392,20 +446,7 @@ export function DjPackUploader({
                     <p className="mt-1 text-xs text-zinc-500">Not uploaded</p>
                   )}
                 </div>
-                <label className="shrink-0">
-                  <span className="sr-only">Upload {PACK_SLOT_LABELS[slot]}</span>
-                  <input
-                    type="file"
-                    disabled={readOnly || slotPhase[slot] === "uploading"}
-                    accept="audio/*"
-                    className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-zinc-100 file:px-3 file:py-2 file:text-sm file:font-medium dark:file:bg-zinc-800"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      e.target.value = "";
-                      if (f) void uploadSlot(slot, f);
-                    }}
-                  />
-                </label>
+                {slotActions(slot, "audio/*")}
               </div>
               {slotProgress(slot)}
             </li>
@@ -434,19 +475,7 @@ export function DjPackUploader({
                     <p className="mt-1 text-xs text-zinc-500">Not uploaded</p>
                   )}
                 </div>
-                <label className="shrink-0">
-                  <input
-                    type="file"
-                    disabled={readOnly || slotPhase[slot] === "uploading"}
-                    accept="audio/*"
-                    className="block w-full text-sm file:mr-3 file:rounded-md file:border-0 file:bg-zinc-100 file:px-3 file:py-2 dark:file:bg-zinc-800"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      e.target.value = "";
-                      if (f) void uploadSlot(slot, f);
-                    }}
-                  />
-                </label>
+                {slotActions(slot, "audio/*")}
               </div>
               {slotProgress(slot)}
             </li>
