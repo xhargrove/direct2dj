@@ -69,6 +69,8 @@ Create or organize a **Design** file (`figma.com/design/...`) with these pages:
 | **06 — Label rep** | Dashboard, roster, catalog (lower priority) |
 | **99 — Reference** | Screenshots from production or localhost for parity checks |
 
+**Repo reference (not in Figma):** native app icon master — [`design/app-icon-reference.png`](../design/app-icon-reference.png) (1024×1024). See [`design/README.md`](../design/README.md).
+
 ### Frame naming convention
 
 ```
