@@ -272,12 +272,15 @@ export default async function ArtistTrackAnalyticsPage({ params }: Props) {
         )}
       </section>
 
-      <div className="text-xs text-zinc-500 sm:flex sm:flex-wrap sm:items-center sm:gap-4">
-        <span>Compare genres and portfolio trends on</span>
+      <p className="text-xs text-zinc-500">
         <Link href="/artist/analytics" className="underline underline-offset-4">
-          Artist analytics
+          All track analytics
         </Link>
-      </div>
+        {" · "}
+        <Link href="/artist/tracks" className="underline underline-offset-4">
+          Your tracks
+        </Link>
+      </p>
     </div>
   );
 }

@@ -3,23 +3,27 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* Figma mock: near-black + neon (forced dark via html.dark) */
-  --background: #000000;
-  --foreground: #f4f4fb;
-  --dj-accent: #38bdf8;
-  --dj-accent-2: #8b5cf6;
-  --dj-accent-3: #fbbf24;
-  --card: rgba(14, 11, 26, 0.88);
-  --card-foreground: #f4f4fb;
-  --muted: rgba(255, 255, 255, 0.07);
-  --muted-foreground: #a8a3bf;
-  --border: rgba(255, 255, 255, 0.1);
-  --input: rgba(255, 255, 255, 0.1);
-  --ring: #8b5cf6;
-  --primary: #f4f4fb;
-  --primary-foreground: #09090b;
-  --secondary: rgba(255, 255, 255, 0.08);
-  --secondary-foreground: #f4f4fb;
+  /* Premium booth — deep ink canvas + controlled neon */
+  --background: #0a0618;
+  --foreground: #f6f4ff;
+  --dj-accent: #22d3ee;
+  --dj-accent-2: #a78bfa;
+  --dj-accent-3: #fcd34d;
+  --card: rgba(18, 14, 36, 0.78);
+  --card-foreground: #f6f4ff;
+  --muted: rgba(255, 255, 255, 0.06);
+  --muted-foreground: #a89ec4;
+  --border: rgba(255, 255, 255, 0.09);
+  --input: rgba(255, 255, 255, 0.11);
+  --ring: #a78bfa;
+  --primary: #f6f4ff;
+  --primary-foreground: #07050f;
+  --secondary: rgba(255, 255, 255, 0.07);
+  --secondary-foreground: #f6f4ff;
+  --dj-glass-edge: rgba(255, 255, 255, 0.14);
+  --dj-glass-shine: rgba(255, 255, 255, 0.05);
+  --dj-shadow-soft: 0 24px 64px rgba(0, 0, 0, 0.55);
+  --dj-shadow-glow: 0 0 48px color-mix(in srgb, var(--dj-accent) 22%, transparent);
 }
 
 @theme inline {
@@ -42,17 +46,18 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
-  --color-zinc-50: #fafafa;
-  --color-zinc-100: #f4f4f5;
-  --color-zinc-200: #e4e4e7;
-  --color-zinc-300: #d4d4d8;
-  --color-zinc-400: #a1a1aa;
-  --color-zinc-500: #71717a;
-  --color-zinc-600: #52525b;
-  --color-zinc-700: #3f3f46;
-  --color-zinc-800: #27272a;
-  --color-zinc-900: #18181b;
-  --color-zinc-950: #09090b;
+  /* Booth-tinted neutrals — lifts border-zinc-* / bg-zinc-* across workspaces */
+  --color-zinc-50: #f8f7fc;
+  --color-zinc-100: #eceaf5;
+  --color-zinc-200: #d5d0e4;
+  --color-zinc-300: #b0a8c4;
+  --color-zinc-400: #8b82a3;
+  --color-zinc-500: #6a6180;
+  --color-zinc-600: #524a66;
+  --color-zinc-700: #3a334d;
+  --color-zinc-800: #241f34;
+  --color-zinc-900: #140f22;
+  --color-zinc-950: #080510;
 }
 
 body {
@@ -60,32 +65,116 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   min-height: 100%;
   background-color: var(--background);
+  background-image:
+    radial-gradient(ellipse 120% 70% at 50% -20%, rgba(124, 58, 237, 0.28), transparent 58%),
+    radial-gradient(ellipse 80% 50% at 100% 0%, rgba(34, 211, 238, 0.14), transparent 52%),
+    radial-gradient(ellipse 60% 40% at 0% 100%, rgba(251, 191, 36, 0.08), transparent 50%);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+@layer base {
+  .dark {
+    color-scheme: dark;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--dj-accent-2) 42%, transparent);
+    color: var(--foreground);
+  }
+
+  .dark tbody tr {
+    transition: background-color 160ms ease;
+  }
+
+  .dark tbody tr:hover {
+    background-color: color-mix(in srgb, var(--dj-accent) 5%, transparent);
+  }
+
+  .dark thead th {
+    color: var(--muted-foreground);
+  }
+
+  .dark input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+  .dark textarea,
+  .dark select {
+    background: rgba(14, 10, 28, 0.82);
+    border-color: color-mix(in srgb, var(--dj-accent-2) 28%, var(--color-zinc-700));
+    color: var(--foreground);
+    box-shadow:
+      inset 0 1px 0 var(--dj-glass-shine),
+      0 1px 2px rgba(0, 0, 0, 0.25);
+  }
+
+  .dark h1 {
+    color: var(--foreground);
+    text-shadow: 0 0 40px color-mix(in srgb, var(--dj-accent-2) 22%, transparent);
+  }
+
+  .dark h2.text-2xl.font-bold,
+  .dark h2.text-lg.font-semibold {
+    color: color-mix(in srgb, var(--foreground) 94%, var(--dj-accent));
+  }
+
+  .dark input:focus-visible,
+  .dark textarea:focus-visible,
+  .dark select:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--ring) 65%, transparent);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .dsp-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--dj-accent-2) 35%, transparent) transparent;
+  }
+
+  .dsp-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .dsp-scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--dj-accent-2) 35%, transparent);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .dsp-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
 
 @layer components {
   .dj-brand {
     font-family: var(--font-syne), var(--font-geist-sans), system-ui, sans-serif;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.035em;
+    text-shadow: 0 0 32px color-mix(in srgb, var(--dj-accent-2) 25%, transparent);
   }
 
   .dj-glow-text {
     background: linear-gradient(
       118deg,
-      #5ce1ff 0%,
-      #38bdf8 16%,
-      #a855f7 42%,
-      #c084fc 68%,
-      #fbbf24 100%
+      #67e8f9 0%,
+      #22d3ee 14%,
+      #c084fc 38%,
+      #e879f9 58%,
+      #fcd34d 88%,
+      #fde68a 100%
     );
-    background-size: 160% 160%;
+    background-size: 180% 180%;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    animation: dj-shimmer 14s ease-in-out infinite;
+    animation: dj-shimmer 16s ease-in-out infinite;
+    filter: drop-shadow(0 0 28px color-mix(in srgb, var(--dj-accent) 18%, transparent));
   }
 
   .dj-text-service-pack {
-    background: linear-gradient(100deg, #7c3aed 0%, #6366f1 42%, #2563eb 100%);
+    background: linear-gradient(102deg, #9333ea 0%, #6366f1 38%, #22d3ee 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -105,8 +194,8 @@ body {
   .dj-lede {
     font-size: 1.125rem;
     line-height: 1.75rem;
-    letter-spacing: -0.01em;
-    color: rgb(161 161 170);
+    letter-spacing: -0.012em;
+    color: color-mix(in srgb, var(--muted-foreground) 92%, var(--foreground));
   }
 
   @media (min-width: 640px) {
@@ -142,45 +231,62 @@ body {
     align-items: center;
     gap: 0.5rem;
     border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--dj-glass-edge);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(0, 0, 0, 0.42) 100%);
     padding: 0.35rem 0.85rem;
     font-size: 0.6875rem;
     font-weight: 600;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: rgb(228 228 231);
+    color: color-mix(in srgb, var(--foreground) 88%, var(--dj-accent));
+    box-shadow:
+      inset 0 1px 0 var(--dj-glass-shine),
+      0 8px 24px rgba(0, 0, 0, 0.25);
   }
 
   .dj-header {
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-    background: linear-gradient(180deg, rgba(14, 11, 26, 0.94) 0%, rgba(8, 6, 16, 0.82) 100%);
+    backdrop-filter: blur(20px) saturate(1.35);
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 90%, var(--dj-accent) 10%);
+    background: linear-gradient(
+      180deg,
+      rgba(18, 14, 36, 0.92) 0%,
+      rgba(8, 6, 18, 0.78) 100%
+    );
     box-shadow:
-      0 1px 0 rgba(34, 211, 238, 0.07),
-      inset 0 -1px 0 rgba(167, 139, 250, 0.04);
+      0 1px 0 color-mix(in srgb, var(--dj-accent) 12%, transparent),
+      0 12px 40px rgba(0, 0, 0, 0.35),
+      inset 0 -1px 0 color-mix(in srgb, var(--dj-accent-2) 8%, transparent);
   }
 
   .dj-sidebar {
-    backdrop-filter: blur(16px);
-    background: linear-gradient(180deg, rgba(14, 11, 26, 0.96) 0%, rgba(8, 6, 16, 0.88) 100%);
-    box-shadow: inset -1px 0 0 rgba(167, 139, 250, 0.04);
+    backdrop-filter: blur(20px) saturate(1.25);
+    background: linear-gradient(
+      180deg,
+      rgba(18, 14, 36, 0.94) 0%,
+      rgba(8, 6, 18, 0.86) 100%
+    );
+    box-shadow:
+      inset -1px 0 0 color-mix(in srgb, var(--dj-accent-2) 10%, transparent),
+      4px 0 32px rgba(0, 0, 0, 0.2);
   }
 
   .dj-footer {
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(5, 3, 12, 0.72);
-    backdrop-filter: blur(14px);
+    border-top: 1px solid color-mix(in srgb, var(--border) 85%, var(--dj-accent-2) 15%);
+    background: linear-gradient(180deg, rgba(8, 6, 18, 0.55) 0%, rgba(4, 3, 10, 0.88) 100%);
+    backdrop-filter: blur(16px) saturate(1.2);
   }
 
   .dj-nav-link {
-    color: rgb(212 212 216);
+    color: color-mix(in srgb, var(--foreground) 72%, var(--muted-foreground));
     text-underline-offset: 4px;
-    transition: color 150ms ease;
+    transition:
+      color 160ms ease,
+      text-shadow 160ms ease;
   }
 
   .dj-nav-link:hover {
-    color: rgb(147 197 253);
+    color: var(--dj-accent);
+    text-shadow: 0 0 20px color-mix(in srgb, var(--dj-accent) 35%, transparent);
   }
 
   .dj-btn-primary {
@@ -195,29 +301,36 @@ body {
     font-size: 0.9375rem;
     font-weight: 600;
     line-height: 1.25rem;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.012em;
     transition:
-      transform 180ms ease,
-      box-shadow 180ms ease,
-      filter 180ms ease;
-    background: linear-gradient(125deg, #a78bfa 0%, #6366f1 40%, #38bdf8 100%);
-    background-size: 140% 140%;
-    color: #09090b;
+      transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1),
+      filter 200ms ease;
+    background: linear-gradient(
+      128deg,
+      #c4b5fd 0%,
+      #818cf8 28%,
+      #6366f1 48%,
+      #22d3ee 100%
+    );
+    background-size: 160% 160%;
+    color: #07050f;
     box-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.2) inset,
-      0 2px 0 rgba(255, 255, 255, 0.14) inset,
-      0 8px 32px color-mix(in srgb, var(--dj-accent) 45%, transparent),
-      0 20px 48px color-mix(in srgb, var(--dj-accent-2) 38%, transparent);
+      0 0 0 1px rgba(255, 255, 255, 0.28) inset,
+      0 2px 0 rgba(255, 255, 255, 0.16) inset,
+      0 10px 36px color-mix(in srgb, var(--dj-accent-2) 42%, transparent),
+      0 24px 56px color-mix(in srgb, var(--dj-accent) 28%, transparent);
   }
 
   .dj-btn-primary:hover {
-    filter: brightness(1.07);
-    transform: translateY(-1px);
+    filter: brightness(1.08) saturate(1.05);
+    transform: translateY(-2px);
+    background-position: 100% 50%;
     box-shadow:
-      0 0 0 1px rgba(255, 255, 255, 0.28) inset,
-      0 2px 0 rgba(255, 255, 255, 0.18) inset,
-      0 12px 40px color-mix(in srgb, var(--dj-accent) 55%, transparent),
-      0 24px 56px color-mix(in srgb, var(--dj-accent-3) 28%, transparent);
+      0 0 0 1px rgba(255, 255, 255, 0.34) inset,
+      0 2px 0 rgba(255, 255, 255, 0.2) inset,
+      0 14px 44px color-mix(in srgb, var(--dj-accent) 48%, transparent),
+      0 28px 64px color-mix(in srgb, var(--dj-accent-3) 22%, transparent);
   }
 
   .dj-btn-primary:active {
@@ -243,35 +356,48 @@ body {
     padding-right: 1.5rem;
     font-size: 0.9375rem;
     font-weight: 500;
-    letter-spacing: -0.01em;
-    border-color: rgba(255, 255, 255, 0.14);
-    color: rgb(244 244 245);
-    background: rgba(255, 255, 255, 0.05);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+    letter-spacing: -0.012em;
+    border-color: var(--dj-glass-edge);
+    color: color-mix(in srgb, var(--foreground) 92%, transparent);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+    box-shadow:
+      inset 0 1px 0 var(--dj-glass-shine),
+      0 8px 24px rgba(0, 0, 0, 0.18);
     transition:
-      background-color 160ms ease,
-      border-color 160ms ease,
-      color 160ms ease,
-      box-shadow 160ms ease,
-      transform 160ms ease;
+      background-color 180ms ease,
+      border-color 180ms ease,
+      color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .dj-btn-ghost:hover {
-    border-color: rgba(103, 232, 249, 0.35);
-    background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 24px rgba(34, 211, 238, 0.12);
-    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--dj-accent) 45%, transparent);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--dj-accent) 12%, transparent) 0%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 32px color-mix(in srgb, var(--dj-accent) 18%, transparent);
+    transform: translateY(-2px);
   }
 
   .dj-card {
     position: relative;
-    border-radius: 1.25rem;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(20px);
-    background: linear-gradient(165deg, rgba(18, 14, 34, 0.72) 0%, rgba(8, 6, 18, 0.62) 100%);
+    border-radius: 1.35rem;
+    border: 1px solid color-mix(in srgb, var(--border) 80%, var(--dj-accent) 20%);
+    backdrop-filter: blur(24px) saturate(1.25);
+    background: linear-gradient(
+      168deg,
+      color-mix(in srgb, var(--card) 95%, white 5%) 0%,
+      rgba(8, 6, 20, 0.55) 100%
+    );
     box-shadow:
-      0 0 0 1px rgba(167, 139, 250, 0.09),
-      0 28px 72px rgba(0, 0, 0, 0.55);
+      inset 0 1px 0 var(--dj-glass-shine),
+      0 0 0 1px color-mix(in srgb, var(--dj-accent-2) 8%, transparent),
+      var(--dj-shadow-soft);
   }
 
   .dj-card::before {
@@ -282,9 +408,10 @@ body {
     padding: 1px;
     background: linear-gradient(
       145deg,
-      rgba(34, 211, 238, 0.35),
-      rgba(139, 92, 246, 0.15) 45%,
-      rgba(236, 72, 153, 0.22)
+      color-mix(in srgb, var(--dj-accent) 55%, transparent),
+      color-mix(in srgb, var(--dj-accent-2) 22%, transparent) 42%,
+      color-mix(in srgb, var(--dj-accent-3) 28%, transparent) 78%,
+      transparent 100%
     );
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
@@ -295,15 +422,16 @@ body {
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
-    opacity: 0.55;
+    opacity: 0.72;
   }
 
-  .dj-eyebrow {
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    color: rgb(196 190 214);
+  .dj-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 255, 255, 0.06), transparent 60%);
+    pointer-events: none;
   }
 
   .dj-atmosphere {
@@ -317,15 +445,15 @@ body {
 
   .dj-atmosphere__mesh {
     position: absolute;
-    inset: -40%;
+    inset: -45%;
     background:
-      radial-gradient(ellipse 52% 48% at 78% 35%, rgba(139, 92, 246, 0.45), transparent 55%),
-      radial-gradient(ellipse 54% 46% at 50% -8%, rgba(192, 132, 252, 0.32), transparent 58%),
-      radial-gradient(ellipse 44% 36% at 94% 24%, rgba(34, 211, 238, 0.2), transparent 55%),
-      radial-gradient(ellipse 42% 34% at 6% 54%, rgba(251, 191, 36, 0.12), transparent 52%),
-      radial-gradient(ellipse 48% 40% at 68% 92%, rgba(147, 51, 234, 0.18), transparent 55%);
-    animation: dj-mesh-shift 28s ease-in-out infinite alternate;
-    opacity: 0.95;
+      radial-gradient(ellipse 54% 50% at 78% 32%, rgba(167, 139, 250, 0.42), transparent 56%),
+      radial-gradient(ellipse 56% 48% at 50% -10%, rgba(192, 132, 252, 0.28), transparent 58%),
+      radial-gradient(ellipse 46% 38% at 96% 22%, rgba(34, 211, 238, 0.22), transparent 55%),
+      radial-gradient(ellipse 44% 36% at 4% 52%, rgba(252, 211, 77, 0.14), transparent 52%),
+      radial-gradient(ellipse 50% 42% at 66% 94%, rgba(124, 58, 237, 0.2), transparent 56%);
+    animation: dj-mesh-shift 32s ease-in-out infinite alternate;
+    opacity: 0.98;
   }
 
   .dj-atmosphere__orb {
@@ -341,8 +469,9 @@ body {
     height: min(52vw, 520px);
     left: -12%;
     top: 18%;
-    background: rgba(34, 211, 238, 0.34);
+    background: rgba(34, 211, 238, 0.48);
     animation-delay: -4s;
+    opacity: 0.72;
   }
 
   .dj-atmosphere__orb--magenta {
@@ -350,9 +479,10 @@ body {
     height: min(44vw, 440px);
     right: -8%;
     bottom: 8%;
-    background: rgba(217, 70, 239, 0.28);
+    background: rgba(217, 70, 239, 0.38);
     animation-delay: -9s;
     animation-duration: 26s;
+    opacity: 0.68;
   }
 
   .dj-atmosphere__orb--violet {
@@ -360,26 +490,27 @@ body {
     height: min(36vw, 380px);
     left: 38%;
     bottom: -12%;
-    background: rgba(124, 58, 237, 0.32);
+    background: rgba(124, 58, 237, 0.42);
     animation-delay: -14s;
     animation-duration: 30s;
+    opacity: 0.7;
   }
 
   .dj-atmosphere__grid {
     position: absolute;
     inset: 0;
-    opacity: 0.22;
+    opacity: 0.18;
     background-image:
-      linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 56px 56px;
-    mask-image: radial-gradient(ellipse 75% 65% at 50% 40%, black 12%, transparent 72%);
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 78% 68% at 50% 38%, black 10%, transparent 74%);
   }
 
   .dj-atmosphere__noise {
     position: absolute;
     inset: 0;
-    opacity: 0.045;
+    opacity: 0.055;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     mix-blend-mode: overlay;
   }
@@ -387,8 +518,10 @@ body {
   .dj-atmosphere__vignette {
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse 85% 70% at 50% 45%, transparent 35%, rgba(0, 0, 0, 0.55) 100%);
-    opacity: 0.55;
+    background:
+      radial-gradient(ellipse 88% 72% at 50% 42%, transparent 32%, rgba(0, 0, 0, 0.62) 100%),
+      linear-gradient(180deg, transparent 60%, rgba(0, 0, 0, 0.35) 100%);
+    opacity: 0.65;
   }
 
   .dj-visual-stage {
@@ -532,34 +665,104 @@ body {
   }
 
   .dj-feature-tile {
-    border-radius: 1rem;
-    padding: 1rem 1.125rem;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(12, 10, 24, 0.45);
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+    border-radius: 1.125rem;
+    padding: 1.125rem 1.25rem;
+    border: 1px solid color-mix(in srgb, var(--border) 75%, var(--dj-accent) 25%);
+    background: linear-gradient(
+      165deg,
+      color-mix(in srgb, var(--card) 88%, transparent) 0%,
+      rgba(8, 6, 20, 0.35) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 var(--dj-glass-shine),
+      0 18px 44px rgba(0, 0, 0, 0.38);
     transition:
-      transform 200ms ease,
-      border-color 200ms ease,
-      box-shadow 200ms ease;
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      border-color 220ms ease,
+      box-shadow 220ms ease;
   }
 
   .dj-feature-tile:hover {
-    transform: translateY(-2px);
-    border-color: rgba(103, 232, 249, 0.2);
-    box-shadow: 0 20px 48px rgba(34, 211, 238, 0.08);
+    transform: translateY(-3px);
+    border-color: color-mix(in srgb, var(--dj-accent) 35%, transparent);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 24px 56px color-mix(in srgb, var(--dj-accent) 12%, transparent);
   }
 
   .dj-trust-pill {
     border-radius: 9999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--dj-glass-edge);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, rgba(0, 0, 0, 0.38) 100%);
     padding: 0.4rem 0.85rem;
     font-size: 0.6875rem;
     font-weight: 600;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgb(212 212 216);
-    box-shadow: 0 0 20px rgba(139, 92, 246, 0.08);
+    color: color-mix(in srgb, var(--foreground) 78%, var(--muted-foreground));
+    box-shadow:
+      inset 0 1px 0 var(--dj-glass-shine),
+      0 0 28px color-mix(in srgb, var(--dj-accent-2) 12%, transparent);
+  }
+
+  .dj-eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--dj-accent) 35%, var(--muted-foreground));
+  }
+
+  /* Premium glass panel — optional on bordered sections */
+  .dj-panel {
+    position: relative;
+    border-radius: 1rem;
+    border: 1px solid color-mix(in srgb, var(--border) 85%, var(--dj-accent-2) 15%);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--card) 70%, transparent) 0%,
+      rgba(8, 6, 18, 0.45) 100%
+    );
+    box-shadow:
+      inset 0 1px 0 var(--dj-glass-shine),
+      0 16px 40px rgba(0, 0, 0, 0.28);
+  }
+
+  /* Workspace skin — targets plain Tailwind panels/cards (feed, forms, admin) */
+  .dark a.rounded-lg.border,
+  .dark div.rounded-lg.border:not(.border-0) {
+    border-color: color-mix(in srgb, var(--dj-accent) 24%, var(--color-zinc-800)) !important;
+    background: linear-gradient(
+      165deg,
+      rgba(22, 16, 42, 0.72) 0%,
+      rgba(10, 8, 22, 0.52) 100%
+    ) !important;
+    backdrop-filter: blur(14px) saturate(1.15);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.07),
+      0 14px 36px rgba(0, 0, 0, 0.38),
+      0 0 0 1px color-mix(in srgb, var(--dj-accent-2) 6%, transparent);
+  }
+
+  .dark a.rounded-lg.border:hover {
+    border-color: color-mix(in srgb, var(--dj-accent) 48%, transparent) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 36px color-mix(in srgb, var(--dj-accent) 16%, transparent),
+      0 18px 44px rgba(0, 0, 0, 0.42) !important;
+  }
+
+  .dark .sticky.rounded-lg.border {
+    border-color: color-mix(in srgb, var(--dj-accent) 32%, var(--color-zinc-800)) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 16px 40px rgba(0, 0, 0, 0.4),
+      0 0 48px color-mix(in srgb, var(--dj-accent-2) 10%, transparent) !important;
+  }
+
+  .dark form.rounded-lg.border,
+  .dark section.rounded-lg.border {
+    border-color: color-mix(in srgb, var(--dj-accent-2) 22%, var(--color-zinc-800)) !important;
   }
 }
 

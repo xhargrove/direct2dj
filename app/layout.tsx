@@ -70,7 +70,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${syne.variable} dark h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${syne.variable} dark dsp-scrollbar h-full antialiased`}
     >
       <body className="relative min-h-full">
         <div className="dj-atmosphere" aria-hidden>

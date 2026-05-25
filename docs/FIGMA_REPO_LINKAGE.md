@@ -12,11 +12,13 @@ Quick reference so design tools and Git stay aligned for **Digital Service Pack*
 | Production URL | https://direct2dja.com |
 | Route contract | `AGENTS.md` in repo root |
 
-## Figma Make file (Digital Service Pack)
+## Figma Design file (Digital Service Pack)
 
 | File | Key | MCP status |
 |------|-----|------------|
-| [Recreate Design Element](https://www.figma.com/make/pU7DPNlSeo5tTZieZp5L0A/Recreate-Design-Element) | `pU7DPNlSeo5tTZieZp5L0A` | Share with `xhargrove71@gmail.com` to enable MCP reads |
+| [Digital Service Pack — Design](https://www.figma.com/design/oLrrwfAVeBv5GuFk0XR8PC) | `oLrrwfAVeBv5GuFk0XR8PC` | ✅ Owned by `xhargrove71@gmail.com` — MCP readable |
+
+Legacy Make file (optional reference): [Recreate Design Element](https://www.figma.com/make/pU7DPNlSeo5tTZieZp5L0A/Recreate-Design-Element) — key `pU7DPNlSeo5tTZieZp5L0A` (share required).
 
 ## What `get_design_context` does
 
@@ -27,7 +29,7 @@ Quick reference so design tools and Git stay aligned for **Digital Service Pack*
 ## MCP command
 
 ```text
-get_design_context  fileKey=pU7DPNlSeo5tTZieZp5L0A  nodeId=0:1
+get_design_context  fileKey=oLrrwfAVeBv5GuFk0XR8PC  nodeId=0:1
 ```
 
 ## Full handoff

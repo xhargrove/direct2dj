@@ -23,6 +23,9 @@
     "verify:launch": "npm run lint && npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
+    "@capacitor/ios": "^8.3.4",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.1",
     "archiver": "^7.0.1",

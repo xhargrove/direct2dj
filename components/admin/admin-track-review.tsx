@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminTrackFeedbackExport } from "@/components/admin/admin-track-feedback-export";
 import { AdminTrackBasicsForm } from "@/components/admin/admin-track-basics-form";
 import { AdminTrackMetadataForm } from "@/components/admin/admin-track-metadata-form";
 import { DjPackUploader } from "@/components/artist/dj-pack-uploader";
@@ -117,6 +118,7 @@ export function AdminTrackReview({
             Full analytics →
           </Link>
         </div>
+        <AdminTrackFeedbackExport trackId={track.id} className="mt-3" />
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div className="rounded-md border border-zinc-100 p-3 text-center dark:border-zinc-800">
             <div className="text-xl font-semibold">{engagement.downloadCount}</div>

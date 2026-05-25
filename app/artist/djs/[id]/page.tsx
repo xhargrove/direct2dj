@@ -56,7 +56,7 @@ export default async function ArtistDjProfilePage({ params }: Props) {
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
         <Link href="/artist/analytics" className="text-zinc-600 underline dark:text-zinc-400">
-          ← Analytics
+          ← Track analytics
         </Link>
       </div>
 

@@ -33,7 +33,7 @@ export default async function ArtistLayout({
         New pack
       </Link>
       <Link className="dj-nav-link hover:underline" href="/artist/analytics">
-        Analytics
+        Track analytics
       </Link>
       <Link className="dj-nav-link hover:underline" href="/artist/play-reports">
         Play reports

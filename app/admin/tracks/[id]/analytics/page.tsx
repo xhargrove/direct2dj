@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AdminTrackFeedbackExport } from "@/components/admin/admin-track-feedback-export";
 import { djTierLabel } from "@/lib/dj/tier-label";
 import { DownloadTimelineStrip, fillDailyDownloads, type TimelinePoint } from "@/components/artist/analytics-charts";
 import type { DjTier } from "@/lib/types/database";
@@ -246,7 +247,10 @@ export default async function AdminTrackAnalyticsPage({ params }: Props) {
       </section>
 
       <section>
-        <h2 className="text-lg font-semibold">Feedback</h2>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h2 className="text-lg font-semibold">Feedback</h2>
+          <AdminTrackFeedbackExport trackId={id} />
+        </div>
         {feedbackList.length === 0 ? (
           <p className="mt-3 text-sm text-zinc-500">No feedback for this track.</p>
         ) : (

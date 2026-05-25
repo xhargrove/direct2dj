@@ -8,28 +8,6 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import type { Track } from "@/lib/types/database";
 
-type SummaryRow = {
-  total_downloads: number;
-  total_ratings: number;
-  avg_rating: number | null;
-};
-
-type EngagementRow = {
-  distinct_supporter_djs: number;
-  feedback_comments: number;
-};
-
-function firstRpcRow<T>(data: unknown): T | null {
-  if (data == null) return null;
-  if (Array.isArray(data)) return (data[0] as T) ?? null;
-  return data as T;
-}
-
-function formatAvgRating(v: number | null | undefined): string {
-  if (v == null || !Number.isFinite(Number(v))) return "—";
-  return Number(v).toFixed(1);
-}
-
 export default async function ArtistDashboardPage() {
   const supabase = await createClient();
   const {
@@ -41,13 +19,12 @@ export default async function ArtistDashboardPage() {
   let firstDraftId: string | null = null;
   let paidDraftUploadHref: string | null = null;
   let recentTracks: Track[] = [];
-  let summary: SummaryRow | null = null;
-  let engagement: EngagementRow | null = null;
+  let publishedCount = 0;
 
   if (user) {
     const { data: artist } = await supabase.from("artists").select("id").eq("profile_id", user.id).maybeSingle();
     if (artist) {
-      const [{ count: d }, { count: p }, firstDraftRes, paymentsRes, tracksResult, summaryRes, engagementRes] =
+      const [{ count: d }, { count: p }, { count: live }, firstDraftRes, paymentsRes, tracksResult] =
         await Promise.all([
         supabase
           .from("tracks")
@@ -60,6 +37,12 @@ export default async function ArtistDashboardPage() {
           .eq("artist_id", artist.id)
           .eq("is_draft", false)
           .eq("moderation_status", "pending"),
+        supabase
+          .from("tracks")
+          .select("*", { count: "exact", head: true })
+          .eq("artist_id", artist.id)
+          .eq("is_draft", false)
+          .eq("moderation_status", "approved"),
         supabase
           .from("tracks")
           .select("id")
@@ -88,12 +71,11 @@ export default async function ArtistDashboardPage() {
           .eq("artist_id", artist.id)
           .order("updated_at", { ascending: false })
           .limit(5),
-        supabase.rpc("artist_analytics_summary"),
-        supabase.rpc("artist_engagement_counts"),
       ]);
 
       draftCount = d ?? 0;
       pendingCount = p ?? 0;
+      publishedCount = live ?? 0;
       firstDraftId = firstDraftRes.data?.id ?? null;
       for (const pay of paymentsRes.data ?? []) {
         const href = submissionUploadHref(pay as SubmissionPaymentForUpload);
@@ -103,15 +85,6 @@ export default async function ArtistDashboardPage() {
         }
       }
       recentTracks = (tracksResult.data ?? []) as Track[];
-
-      if (!summaryRes.error) {
-        const row = firstRpcRow<SummaryRow>(summaryRes.data);
-        summary = row;
-      }
-      if (!engagementRes.error) {
-        const row = firstRpcRow<EngagementRow>(engagementRes.data);
-        engagement = row;
-      }
     }
   }
 
@@ -120,7 +93,8 @@ export default async function ArtistDashboardPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Artist dashboard</h1>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          Your packs, reach, and ratings at a glance. Buy another upload or featured placement anytime on{" "}
+          Manage your packs and open per-track analytics for downloads, ratings, and feedback. Buy another upload or
+          featured placement anytime on{" "}
           <Link href="/artist/billing" className="font-medium text-zinc-900 underline dark:text-zinc-100">
             Billing
           </Link>
@@ -151,7 +125,7 @@ export default async function ArtistDashboardPage() {
         </div>
       ) : null}
 
-      <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-3">
         <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
           <div className="text-2xl font-semibold">{draftCount}</div>
           <div className="text-xs text-zinc-500">Draft packs</div>
@@ -161,31 +135,10 @@ export default async function ArtistDashboardPage() {
           <div className="text-xs text-zinc-500">Awaiting admin</div>
         </div>
         <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-          <div className="text-2xl font-semibold">{summary?.total_downloads ?? "—"}</div>
-          <div className="text-xs text-zinc-500">Pack downloads</div>
-        </div>
-        <div className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
-          <div className="text-2xl font-semibold">{formatAvgRating(summary?.avg_rating)}</div>
-          <div className="text-xs text-zinc-500">Avg rating</div>
+          <div className="text-2xl font-semibold">{publishedCount}</div>
+          <div className="text-xs text-zinc-500">Live packs</div>
         </div>
       </div>
-
-      {(summary || engagement) && (
-        <dl className="grid gap-3 rounded-lg border border-zinc-200 p-4 text-sm dark:border-zinc-800 sm:grid-cols-2">
-          <div className="flex justify-between gap-4">
-            <dt className="text-zinc-500">Total ratings</dt>
-            <dd className="font-medium tabular-nums">{summary?.total_ratings ?? "—"}</dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-zinc-500">DJs engaged</dt>
-            <dd className="font-medium tabular-nums">{engagement?.distinct_supporter_djs ?? "—"}</dd>
-          </div>
-          <div className="flex justify-between gap-4 sm:col-span-2">
-            <dt className="text-zinc-500">Feedback comments</dt>
-            <dd className="font-medium tabular-nums">{engagement?.feedback_comments ?? "—"}</dd>
-          </div>
-        </dl>
-      )}
 
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -256,7 +209,7 @@ export default async function ArtistDashboardPage() {
           href="/artist/analytics"
           className="inline-flex min-h-11 flex-1 items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900 sm:flex-none sm:min-w-[12rem]"
         >
-          Full analytics
+          Track analytics
         </Link>
         <Link
           href="/artist/billing"
