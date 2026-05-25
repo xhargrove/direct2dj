@@ -1,14 +1,11 @@
 import "server-only";
 
 import { createServiceRoleClientOrNull } from "@/lib/supabase/service-role";
+import { getPublicSiteUrl } from "@/lib/site-url";
 import type { NotificationKind } from "@/lib/notifications/types";
 
 function siteUrl(): string {
-  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (explicit) return explicit;
-  const vercel = process.env.VERCEL_URL?.trim();
-  if (vercel) return vercel.startsWith("http") ? vercel : `https://${vercel}`;
-  return "http://localhost:3000";
+  return getPublicSiteUrl();
 }
 
 /** True when any supported transactional email env is present; sending remains best-effort. */

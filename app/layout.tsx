@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Syne } from "next/font/google";
+import { getMetadataBaseUrl } from "@/lib/site-url";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -24,7 +25,7 @@ const syne = Syne({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://direct2dj.vercel.app"),
+  metadataBase: getMetadataBaseUrl(),
   title: "Digital Service Pack — Get Your Music Directly To The DJ",
   description:
     "Get your music directly to DJs: discovery, clean packs, downloads, and reporting — without the inbox chaos.",
