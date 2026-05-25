@@ -83,8 +83,9 @@ export function SpotlightHubContent({
     );
   }
 
-  const gapClass = variant === "home" ? "gap-10" : variant === "dj" ? "gap-8" : "gap-12";
+  const gapClass = variant === "home" ? "gap-10" : variant === "dj" ? "gap-6" : "gap-12";
   const hideSponsoredPaidCopy = variant === "dj";
+  const density = variant === "dj" ? "compact" : "default";
   const useEditorialRow = variant === "featured" || variant === "home";
 
   const editorialCardSections = useEditorialRow
@@ -128,6 +129,7 @@ export function SpotlightHubContent({
           item={rotw}
           sectionLabel={SPOTLIGHT_SECTION_LABELS.record_of_week}
           linkMode={linkMode}
+          density={density}
         />
       ) : null}
 
@@ -135,6 +137,7 @@ export function SpotlightHubContent({
         <SpotlightCardGrid
           entries={editorialGridItems}
           linkMode={linkMode}
+          density={density}
           hideSponsoredPaidCopy={hideSponsoredPaidCopy}
           minColumns={editorialGridItems.length}
         />
@@ -148,6 +151,7 @@ export function SpotlightHubContent({
           subtitle={SECTION_SUBTITLES[sec.id]}
           items={sec.items}
           linkMode={linkMode}
+          density={density}
           hideSponsoredPaidCopy={hideSponsoredPaidCopy}
           emptyMessage={
             showEmptyEditorialSections && sec.items.length === 0

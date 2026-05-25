@@ -117,8 +117,8 @@ async function FeedSpotlight({
   return (
     <div className="flex flex-col gap-8">
       {showHub ? (
-        <section className="flex flex-col gap-5">
-          <h2 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Spotlight hub</h2>
+        <section className="flex flex-col gap-4">
+          <h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Spotlight hub</h2>
           <SpotlightHubContent sections={hub.sections} linkMode="dj" variant="dj" error={hub.error} />
         </section>
       ) : null}
