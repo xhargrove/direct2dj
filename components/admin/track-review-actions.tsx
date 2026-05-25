@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { useHydrated } from "@/lib/hooks/use-hydrated";
 import {
   approveTrack,
   deleteFeaturedPlacement,
@@ -162,23 +163,28 @@ function FeaturedRowEditor({
   setMessage: (s: string | null) => void;
   refresh: () => void;
 }) {
+  const hydrated = useHydrated();
   const [label, setLabel] = useState(placement.label ?? "");
-  const [starts, setStarts] = useState(toLocalInput(placement.starts_at));
-  const [ends, setEnds] = useState(toLocalInput(placement.ends_at));
+  const [startsDraft, setStartsDraft] = useState<string | null>(null);
+  const [endsDraft, setEndsDraft] = useState<string | null>(null);
 
-  const expired = placement.ends_at ? new Date(placement.ends_at) < new Date() : false;
+  const starts = startsDraft ?? (hydrated ? toLocalInput(placement.starts_at) : "");
+  const ends = endsDraft ?? (hydrated ? toLocalInput(placement.ends_at) : "");
+  const expired = hydrated && isFeaturedPlacementExpired(placement.ends_at);
 
   return (
     <div className="rounded-md border border-zinc-100 p-3 dark:border-zinc-800">
       <div className="mb-2 flex items-center justify-between gap-2">
         <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Placement</span>
-        {expired ? (
-          <span className="rounded bg-zinc-200 px-2 py-0.5 text-xs dark:bg-zinc-700">Ended</span>
-        ) : (
-          <span className="rounded bg-emerald-100 px-2 py-0.5 text-xs text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-100">
-            Active window
-          </span>
-        )}
+        {hydrated ? (
+          expired ? (
+            <span className="rounded bg-zinc-200 px-2 py-0.5 text-xs dark:bg-zinc-700">Ended</span>
+          ) : (
+            <span className="rounded bg-emerald-100 px-2 py-0.5 text-xs text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-100">
+              Active window
+            </span>
+          )
+        ) : null}
       </div>
       <div className="grid gap-2 sm:grid-cols-2">
         <label className="flex flex-col gap-1 text-xs">
@@ -194,7 +200,7 @@ function FeaturedRowEditor({
           <input
             type="datetime-local"
             value={starts}
-            onChange={(e) => setStarts(e.target.value)}
+            onChange={(e) => setStartsDraft(e.target.value)}
             className="rounded border border-zinc-300 px-2 py-1.5 text-sm dark:border-zinc-600"
           />
         </label>
@@ -203,7 +209,7 @@ function FeaturedRowEditor({
           <input
             type="datetime-local"
             value={ends}
-            onChange={(e) => setEnds(e.target.value)}
+            onChange={(e) => setEndsDraft(e.target.value)}
             className="rounded border border-zinc-300 px-2 py-1.5 text-sm dark:border-zinc-600"
           />
         </label>
@@ -323,6 +329,12 @@ function NewFeaturedForm({
       </button>
     </div>
   );
+}
+
+function isFeaturedPlacementExpired(endsAt: string | null): boolean {
+  if (!endsAt) return false;
+  const endMs = new Date(endsAt).getTime();
+  return Number.isFinite(endMs) && endMs < Date.now();
 }
 
 function toLocalInput(iso: string | null): string {
