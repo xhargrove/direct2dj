@@ -17,7 +17,7 @@ function hrefFromMeta(meta: Record<string, unknown>): string | null {
 }
 
 function kindLabel(kind: string): string | null {
-  if (kind === "admin_announcement" || kind === "admin_message") {
+  if (kind === "admin_announcement" || kind === "admin_message" || kind === "admin_account_notice") {
     return "From Digital Service Pack";
   }
   return null;

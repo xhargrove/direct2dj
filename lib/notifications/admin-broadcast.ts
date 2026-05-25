@@ -9,7 +9,7 @@ const NOTIFY_CHUNK = 150;
 const MAX_TITLE_LEN = 120;
 const MAX_BODY_LEN = 2000;
 
-export type AdminBroadcastAudience = "all_approved_djs" | "single_dj";
+export type AdminBroadcastAudience = "all_approved_djs" | "single_dj" | "pending_djs" | "single_profile";
 
 export type SendAdminDjAnnouncementInput = {
   adminUserId: string;
@@ -18,6 +18,7 @@ export type SendAdminDjAnnouncementInput = {
   href: string | null;
   audience: AdminBroadcastAudience;
   targetDjId?: string | null;
+  targetProfileId?: string | null;
 };
 
 export type SendAdminDjAnnouncementResult =
@@ -49,7 +50,27 @@ async function resolveRecipientProfileIds(
   admin: NonNullable<ReturnType<typeof createServiceRoleClientOrNull>>,
   audience: AdminBroadcastAudience,
   targetDjId: string | null | undefined,
-): Promise<{ profileIds: string[]; targetDjId: string | null } | { error: string }> {
+  targetProfileId: string | null | undefined,
+): Promise<{ profileIds: string[]; targetDjId: string | null; targetProfileId: string | null } | { error: string }> {
+  if (audience === "single_profile") {
+    const profileId = targetProfileId?.trim();
+    if (!profileId) return { error: "Choose a user to message." };
+
+    const { data: profile, error } = await admin
+      .from("profiles")
+      .select("id, role")
+      .eq("id", profileId)
+      .maybeSingle();
+
+    if (error) return { error: error.message };
+    if (!profile?.id) return { error: "User not found." };
+    if (profile.role === "admin" || profile.role === "co_admin") {
+      return { error: "Cannot send outreach messages to admin accounts." };
+    }
+
+    return { profileIds: [profile.id], targetDjId: null, targetProfileId: profile.id };
+  }
+
   if (audience === "single_dj") {
     const djId = targetDjId?.trim();
     if (!djId) return { error: "Choose a DJ for a single-DJ message." };
@@ -63,7 +84,24 @@ async function resolveRecipientProfileIds(
     if (error) return { error: error.message };
     if (!dj?.profile_id) return { error: "DJ not found." };
 
-    return { profileIds: [dj.profile_id], targetDjId: dj.id };
+    return { profileIds: [dj.profile_id], targetDjId: dj.id, targetProfileId: null };
+  }
+
+  if (audience === "pending_djs") {
+    const { data: djRows, error } = await admin
+      .from("djs")
+      .select("profile_id")
+      .eq("vetting_status", "pending");
+
+    if (error) return { error: error.message };
+
+    const profileIds = [
+      ...new Set((djRows ?? []).map((r) => r.profile_id).filter((id): id is string => typeof id === "string")),
+    ];
+
+    if (profileIds.length === 0) return { error: "No pending DJ applications to notify." };
+
+    return { profileIds, targetDjId: null, targetProfileId: null };
   }
 
   const { data: djRows, error } = await admin
@@ -79,7 +117,7 @@ async function resolveRecipientProfileIds(
 
   if (profileIds.length === 0) return { error: "No approved DJs to notify." };
 
-  return { profileIds, targetDjId: null };
+  return { profileIds, targetDjId: null, targetProfileId: null };
 }
 
 /** Backstage-only: fan-out in-app notifications to approved DJs or one DJ. */
@@ -100,11 +138,20 @@ export async function sendAdminDjAnnouncement(
     return { error: "Server is missing SUPABASE_SERVICE_ROLE_KEY; cannot send announcements." };
   }
 
-  const recipients = await resolveRecipientProfileIds(admin, input.audience, input.targetDjId);
+  const recipients = await resolveRecipientProfileIds(
+    admin,
+    input.audience,
+    input.targetDjId,
+    input.targetProfileId,
+  );
   if ("error" in recipients) return { error: recipients.error };
 
   const kind: NotificationKind =
-    input.audience === "single_dj" ? "admin_message" : "admin_announcement";
+    input.audience === "single_profile"
+      ? "admin_account_notice"
+      : input.audience === "single_dj"
+        ? "admin_message"
+        : "admin_announcement";
 
   const { data: broadcast, error: insErr } = await admin
     .from("admin_broadcasts")
@@ -115,6 +162,7 @@ export async function sendAdminDjAnnouncement(
       href,
       audience: input.audience,
       target_dj_id: recipients.targetDjId,
+      target_profile_id: recipients.targetProfileId,
       recipient_count: 0,
     })
     .select("id")

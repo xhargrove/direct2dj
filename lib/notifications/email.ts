@@ -25,7 +25,16 @@ type EmailPayload = {
   title: string;
   body: string | null;
   kind: NotificationKind;
+  metadata?: Record<string, unknown>;
 };
+
+function openLinkFromMetadata(metadata?: Record<string, unknown>): string {
+  const href = metadata?.href;
+  if (typeof href === "string" && href.startsWith("/")) {
+    return `${siteUrl()}${href}`;
+  }
+  return siteUrl();
+}
 
 /**
  * Email-ready hook: loads recipient email and sends when a provider is configured.
@@ -43,7 +52,8 @@ export async function sendNotificationEmail(payload: EmailPayload): Promise<void
   if (!to) return;
 
   const subject = payload.title;
-  const text = [payload.body, ``, `Open: ${siteUrl()}`].filter(Boolean).join("\n");
+  const openUrl = openLinkFromMetadata(payload.metadata);
+  const text = [payload.body, ``, `Open Digital Service Pack: ${openUrl}`].filter(Boolean).join("\n");
 
   const resend = process.env.RESEND_API_KEY?.trim();
   if (resend) {

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import {
@@ -110,6 +111,12 @@ export function DjVettingRow({
       )}
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
+        <Link
+          href={`/admin/user-outreach?dj_id=${encodeURIComponent(djId)}&audience=single_dj`}
+          className="inline-flex min-h-10 items-center rounded-md border border-zinc-300 px-3 text-sm dark:border-zinc-600"
+        >
+          Message
+        </Link>
         {vettingStatus === "pending" || vettingStatus === "rejected" ? (
           <>
             <select

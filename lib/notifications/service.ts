@@ -41,6 +41,7 @@ export async function emitNotifications(rows: EmitNotificationInput[]): Promise<
         title: r.title,
         body: r.body,
         kind: r.kind,
+        metadata: r.metadata,
       }),
     ),
   );

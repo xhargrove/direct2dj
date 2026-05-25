@@ -12,7 +12,13 @@ export async function sendDjAnnouncementAction(formData: FormData) {
   if ("error" in ctx) return { error: ctx.error };
 
   const audience = formData.get("audience") as AdminBroadcastAudience | null;
-  if (audience !== "all_approved_djs" && audience !== "single_dj") {
+  const allowed: AdminBroadcastAudience[] = [
+    "all_approved_djs",
+    "single_dj",
+    "pending_djs",
+    "single_profile",
+  ];
+  if (!audience || !allowed.includes(audience)) {
     return { error: "Choose who receives this message." };
   }
 
@@ -24,6 +30,9 @@ export async function sendDjAnnouncementAction(formData: FormData) {
   const targetDjIdRaw = formData.get("target_dj_id");
   const targetDjId = typeof targetDjIdRaw === "string" ? targetDjIdRaw : null;
 
+  const targetProfileIdRaw = formData.get("target_profile_id");
+  const targetProfileId = typeof targetProfileIdRaw === "string" ? targetProfileIdRaw : null;
+
   const result = await sendAdminDjAnnouncement({
     adminUserId: ctx.userId,
     title,
@@ -31,11 +40,13 @@ export async function sendDjAnnouncementAction(formData: FormData) {
     href,
     audience,
     targetDjId: audience === "single_dj" ? targetDjId : null,
+    targetProfileId: audience === "single_profile" ? targetProfileId : null,
   });
 
   if ("error" in result) return { error: result.error };
 
   revalidatePath("/admin/communications");
+  revalidatePath("/admin/user-outreach");
   return {
     ok: true as const,
     recipientCount: result.recipientCount,

@@ -10,6 +10,7 @@ export const fullAdminNav: readonly AdminNavItem[] = [
   { href: "/admin/featured", label: "Featured" },
   { href: "/admin/artists", label: "Artists" },
   { href: "/admin/djs", label: "DJs" },
+  { href: "/admin/user-outreach", label: "User outreach" },
   { href: "/admin/communications", label: "DJ messages" },
   { href: "/admin/dj-activity", label: "DJ activity" },
   { href: "/admin/dj-applications", label: "DJ applications" },

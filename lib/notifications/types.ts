@@ -18,4 +18,5 @@ export type NotificationKind =
   | "catalog_new_track"
   | "admin_announcement"
   | "admin_message"
+  | "admin_account_notice"
   | "submission_upload_ready";

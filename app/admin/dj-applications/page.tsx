@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { DjVettingRow } from "@/components/admin/dj-vetting-row";
 import { createClient } from "@/lib/supabase/server";
 import type { DjTier, DjVettingStatus } from "@/lib/types/database";
@@ -63,7 +64,11 @@ export default async function AdminDjApplicationsPage() {
         <h1 className="text-2xl font-semibold tracking-tight">DJ applications</h1>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
           Pending DJs are listed first. Approve assigns tier and copies application name and location onto the DJ
-          profile for artist-facing analytics.
+          profile for artist-facing analytics.{" "}
+          <Link href="/admin/user-outreach" className="font-medium underline underline-offset-4">
+            Email pending DJs
+          </Link>{" "}
+          or fix wrong account roles from User outreach.
         </p>
       </div>
 
