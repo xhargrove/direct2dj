@@ -5,7 +5,7 @@ import {
   type SpotlightSection,
   type SpotlightSectionId,
 } from "@/lib/spotlight/load-spotlight-hub";
-import { SpotlightHero, SpotlightRow } from "@/components/spotlight/spotlight-cards";
+import { SpotlightHero, SpotlightRow, SpotlightCardGrid } from "@/components/spotlight/spotlight-cards";
 
 const ROW_SECTIONS: SpotlightSectionId[] = [
   "dj_pick",
@@ -16,6 +16,14 @@ const ROW_SECTIONS: SpotlightSectionId[] = [
   "trending",
   "most_downloaded",
   "most_feedback",
+];
+
+/** Single-slot editorial picks — shown together in one horizontal row on marketing pages. */
+const EDITORIAL_CARD_SECTIONS: SpotlightSectionId[] = [
+  "dj_pick",
+  "new_release",
+  "artist_spotlight",
+  "must_spin",
 ];
 
 const SECTION_SUBTITLES: Partial<Record<SpotlightSectionId, string>> = {
@@ -77,6 +85,17 @@ export function SpotlightHubContent({
 
   const gapClass = variant === "home" ? "gap-10" : variant === "dj" ? "gap-8" : "gap-12";
   const hideSponsoredPaidCopy = variant === "dj";
+  const useEditorialRow = variant === "featured" || variant === "home";
+
+  const editorialCardSections = useEditorialRow
+    ? visibleRows.filter((s) => EDITORIAL_CARD_SECTIONS.includes(s.id) && s.items.length > 0)
+    : [];
+  const blockRows = useEditorialRow
+    ? visibleRows.filter((s) => !EDITORIAL_CARD_SECTIONS.includes(s.id))
+    : visibleRows;
+  const editorialGridItems = editorialCardSections.flatMap((sec) =>
+    sec.items.map((item) => ({ item, sectionId: sec.id }))
+  );
 
   return (
     <div className={`flex flex-col ${gapClass}`}
@@ -97,12 +116,6 @@ export function SpotlightHubContent({
         </div>
       ) : null}
 
-      {variant === "featured" ? (
-        <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Featured Artist, Record of the Week, and other editorial slots — plus paid Featured Spotlight placements from
-          artists. Sign in as a DJ to open a track and download the pack.
-        </p>
-      ) : null}
 
       {variant === "dj" ? (
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -118,7 +131,16 @@ export function SpotlightHubContent({
         />
       ) : null}
 
-      {visibleRows.map((sec) => (
+      {editorialGridItems.length > 0 ? (
+        <SpotlightCardGrid
+          entries={editorialGridItems}
+          linkMode={linkMode}
+          hideSponsoredPaidCopy={hideSponsoredPaidCopy}
+          minColumns={editorialGridItems.length}
+        />
+      ) : null}
+
+      {blockRows.map((sec) => (
         <SpotlightRow
           key={sec.id}
           sectionId={sec.id}

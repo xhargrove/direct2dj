@@ -50,7 +50,7 @@ export default async function PublicFeaturedPage() {
               paid Featured Spotlight slots from artists in the catalog. Sign in as a DJ to preview and download packs.
             </p>
 
-            <div className="mt-12">
+            <div className="mx-auto mt-12 w-full max-w-6xl">
               <SpotlightHub variant="featured" linkMode="public" showSponsoredCta />
             </div>
           </section>

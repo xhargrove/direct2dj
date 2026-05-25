@@ -29,47 +29,50 @@ function artistLine(item: SpotlightItem): string {
   return credit || workspace || "—";
 }
 
+function spotlightBadgeLabel(sectionId: SpotlightSectionId, fullLabel: string): string {
+  if (sectionId === "sponsored") return "Featured";
+  const words = fullLabel.split(/\s+/);
+  if (sectionId === "trending") return "Trending with";
+  if (sectionId === "most_downloaded") return "Most downloaded";
+  if (sectionId === "most_feedback") return "Most feedback";
+  return words.slice(0, 2).join(" ");
+}
+
 export function SpotlightTrackCard({
   item,
   sectionId,
   linkMode,
-  size = "default",
+  size = "grid",
   hideSponsoredPaidCopy = false,
 }: {
   item: SpotlightItem;
   sectionId: SpotlightSectionId;
   linkMode: "public" | "dj";
-  size?: "default" | "compact";
+  size?: "grid" | "list";
   hideSponsoredPaidCopy?: boolean;
 }) {
   const badge = SPOTLIGHT_SECTION_LABELS[sectionId];
   const isSponsored = sectionId === "sponsored";
-  const shell =
-    size === "compact"
-      ? "flex min-w-[14rem] max-w-[16rem] shrink-0 flex-col gap-2 rounded-lg border border-zinc-200 p-3 dark:border-zinc-800"
-      : "flex gap-3 rounded-lg border border-zinc-200 p-3 transition hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900";
+  const isGrid = size === "grid";
 
-  const innerLayout = size === "compact" ? "flex flex-col gap-2" : "flex min-w-0 flex-1 gap-3";
+  const shell = isGrid
+    ? "flex min-w-0 flex-col gap-2.5 rounded-lg border border-cyan-500/15 bg-zinc-950/50 p-3 transition hover:border-cyan-400/30 hover:bg-zinc-900/80 dark:border-cyan-400/20"
+    : "flex w-full items-stretch gap-4 rounded-lg border border-zinc-200 p-4 transition hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900";
 
-  return (
-    <Link href={trackHref(item.trackId, linkMode)} className={shell}>
-      <div className="flex items-start justify-between gap-2">
-        <span
-          className={`rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${BADGE_STYLES[sectionId]}`}
-        >
-          {sectionId === "sponsored" ? "Featured" : badge.split(" ").slice(0, 2).join(" ")}
-        </span>
-        {isSponsored && !hideSponsoredPaidCopy ? (
-          <span className="text-[10px] text-zinc-500">Paid</span>
-        ) : null}
-      </div>
-      <div className={innerLayout}>
-        <div className={
-            size === "compact"
-              ? "relative aspect-square w-full overflow-hidden rounded-md bg-zinc-100 dark:bg-zinc-800"
-              : "relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-zinc-100 dark:bg-zinc-800"
-          }
-        >
+  if (isGrid) {
+    return (
+      <Link href={trackHref(item.trackId, linkMode)} className={shell}>
+        <div className="flex items-start justify-between gap-2">
+          <span
+            className={`rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${BADGE_STYLES[sectionId]}`}
+          >
+            {spotlightBadgeLabel(sectionId, badge)}
+          </span>
+          {isSponsored && !hideSponsoredPaidCopy ? (
+            <span className="text-[10px] text-zinc-500">Paid</span>
+          ) : null}
+        </div>
+        <div className="relative aspect-square w-full overflow-hidden rounded-md bg-zinc-800">
           {item.coverSignedUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={item.coverSignedUrl} alt="" className="h-full w-full object-cover" />
@@ -77,18 +80,53 @@ export function SpotlightTrackCard({
             <div className="flex h-full items-center justify-center text-xs text-zinc-500">♪</div>
           )}
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-medium">{item.title}</p>
-          <p className="truncate text-sm text-zinc-600 dark:text-zinc-400">{artistLine(item)}</p>
+        <div className="min-w-0">
+          <p className="truncate font-semibold text-zinc-50">{item.title}</p>
+          <p className="truncate text-sm text-zinc-400">{artistLine(item)}</p>
           <p className="mt-1 text-xs text-zinc-500">
             {[item.genre, item.bpm != null ? `${Math.round(item.bpm)} BPM` : null]
               .filter(Boolean)
               .join(" · ")}
           </p>
           {item.metricLabel && sectionId !== "most_downloaded" && !(hideSponsoredPaidCopy && isSponsored) ? (
-            <p className="mt-1 text-xs font-medium text-zinc-700 dark:text-zinc-300">{item.metricLabel}</p>
+            <p className="mt-1 text-xs text-zinc-500">{item.metricLabel}</p>
           ) : null}
         </div>
+      </Link>
+    );
+  }
+
+  return (
+    <Link href={trackHref(item.trackId, linkMode)} className={shell}>
+      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-zinc-100 sm:h-24 sm:w-24 dark:bg-zinc-800">
+        {item.coverSignedUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={item.coverSignedUrl} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full items-center justify-center text-xs text-zinc-500">♪</div>
+        )}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${BADGE_STYLES[sectionId]}`}
+          >
+            {sectionId === "sponsored" ? "Featured" : spotlightBadgeLabel(sectionId, badge)}
+          </span>
+          {isSponsored && !hideSponsoredPaidCopy ? (
+            <span className="text-[10px] text-zinc-500">Paid</span>
+          ) : null}
+        </div>
+        <p className="truncate font-medium">{item.title}</p>
+        <p className="truncate text-sm text-zinc-600 dark:text-zinc-400">{artistLine(item)}</p>
+        <p className="text-xs text-zinc-500">
+          {[item.genre, item.bpm != null ? `${Math.round(item.bpm)} BPM` : null]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+        {item.metricLabel && sectionId !== "most_downloaded" && !(hideSponsoredPaidCopy && isSponsored) ? (
+          <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{item.metricLabel}</p>
+        ) : null}
       </div>
     </Link>
   );
@@ -139,6 +177,41 @@ export function SpotlightHero({
   );
 }
 
+function spotlightGridClass(count: number): string {
+  if (count <= 1) return "grid grid-cols-1 gap-3";
+  if (count === 2) return "grid grid-cols-1 gap-3 sm:grid-cols-2";
+  if (count === 3) return "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3";
+  return "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+}
+
+export function SpotlightCardGrid({
+  entries,
+  linkMode,
+  hideSponsoredPaidCopy = false,
+  minColumns = 1,
+}: {
+  entries: { item: SpotlightItem; sectionId: SpotlightSectionId }[];
+  linkMode: "public" | "dj";
+  hideSponsoredPaidCopy?: boolean;
+  minColumns?: number;
+}) {
+  const count = Math.max(entries.length, minColumns);
+  return (
+    <div className={spotlightGridClass(count)}>
+      {entries.map(({ item, sectionId }) => (
+        <SpotlightTrackCard
+          key={`${sectionId}-${item.trackId}`}
+          item={item}
+          sectionId={sectionId}
+          linkMode={linkMode}
+          size="grid"
+          hideSponsoredPaidCopy={hideSponsoredPaidCopy}
+        />
+      ))}
+    </div>
+  );
+}
+
 export function SpotlightRow({
   sectionId,
   title,
@@ -171,23 +244,25 @@ export function SpotlightRow({
     );
   }
 
+  const gridClass = spotlightGridClass(items.length);
+
   return (
     <section className="flex flex-col gap-3">
       <div>
-        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
+        <h2 className="text-lg font-semibold tracking-tight text-zinc-50">{title}</h2>
         {subtitle ? <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{subtitle}</p> : null}
         {sectionId === "sponsored" && !hideSponsoredPaidCopy ? (
           <p className="mt-1 text-xs text-zinc-500">Paid placement — clearly labeled for transparency.</p>
         ) : null}
       </div>
-      <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
+      <div className={gridClass}>
         {items.map((item) => (
           <SpotlightTrackCard
             key={`${sectionId}-${item.trackId}`}
             item={item}
             sectionId={sectionId}
             linkMode={linkMode}
-            size="compact"
+            size="grid"
             hideSponsoredPaidCopy={hideSponsoredPaidCopy}
           />
         ))}
