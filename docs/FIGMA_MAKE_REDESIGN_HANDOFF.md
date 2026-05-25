@@ -1,5 +1,7 @@
 # Figma Make — visual redesign handoff
 
+> **Full handoff:** see [`FIGMA_DESIGN_HANDOFF.md`](./FIGMA_DESIGN_HANDOFF.md) for tokens, screen inventory, components, access gates, and Figma file structure.
+
 Use this doc when prompting **Figma Make** or briefing a designer. Goal: **skin and atmosphere** that feel **DJ / booth / nightlife**, not corporate SaaS. **Do not redesign information architecture** unless product explicitly expands scope.
 
 ---
@@ -8,7 +10,7 @@ Use this doc when prompting **Figma Make** or briefing a designer. Goal: **skin 
 
 **Digital Service Pack** — promos from artists and labels to **DJs**: discovery, DJ pack downloads, play reporting, billing for featured placements. Roles: **artist**, **DJ**, **label rep**, **admin**.
 
-Canonical site (confirm in deploy env): **https://digitalservicepack.com**
+Canonical site (confirm in deploy env): **https://direct2dja.com** (also https://direct2dj.vercel.app)
 
 ---
 
@@ -35,16 +37,17 @@ Canonical site (confirm in deploy env): **https://digitalservicepack.com**
 
 ## Figma Make file (this project)
 
-**Canonical design source (current):** “Recreate Design Element” — use this file for tokens, layout reference, and MCP reads.
+> **Repo linkage:** [`FIGMA_REPO_LINKAGE.md`](./FIGMA_REPO_LINKAGE.md) — Git is `direct2dj`.
+
+**Canonical design source (Digital Service Pack):** [Recreate Design Element](https://www.figma.com/make/pU7DPNlSeo5tTZieZp5L0A/Recreate-Design-Element) — file key `pU7DPNlSeo5tTZieZp5L0A`. Share with your Figma account so MCP can read it.
 
 | | |
 |--|--|
 | **Make URL** | `https://www.figma.com/make/pU7DPNlSeo5tTZieZp5L0A/Recreate-Design-Element` |
 | **File key** | `pU7DPNlSeo5tTZieZp5L0A` |
+| **MCP read** | `get_design_context` with `nodeId: "0:1"` |
 
-**Older exploration (optional):** `y0txXZyFfbVK66idEaf3lI` (“User greeting”) — superseded for handoff; keep only if you still need legacy frames.
-
-Cursor **Figma MCP** can read the canonical file with `fileKey: "pU7DPNlSeo5tTZieZp5L0A"`. It does **not** auto-push designs into the Git repo.
+Cursor **Figma MCP** reads Make source for the `fileKey` you pass. It does **not** read the Git repo automatically.
 
 ---
 
