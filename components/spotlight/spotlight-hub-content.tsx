@@ -85,8 +85,8 @@ export function SpotlightHubContent({
 
   const gapClass = variant === "home" ? "gap-10" : variant === "dj" ? "gap-6" : "gap-12";
   const hideSponsoredPaidCopy = variant === "dj";
-  const density = variant === "dj" ? "compact" : "default";
-  const useEditorialRow = variant === "featured" || variant === "home";
+  const blockDensity = variant === "dj" ? "compact" : "default";
+  const useEditorialRow = variant === "featured" || variant === "home" || variant === "dj";
 
   const editorialCardSections = useEditorialRow
     ? visibleRows.filter((s) => EDITORIAL_CARD_SECTIONS.includes(s.id) && s.items.length > 0)
@@ -129,7 +129,7 @@ export function SpotlightHubContent({
           item={rotw}
           sectionLabel={SPOTLIGHT_SECTION_LABELS.record_of_week}
           linkMode={linkMode}
-          density={density}
+          density={blockDensity}
         />
       ) : null}
 
@@ -137,7 +137,8 @@ export function SpotlightHubContent({
         <SpotlightCardGrid
           entries={editorialGridItems}
           linkMode={linkMode}
-          density={density}
+          density={blockDensity}
+          editorialStrip={useEditorialRow}
           hideSponsoredPaidCopy={hideSponsoredPaidCopy}
           minColumns={editorialGridItems.length}
         />
@@ -151,7 +152,7 @@ export function SpotlightHubContent({
           subtitle={SECTION_SUBTITLES[sec.id]}
           items={sec.items}
           linkMode={linkMode}
-          density={density}
+          density={blockDensity}
           hideSponsoredPaidCopy={hideSponsoredPaidCopy}
           emptyMessage={
             showEmptyEditorialSections && sec.items.length === 0

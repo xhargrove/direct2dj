@@ -214,7 +214,13 @@ export function SpotlightHero({
   );
 }
 
-function spotlightGridClass(count: number, density: SpotlightDensity = "default"): string {
+function spotlightGridClass(count: number, density: SpotlightDensity = "default", editorialStrip = false): string {
+  if (editorialStrip) {
+    if (count <= 1) return "grid max-w-[11rem] grid-cols-1 gap-2 sm:max-w-xs";
+    if (count === 2) return "grid grid-cols-2 gap-2";
+    if (count === 3) return "grid grid-cols-2 gap-2 sm:grid-cols-3";
+    return "grid grid-cols-2 gap-2 sm:grid-cols-4";
+  }
   if (density === "compact") {
     if (count <= 1) return "grid grid-cols-1 gap-2";
     return "grid grid-cols-2 gap-2";
@@ -229,18 +235,22 @@ export function SpotlightCardGrid({
   entries,
   linkMode,
   density = "default",
+  editorialStrip = false,
   hideSponsoredPaidCopy = false,
   minColumns = 1,
 }: {
   entries: { item: SpotlightItem; sectionId: SpotlightSectionId }[];
   linkMode: "public" | "dj";
   density?: SpotlightDensity;
+  /** Four editorial slots in one row (Discover feed + marketing). */
+  editorialStrip?: boolean;
   hideSponsoredPaidCopy?: boolean;
   minColumns?: number;
 }) {
   const count = Math.max(entries.length, minColumns);
+  const cardDensity = editorialStrip ? "default" : density;
   return (
-    <div className={spotlightGridClass(count, density)}>
+    <div className={spotlightGridClass(count, density, editorialStrip)}>
       {entries.map(({ item, sectionId }) => (
         <SpotlightTrackCard
           key={`${sectionId}-${item.trackId}`}
@@ -248,7 +258,7 @@ export function SpotlightCardGrid({
           sectionId={sectionId}
           linkMode={linkMode}
           size="grid"
-          density={density}
+          density={cardDensity}
           hideSponsoredPaidCopy={hideSponsoredPaidCopy}
         />
       ))}
