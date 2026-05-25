@@ -10,6 +10,7 @@ import {
   type DjRatingInput,
 } from "@/app/dj/actions";
 import { triggerPackZipDownload } from "@/lib/dj/trigger-pack-downloads";
+import { isNativeAppShell } from "@/lib/capacitor/navigation";
 import {
   feedbackQualifiesForDownload,
   packDownloadQualifies,
@@ -296,7 +297,7 @@ export function TrackDetailPanel({
                         setModerationStatus("pending");
                       }
                       syncDownloadReady(trimmed);
-                      router.refresh();
+                      if (!isNativeAppShell()) router.refresh();
                     }
                   })
                 }
@@ -428,7 +429,7 @@ export function TrackDetailPanel({
               else {
                 setRatingMsg(null);
                 syncDownloadReady(feedback);
-                router.refresh();
+                if (!isNativeAppShell()) router.refresh();
               }
             })
           }

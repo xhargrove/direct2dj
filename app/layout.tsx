@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Syne } from "next/font/google";
+import { NativeNavigationGuard } from "@/components/capacitor/native-navigation-guard";
 import { getMetadataBaseUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -82,6 +83,7 @@ export default function RootLayout({
           <div className="dj-atmosphere__noise" />
           <div className="dj-atmosphere__vignette" />
         </div>
+        <NativeNavigationGuard />
         <div className="relative z-[1] flex min-h-full flex-col">{children}</div>
       </body>
     </html>

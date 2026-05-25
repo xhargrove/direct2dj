@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
+import { hardNavigate, isNativeAppShell } from "@/lib/capacitor/navigation";
 
 const sortOptions = [
   { value: "newest", label: "Newest" },
@@ -24,7 +25,9 @@ export function DjFeedFilters({ genreOptions }: { genreOptions: string[] }) {
     }
     next.delete("page");
     startTransition(() => {
-      router.push(`/dj/feed?${next.toString()}`);
+      const path = `/dj/feed?${next.toString()}`;
+      if (isNativeAppShell()) hardNavigate(path);
+      else router.push(path);
     });
   };
 

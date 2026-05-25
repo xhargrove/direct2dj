@@ -2,7 +2,13 @@ import { Capacitor } from "@capacitor/core";
 import { Browser } from "@capacitor/browser";
 
 export function isNativeAppShell(): boolean {
-  return Capacitor.isNativePlatform();
+  if (typeof window === "undefined") return false;
+  try {
+    if (Capacitor.isNativePlatform()) return true;
+  } catch {
+    /* bridge not ready */
+  }
+  return /Capacitor/i.test(navigator.userAgent);
 }
 
 /** Full page load — required after auth in WKWebView so cookies + RSC requests stay in sync. */
