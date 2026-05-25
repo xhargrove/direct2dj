@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import { SiteLogo } from "@/components/brand/site-logo";
 import { authGetUserOrTimeout } from "@/lib/supabase/auth-bounded";
 import { createClient } from "@/lib/supabase/server";
 import { maybeSingleTimeoutFallback } from "@/lib/supabase/maybe-single-timeout-fallback";
@@ -144,7 +144,7 @@ export default async function Home() {
                   </Link>
                 )}
                 <Link
-                  href="/featured#features"
+                  href="/featured#how-it-works"
                   className="dj-btn-ghost inline-flex justify-center gap-2 sm:min-w-[11rem]"
                 >
                   <IconPlay />
@@ -165,21 +165,21 @@ export default async function Home() {
               </div>
 
               <p className="mt-6 text-center lg:text-left">
-                <Link href="/featured" className="dj-nav-link text-sm font-semibold underline-offset-4 hover:underline">
-                  Spotlight hub on Discover →
+                <Link
+                  href="/featured#featured-artists"
+                  className="dj-nav-link text-sm font-semibold underline-offset-4 hover:underline"
+                >
+                  Featured artists →
                 </Link>
               </p>
             </div>
 
             <div className="dj-hero-image-wrap relative z-[1]">
-              <Image
-                src="/site-logo.png"
-                alt="Digital Service Pack logo"
+              <SiteLogo
                 width={819}
                 height={1024}
                 className="relative z-[1] h-auto w-full max-w-[min(92vw,520px)] object-contain sm:max-w-[580px] lg:max-h-[min(88vh,820px)] lg:max-w-[min(100%,640px)] xl:max-w-[min(100%,720px)]"
                 priority
-                sizes="(max-width: 1024px) 92vw, (max-width: 1280px) 50vw, 720px"
               />
             </div>
           </div>

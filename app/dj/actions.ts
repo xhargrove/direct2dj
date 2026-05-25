@@ -174,6 +174,17 @@ export async function submitFeedback(trackId: string, body: string) {
       .eq("id", existing.id);
 
     if (error) return { error: error.message };
+
+    await notifyTrackFeedback(trackId);
+
+    revalidatePath(`/dj/tracks/${trackId}`);
+    revalidatePath("/dj/history");
+    revalidatePath("/artist/analytics");
+    return {
+      ok: true as const,
+      body: text,
+      moderation_status: existing.moderation_status ?? "pending",
+    };
   } else {
     const { error } = await ctx.supabase.from("feedback").insert({
       track_id: trackId,
@@ -190,7 +201,7 @@ export async function submitFeedback(trackId: string, body: string) {
   revalidatePath(`/dj/tracks/${trackId}`);
   revalidatePath("/dj/history");
   revalidatePath("/artist/analytics");
-  return { ok: true as const };
+  return { ok: true as const, body: text, moderation_status: "pending" as const };
 }
 
 export async function updateAllowArtistContact(allow: boolean) {

@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import { SiteLogo } from "@/components/brand/site-logo";
 import { adminWorkspaceTestEnabled, getAdminWorkspaceTestSecret } from "@/lib/auth/admin-workspace-test";
 import { isCoAdminRole } from "@/lib/auth/backstage-access";
 import { requireRoles } from "@/lib/auth/require-role";
@@ -47,14 +47,7 @@ export default async function AdminLayout({
       <aside className="dj-sidebar flex w-full shrink-0 flex-col border-b border-white/7 lg:sticky lg:top-0 lg:h-screen lg:w-56 lg:border-b-0 lg:border-r">
         <div className="flex items-center justify-between gap-3 px-4 py-3 lg:flex-col lg:items-stretch lg:gap-2">
           <Link href="/" className="flex min-w-0 items-center gap-2 no-underline">
-            <Image
-              src="/site-logo.png"
-              alt="Digital Service Pack logo"
-              width={164}
-              height={205}
-              className="h-9 w-auto shrink-0 object-contain"
-              priority
-            />
+            <SiteLogo width={164} height={205} className="h-9 w-auto shrink-0 object-contain" priority />
             <div className="flex min-w-0 flex-col gap-0.5">
               <span className="dj-brand truncate text-sm font-semibold leading-none tracking-tight text-foreground">
                 Digital Service Pack

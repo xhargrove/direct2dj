@@ -10,7 +10,13 @@ import {
   type DjRatingInput,
 } from "@/app/dj/actions";
 import { triggerPackZipDownload } from "@/lib/dj/trigger-pack-downloads";
-import { validateOptionalCrowdReaction, validateYesNoAnswer } from "@/lib/dj/catalog-validation";
+import {
+  feedbackQualifiesForDownload,
+  packDownloadQualifies,
+  ratingQualifiesForDownload,
+  validateOptionalCrowdReaction,
+  validateYesNoAnswer,
+} from "@/lib/dj/catalog-validation";
 import type { CrowdReaction } from "@/lib/types/database";
 
 function boolToSelect(v: boolean | null): "" | "yes" | "no" {
@@ -75,6 +81,11 @@ export function TrackDetailPanel({
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
   const [packSuccessMsg, setPackSuccessMsg] = useState<string | null>(null);
   const [feedback, setFeedback] = useState(initialFeedbackBody);
+  const [savedFeedbackBody, setSavedFeedbackBody] = useState(initialFeedbackBody);
+  const [feedbackSaved, setFeedbackSaved] = useState(() => feedbackQualifiesForDownload(initialFeedbackBody));
+  const [editingFeedback, setEditingFeedback] = useState(() => !feedbackQualifiesForDownload(initialFeedbackBody));
+  const [moderationStatus, setModerationStatus] = useState(feedbackModerationStatus);
+  const [downloadReady, setDownloadReady] = useState(downloadAllowed);
   const [pendingPack, startPackTransition] = useTransition();
   const [pendingFeedback, startFeedbackTransition] = useTransition();
 
@@ -85,6 +96,33 @@ export function TrackDetailPanel({
   const [crowd, setCrowd] = useState<string>(initialRating.crowd_reaction ?? "");
 
   const [pendingRating, startRatingTransition] = useTransition();
+
+  useEffect(() => {
+    setFeedback(initialFeedbackBody);
+    setSavedFeedbackBody(initialFeedbackBody);
+    const saved = feedbackQualifiesForDownload(initialFeedbackBody);
+    setFeedbackSaved(saved);
+    setEditingFeedback(!saved);
+    setModerationStatus(feedbackModerationStatus);
+    setDownloadReady(downloadAllowed);
+  }, [initialFeedbackBody, feedbackModerationStatus, downloadAllowed]);
+
+  function currentRatingSnapshot() {
+    return {
+      score,
+      club_ready: selectToBool(clubSel),
+      radio_ready: selectToBool(radioSel),
+    };
+  }
+
+  function syncDownloadReady(nextFeedbackBody: string) {
+    setDownloadReady(
+      packDownloadQualifies({
+        feedbackBody: nextFeedbackBody,
+        rating: currentRatingSnapshot(),
+      }),
+    );
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -188,47 +226,104 @@ export function TrackDetailPanel({
         )}
       </section>
 
-      <section className="rounded-lg border border-amber-200/80 bg-amber-50/50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
-        <h2 className="text-sm font-semibold">Feedback for the artist (required before download)</h2>
-        <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
-          Write at least a few characters of feedback, then save. You also need a complete rating (stars, club ready, and
-          radio ready) before the DJ pack unlocks. You can update both later.
-        </p>
-        {feedbackModerationStatus ? (
-          <p className="mt-2 text-xs text-zinc-500">
-            Status: <span className="font-medium">{feedbackModerationStatus}</span>
-          </p>
-        ) : null}
-        <textarea
-          value={feedback}
-          onChange={(e) => setFeedback(e.target.value)}
-          rows={4}
-          placeholder="Constructive notes for the artist…"
-          className="mt-2 w-full max-w-lg rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600"
-        />
-        <button
-          type="button"
-          disabled={pendingFeedback}
-          className="mt-2 min-h-10 rounded-md border border-zinc-300 bg-white px-4 text-sm font-medium dark:border-zinc-600 dark:bg-zinc-900"
-          onClick={() =>
-            startFeedbackTransition(async () => {
-              setFeedbackMsg(null);
-              const r = await submitFeedback(trackId, feedback);
-              if ("error" in r && r.error) setFeedbackMsg(r.error);
-              else {
-                setFeedbackMsg("Feedback saved.");
-                router.refresh();
-              }
-            })
-          }
-        >
-          {pendingFeedback ? "Saving…" : "Save feedback"}
-        </button>
-        {feedbackMsg ? (
-          <p className="mt-2 text-sm text-zinc-700 dark:text-zinc-300" role="status">
-            {feedbackMsg}
-          </p>
-        ) : null}
+      <section
+        className={
+          feedbackSaved && !editingFeedback
+            ? "rounded-lg border border-zinc-200 bg-zinc-50/80 p-4 dark:border-zinc-800 dark:bg-zinc-900/40"
+            : "rounded-lg border border-amber-200/80 bg-amber-50/50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20"
+        }
+      >
+        {feedbackSaved && !editingFeedback ? (
+          <>
+            <h2 className="text-sm font-semibold">Your feedback for the artist</h2>
+            <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+              Saved to your account for this track. You can edit it anytime.
+            </p>
+            {moderationStatus ? (
+              <p className="mt-2 text-xs text-zinc-500">
+                Status: <span className="font-medium">{moderationStatus}</span>
+              </p>
+            ) : null}
+            <p className="mt-3 whitespace-pre-wrap text-sm text-zinc-800 dark:text-zinc-200">{savedFeedbackBody}</p>
+            <button
+              type="button"
+              className="mt-3 min-h-10 rounded-md border border-zinc-300 bg-white px-4 text-sm font-medium dark:border-zinc-600 dark:bg-zinc-900"
+              onClick={() => {
+                setFeedbackMsg(null);
+                setEditingFeedback(true);
+              }}
+            >
+              Edit feedback
+            </button>
+          </>
+        ) : (
+          <>
+            <h2 className="text-sm font-semibold">Feedback for the artist (required before download)</h2>
+            <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+              Write at least a few characters of feedback, then save. You also need a complete rating (stars, club ready,
+              and radio ready) before the DJ pack unlocks.
+            </p>
+            {moderationStatus ? (
+              <p className="mt-2 text-xs text-zinc-500">
+                Status: <span className="font-medium">{moderationStatus}</span>
+              </p>
+            ) : null}
+            <textarea
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
+              rows={4}
+              placeholder="Constructive notes for the artist…"
+              className="mt-2 w-full max-w-lg rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-600"
+            />
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button
+                type="button"
+                disabled={pendingFeedback}
+                className="min-h-10 rounded-md border border-zinc-300 bg-white px-4 text-sm font-medium dark:border-zinc-600 dark:bg-zinc-900"
+                onClick={() =>
+                  startFeedbackTransition(async () => {
+                    setFeedbackMsg(null);
+                    const r = await submitFeedback(trackId, feedback);
+                    if ("error" in r && r.error) setFeedbackMsg(r.error);
+                    else {
+                      const trimmed = feedback.trim();
+                      setFeedbackSaved(true);
+                      setEditingFeedback(false);
+                      setSavedFeedbackBody(trimmed);
+                      if ("moderation_status" in r && r.moderation_status) {
+                        setModerationStatus(r.moderation_status);
+                      } else if (!moderationStatus) {
+                        setModerationStatus("pending");
+                      }
+                      syncDownloadReady(trimmed);
+                      router.refresh();
+                    }
+                  })
+                }
+              >
+                {pendingFeedback ? "Saving…" : feedbackSaved ? "Save changes" : "Save feedback"}
+              </button>
+              {feedbackSaved ? (
+                <button
+                  type="button"
+                  className="min-h-10 rounded-md px-4 text-sm font-medium text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-400"
+                  onClick={() => {
+                    setFeedbackMsg(null);
+                    setEditingFeedback(false);
+                    setFeedback(savedFeedbackBody);
+                  }}
+                >
+                  Cancel
+                </button>
+              ) : null}
+            </div>
+            {feedbackMsg ? (
+              <p className="mt-2 text-sm text-red-600 dark:text-red-400" role="alert">
+                {feedbackMsg}
+              </p>
+            ) : null}
+          </>
+        )}
       </section>
 
       <section className="flex flex-col gap-4 rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
@@ -240,7 +335,7 @@ export function TrackDetailPanel({
 
         <div>
           <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Stars (required to save)</span>
-          <div className="mt-2 flex flex-wrap gap-2">
+            <div className="mt-2 flex flex-wrap gap-2">
             {[1, 2, 3, 4, 5].map((n) => (
               <button
                 key={n}
@@ -331,7 +426,8 @@ export function TrackDetailPanel({
               const r = await submitRating(trackId, payload);
               if ("error" in r && r.error) setRatingMsg(r.error);
               else {
-                setRatingMsg("Rating saved.");
+                setRatingMsg(null);
+                syncDownloadReady(feedback);
                 router.refresh();
               }
             })
@@ -353,14 +449,18 @@ export function TrackDetailPanel({
           Files inside use the artist&apos;s <strong>release title</strong> and <strong>credited artist</strong> (e.g.{" "}
           <span className="font-mono text-[11px]">Artist Name - Make Way (Clean).mp3</span>).
         </p>
-        {!downloadAllowed ? (
+        {!downloadReady ? (
           <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-100">
-            Save feedback and complete your rating (stars, club ready, radio ready) above — then the download button unlocks.
+            {!feedbackSaved
+              ? "Save feedback and complete your rating (stars, club ready, radio ready) above — then the download button unlocks."
+              : !ratingQualifiesForDownload(currentRatingSnapshot())
+                ? "Complete your rating (stars, club ready, radio ready) above — then the download button unlocks."
+                : "Finish the requirements above — then the download button unlocks."}
           </p>
         ) : null}
         <button
           type="button"
-          disabled={pendingPack || !downloadAllowed}
+          disabled={pendingPack || !downloadReady}
           className="min-h-11 max-w-xs rounded-md bg-zinc-900 px-4 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
           onClick={() =>
             startPackTransition(async () => {

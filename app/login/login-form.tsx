@@ -2,13 +2,14 @@
 
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { describeLoginFailure } from "@/lib/auth/supabase-auth-error";
 import { dashboardPathForRole, safeAppPath } from "@/lib/auth/paths";
 import type { UserRole } from "@/lib/types/roles";
 import { isUserRole } from "@/lib/types/roles";
 import { applySelectedLoginRole } from "./actions";
+import { hardNavigate } from "@/lib/capacitor/navigation";
 
 /** Where to send the user after email/password sign-in when no `?next=` deep-link is present. */
 const WORKSPACE = {
@@ -37,7 +38,6 @@ export function LoginForm({
   showLoginRoleSelector?: boolean;
   initialMode?: "signin" | "signup";
 }) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const nextParam = searchParams.get("next");
   const authError = searchParams.get("error");
@@ -130,9 +130,7 @@ export function LoginForm({
         ? WORKSPACE[workspace]
         : fallback;
 
-    router.push(safeAppPath(destinationPath, fallback));
-    router.refresh();
-    setPending(false);
+    hardNavigate(safeAppPath(destinationPath, fallback));
   }
 
   return (

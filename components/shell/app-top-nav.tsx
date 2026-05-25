@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { SiteLogo } from "@/components/brand/site-logo";
 
 export function AppTopNav({
   kicker,
@@ -14,9 +14,7 @@ export function AppTopNav({
   return (
     <header className="dj-header flex flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
       <Link href="/" className="flex w-fit shrink-0 items-center gap-2 no-underline">
-        <Image
-          src="/site-logo.png"
-          alt="Digital Service Pack logo"
+        <SiteLogo
           width={164}
           height={205}
           className="h-10 w-auto shrink-0 object-contain"

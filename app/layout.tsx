@@ -30,8 +30,8 @@ export const metadata: Metadata = {
   description:
     "Get your music directly to DJs: discovery, clean packs, downloads, and reporting — without the inbox chaos.",
   icons: {
-    icon: "/site-logo.png",
-    apple: "/site-logo.png",
+    icon: "/site-logo.jpg",
+    apple: "/site-logo.jpg",
   },
   openGraph: {
     title: "Digital Service Pack — Get Your Music Directly To The DJ",
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
       "Get your music directly to DJs: discovery, clean packs, downloads, and reporting — without the inbox chaos.",
     images: [
       {
-        url: "/site-logo.png",
+        url: "/site-logo.jpg",
         width: 1024,
         height: 1024,
         alt: "Digital Service Pack logo",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     title: "Digital Service Pack — Get Your Music Directly To The DJ",
     description:
       "Get your music directly to DJs: discovery, clean packs, downloads, and reporting — without the inbox chaos.",
-    images: ["/site-logo.png"],
+    images: ["/site-logo.jpg"],
   },
 };
 

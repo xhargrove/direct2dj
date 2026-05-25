@@ -46,7 +46,7 @@ export async function MarketingSiteHeader() {
         Home
       </Link>
       <Link href="/featured" className="dj-nav-link underline-offset-4 hover:underline">
-        Featured
+        How it works
       </Link>
     </>
   );

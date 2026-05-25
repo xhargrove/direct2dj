@@ -20,9 +20,14 @@
     "types:supabase": "supabase gen types typescript --local --schema public > lib/types/database.generated.ts",
     "verify:stripe": "node scripts/verify-stripe.cjs",
     "verify:stripe-webhooks": "node scripts/verify-stripe-webhooks.cjs",
-    "verify:launch": "npm run lint && npm run typecheck && npm test && npm run build"
+    "verify:launch": "npm run lint && npm run typecheck && npm test && npm run build",
+    "cap:sync": "npx cap sync ios",
+    "cap:copy": "npx cap copy ios",
+    "cap:open:ios": "npx cap open ios",
+    "cap:ios": "npm run cap:sync && npm run cap:open:ios"
   },
   "dependencies": {
+    "@capacitor/browser": "^8.0.3",
     "@capacitor/cli": "^8.3.4",
     "@capacitor/core": "^8.3.4",
     "@capacitor/ios": "^8.3.4",

@@ -86,21 +86,21 @@ export function SpotlightHubContent({
         >
           <div>
             <p className="dj-kicker dj-eyebrow">Spotlight hub</p>
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">What&apos;s spinning on Discover</h2>
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Featured on Discover</h2>
             <p className="mt-2 max-w-xl text-sm text-zinc-600 dark:text-zinc-400">
-              Editorial picks, Featured Spotlight slots, and live leaderboards from the DJ catalog.
+              A preview of editorial picks and featured artists — see the full list on How it works.
             </p>
           </div>
-          <Link href="/featured" className="dj-btn-ghost shrink-0 self-start sm:self-auto">
-            Full spotlight hub →
+          <Link href="/featured#featured-artists" className="dj-btn-ghost shrink-0 self-start sm:self-auto">
+            Featured artists →
           </Link>
         </div>
       ) : null}
 
       {variant === "featured" ? (
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Editorial picks, paid Featured Spotlight slots, and algorithmic leaderboards — the same sections DJs see at the top of
-          Discover. Sign in as a DJ to open a track and grab downloads.
+          Featured Artist, Record of the Week, and other editorial slots — plus paid Featured Spotlight placements from
+          artists. Sign in as a DJ to open a track and download the pack.
         </p>
       ) : null}
 

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { startSubmissionCheckout } from "@/app/artist/tracks/actions";
+import { openExternalFlowUrl } from "@/lib/capacitor/navigation";
 
 export type SubmissionTierOption = {
   id: string;
@@ -44,7 +45,7 @@ export function SubmissionCheckout({ tiers }: { tiers: SubmissionTierOption[] })
       return;
     }
     if ("url" in r && r.url) {
-      window.location.assign(r.url);
+      await openExternalFlowUrl(r.url);
       return;
     }
     setError("Could not start checkout.");

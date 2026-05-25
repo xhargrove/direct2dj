@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/site-logo.png",
+        destination: "/site-logo.jpg",
+        permanent: true,
+      },
+      {
         source: "/dj/status",
         destination: "/dj/application-status",
         permanent: false,

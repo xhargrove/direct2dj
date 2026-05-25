@@ -1,20 +1,14 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { createFeaturedCheckoutSession } from "@/lib/billing/create-featured-checkout-session";
 
-export async function startFeaturedCheckoutForm(
-  _prevState: { error?: string } | null,
-  formData: FormData,
-): Promise<{ error?: string }> {
-  const trackId = formData.get("trackId")?.toString().trim() ?? "";
-  const pricingPlanId = formData.get("pricingPlanId")?.toString().trim() ?? "";
+export async function startFeaturedCheckout(trackId: string, pricingPlanId: string) {
   if (!trackId || !pricingPlanId) {
-    return { error: "Missing track or plan." };
+    return { error: "Missing track or plan." } as const;
   }
   const r = await createFeaturedCheckoutSession({ trackId, pricingPlanId });
   if ("error" in r) {
-    return { error: r.error };
+    return { error: r.error } as const;
   }
-  redirect(r.url);
+  return { url: r.url } as const;
 }

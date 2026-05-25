@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { SiteLogo } from "@/components/brand/site-logo";
 import { loginRoleSelectorEnabled } from "@/lib/auth/login-role-selector";
 import { getRoleDashboardPath } from "@/lib/auth/session";
 import { MarketingSiteHeader } from "@/components/shell/marketing-site-header";
@@ -26,14 +26,7 @@ export default async function LoginPage({ searchParams }: Props) {
       <MarketingSiteHeader />
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-10">
         <div className="mb-8 flex flex-col items-center gap-2 text-center">
-          <Image
-            src="/site-logo.png"
-            alt=""
-            width={120}
-            height={150}
-            className="h-24 w-auto object-contain"
-            priority
-          />
+          <SiteLogo width={120} height={150} className="h-24 w-auto object-contain" priority alt="" />
           <p className="dj-brand text-lg font-semibold tracking-tight text-zinc-50">Digital Service Pack</p>
           <p className="max-w-xs text-sm text-zinc-400">Sign in and step into your booth.</p>
         </div>
