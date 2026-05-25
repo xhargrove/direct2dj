@@ -85,7 +85,12 @@ export async function submitDjApplication(
 
   const { error } = await ctx.supabase.from("dj_applications").upsert(payload, { onConflict: "dj_id" });
 
-  if (error) return { error: error.message };
+  if (error) {
+    if (error.code === "23505") {
+      return { error: "An application already exists for this account." };
+    }
+    return { error: "Could not save your application. Please try again." };
+  }
 
   const { error: orgErr } = await ctx.supabase.rpc("dj_set_organization_membership", {
     p_display_name: crew_organization_name,

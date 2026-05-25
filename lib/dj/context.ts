@@ -1,4 +1,7 @@
 import "server-only";
+
+import { copyForAccessState } from "@/lib/auth/account-access-copy";
+import { resolveAccountAccessState } from "@/lib/auth/account-access-state";
 import { createClient } from "@/lib/supabase/server";
 import type { DjVettingStatus } from "@/lib/types/database";
 import type { UserRole } from "@/lib/types/roles";
@@ -27,18 +30,20 @@ export async function getDjContext(): Promise<DjContextResult> {
     .eq("id", user.id)
     .maybeSingle();
   if (profileErr) {
-    return { error: profileErr.message };
+    return { error: "Could not verify your account. Please try again." };
   }
   if ((profile?.role as UserRole | undefined) !== "dj") {
-    return { error: "This action is only available to DJ accounts." };
+    const artistCopy = copyForAccessState("ARTIST_ACCOUNT");
+    return { error: artistCopy?.title ?? "This action is only available to DJ accounts." };
   }
 
   const { data: dj, error: djErr } = await supabase.from("djs").select("id").eq("profile_id", user.id).maybeSingle();
   if (djErr) {
-    return { error: djErr.message };
+    return { error: "Could not verify your DJ profile. Please try again." };
   }
   if (!dj) {
-    return { error: "No DJ profile found." };
+    const notStarted = copyForAccessState("DJ_APPLICATION_NOT_STARTED");
+    return { error: notStarted?.message ?? "No DJ profile found." };
   }
 
   return { supabase, userId: user.id, djId: dj.id };
@@ -57,22 +62,27 @@ export async function getApprovedDjCatalogContext(): Promise<DjContextResult> {
     .eq("id", base.djId)
     .maybeSingle();
   if (djErr) {
-    return { error: djErr.message };
+    return { error: "Could not verify DJ approval status. Please try again." };
   }
 
-  const status = dj?.vetting_status as DjVettingStatus | undefined;
-  if (status === "pending") {
-    return { error: "Your DJ application is still pending. You cannot use the catalog until approved." };
-  }
-  if (status === "rejected") {
-    return { error: "Your DJ application was not approved for the promo pool." };
-  }
-  if (status === "suspended") {
-    return { error: "Your DJ account is suspended. Catalog access is disabled." };
-  }
-  if (status !== "approved") {
-    return { error: "You are not approved to use the DJ catalog." };
+  const { data: applicationRow } = await base.supabase
+    .from("dj_applications")
+    .select("id, dj_id")
+    .eq("dj_id", base.djId)
+    .maybeSingle();
+
+  const access = resolveAccountAccessState({
+    userId: base.userId,
+    profile: { id: base.userId, role: "dj", full_name: null, email: null },
+    dj: dj ? { id: base.djId, vetting_status: dj.vetting_status as DjVettingStatus } : null,
+    djApplication: applicationRow,
+    artist: null,
+    workspace: "dj",
+  });
+
+  if (access.state === "DJ_APPROVED") {
+    return base;
   }
 
-  return base;
+  return { error: access.message };
 }

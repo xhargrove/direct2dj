@@ -1,14 +1,17 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getUnreadNotificationCount } from "@/app/notifications/actions";
-import { requireRoles } from "@/lib/auth/require-role";
+import { AccountAccessGate } from "@/components/auth/account-access-gate";
 import { getAdminWorkspaceTestBannerState } from "@/lib/auth/admin-workspace-test-banner-state";
+import { isDjWorkspaceShellBlocked } from "@/lib/auth/account-access-state";
+import { dashboardPathForRole } from "@/lib/auth/paths";
+import { resolveDjWorkspaceAccess } from "@/lib/auth/resolve-dj-workspace-access";
 import { AdminWorkspaceTestBanner } from "@/components/admin/admin-workspace-test-banner";
 import { DjWorkspaceGateBanner } from "@/components/dj/dj-workspace-gate-banner";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { AppTopNav } from "@/components/shell/app-top-nav";
-import { createClient } from "@/lib/supabase/server";
-import type { DjVettingStatus } from "@/lib/types/database";
+import { isUserRole } from "@/lib/types/roles";
 
 const promoNav = [
   { href: "/dj/dashboard", label: "Dashboard" },
@@ -20,53 +23,55 @@ const promoNav = [
   { href: "/dj/settings", label: "Privacy" },
 ] as const;
 
+const LIMITED_DJ_NAV = [
+  { href: "/dj/dashboard", label: "Dashboard" },
+  { href: "/dj/application-status", label: "Status" },
+  { href: "/dj/profile", label: "Profile" },
+  { href: "/dj/settings", label: "Privacy" },
+] as const;
+
 export default async function DjLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await requireRoles(["dj"]);
+  const access = await resolveDjWorkspaceAccess();
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  if (access.state === "SIGNED_OUT") {
+    redirect("/login");
+  }
+
+  if (access.profile && !["dj", "artist"].includes(access.profile.role)) {
+    const next = isUserRole(access.profile.role)
+      ? dashboardPathForRole(access.profile.role)
+      : "/login";
+    redirect(next);
+  }
+
+  const shellBlocked = isDjWorkspaceShellBlocked(access.state, access.dj);
+  const unread = access.userId ? await getUnreadNotificationCount() : 0;
 
   let navItems: readonly { href: string; label: string }[] = promoNav;
   let gateBanner: ReactNode = null;
 
-  const unread = user ? await getUnreadNotificationCount() : 0;
-
-  if (user) {
-    const { data: dj } = await supabase.from("djs").select("id, vetting_status").eq("profile_id", user.id).maybeSingle();
-    const status = dj?.vetting_status;
-    if (status !== "approved") {
-      const gated: { href: string; label: string }[] = [
-        { href: "/dj/dashboard", label: "Dashboard" },
-        { href: "/dj/application-status", label: "Status" },
-        { href: "/dj/profile", label: "Profile" },
-        { href: "/dj/settings", label: "Privacy" },
-      ];
-      if (status !== "suspended") {
-        gated.splice(2, 0, { href: "/dj/apply", label: "Apply" });
-      }
-      navItems = gated;
+  if (access.profile?.role === "dj" && access.state !== "DJ_APPROVED" && !shellBlocked) {
+    const isSuspended = access.dj?.vetting_status === "suspended";
+    const gated: { href: string; label: string }[] = [...LIMITED_DJ_NAV];
+    if (
+      !isSuspended &&
+      (access.state === "DJ_APPLICATION_NOT_STARTED" ||
+        access.state === "DJ_APPLICATION_PENDING" ||
+        access.state === "DJ_APPLICATION_REJECTED")
+    ) {
+      gated.splice(2, 0, { href: "/dj/apply", label: "Apply" });
     }
-
-    if (dj && status && status !== "approved") {
-      const { data: appRow } = await supabase.from("dj_applications").select("dj_id").eq("dj_id", dj.id).maybeSingle();
-      gateBanner = (
-        <DjWorkspaceGateBanner
-          vettingStatus={status as DjVettingStatus}
-          hasSubmittedApplication={!!appRow}
-        />
-      );
-    }
+    navItems = gated;
+    gateBanner = <DjWorkspaceGateBanner accessState={access.state} message={access.message} />;
   }
 
   const workspaceBanner = await getAdminWorkspaceTestBannerState();
 
-  const nav = (
+  const nav = shellBlocked ? null : (
     <>
       {navItems.map((item) => (
         <Link key={item.href} href={item.href} className="dj-nav-link underline-offset-4 hover:underline">
@@ -78,7 +83,7 @@ export default async function DjLayout({
 
   const trailing = (
     <>
-      <NotificationBell initialUnread={unread} />
+      {!shellBlocked ? <NotificationBell initialUnread={unread} /> : null}
       <form action="/auth/sign-out" method="post">
         <button type="submit" className="dj-nav-link min-h-10 rounded-md px-3 text-sm font-medium hover:underline">
           Sign out
@@ -92,7 +97,13 @@ export default async function DjLayout({
       {workspaceBanner.show ? <AdminWorkspaceTestBanner role={workspaceBanner.role} /> : null}
       <AppTopNav kicker="DJ deck" nav={nav} trailing={trailing} />
       {gateBanner}
-      <main className="flex flex-1 flex-col px-4 py-6">{children}</main>
+      <main className="flex flex-1 flex-col px-4 py-6">
+        {shellBlocked ? (
+          <AccountAccessGate state={access.state} message={access.message} />
+        ) : (
+          children
+        )}
+      </main>
       <footer className="dj-footer px-4 py-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
         <Link href="/" className="dj-nav-link underline underline-offset-4 hover:underline">
           Home

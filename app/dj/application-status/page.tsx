@@ -1,50 +1,34 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { DjCrewRoster } from "@/components/dj/dj-crew-roster";
+import { copyForAccessState } from "@/lib/auth/account-access-copy";
+import { resolveDjWorkspaceAccess } from "@/lib/auth/resolve-dj-workspace-access";
 import { djTierLabel } from "@/lib/dj/tier-label";
 import { formatDateDisplay } from "@/lib/format/datetime-display";
 import { createClient } from "@/lib/supabase/server";
-import type { DjVettingStatus } from "@/lib/types/database";
 
 type Props = { searchParams: Promise<{ submitted?: string }> };
-
-function statusMessage(status: DjVettingStatus, hasApplication: boolean) {
-  switch (status) {
-    case "pending":
-      return hasApplication
-        ? "Your application is pending review. You’ll get promo access once an admin approves you."
-        : "You haven’t submitted a DJ application yet. Complete the form first — then we can review you for the promo pool.";
-    case "approved":
-      return "You’re approved — the Discover feed, downloads, and ratings are available.";
-    case "rejected":
-      return "Your application wasn’t approved. Update your details and submit again.";
-    case "suspended":
-      return "Your DJ access is suspended. Contact support if you believe this is a mistake.";
-    default:
-      return "";
-  }
-}
 
 export default async function DjApplicationStatusPage({ searchParams }: Props) {
   const sp = await searchParams;
   const submitted = sp.submitted === "1";
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const access = await resolveDjWorkspaceAccess();
+  if (access.state === "SIGNED_OUT") redirect("/login");
+  if (access.profile?.role !== "dj" || !access.dj) redirect("/login");
 
+  const supabase = await createClient();
   const { data: dj } = await supabase
     .from("djs")
     .select("id, vetting_status, dj_tier, display_name")
-    .eq("profile_id", user.id)
+    .eq("id", access.dj.id)
     .maybeSingle();
 
   if (!dj) redirect("/login");
 
-  const { data: applicationRow } = await supabase.from("dj_applications").select("dj_id").eq("dj_id", dj.id).maybeSingle();
-  const hasApplication = !!applicationRow;
+  const hasApplication = !!access.djApplication;
+  const statusCopy = copyForAccessState(access.state);
+  const statusMessage = access.message || statusCopy?.message || "";
 
   const { data: orgMembership } = await supabase
     .from("dj_organization_members")
@@ -74,18 +58,13 @@ export default async function DjApplicationStatusPage({ searchParams }: Props) {
     <div className="mx-auto flex w-full max-w-xl flex-col gap-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Application status</h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          {statusMessage(dj.vetting_status as DjVettingStatus, hasApplication)}
-        </p>
+        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{statusMessage}</p>
       </div>
 
-      {dj.vetting_status === "pending" && !hasApplication ? (
+      {access.state === "DJ_APPLICATION_NOT_STARTED" ? (
         <div className="rounded-lg border border-cyan-200 bg-cyan-50 px-4 py-4 text-sm text-zinc-900 dark:border-cyan-900/40 dark:bg-cyan-950/40 dark:text-zinc-100">
-          <p className="font-semibold">Next step: submit your application</p>
-          <p className="mt-2 text-zinc-700 dark:text-zinc-300">
-            Discover, downloads, and ratings stay locked until you send us your application and an admin approves your DJ
-            profile.
-          </p>
+          <p className="font-semibold">{statusCopy?.title ?? "Your DJ application is not complete yet"}</p>
+          <p className="mt-2 text-zinc-700 dark:text-zinc-300">{statusCopy?.message}</p>
           <Link
             href="/dj/apply"
             className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900 sm:w-auto"
@@ -139,19 +118,21 @@ export default async function DjApplicationStatusPage({ searchParams }: Props) {
       <DjCrewRoster djId={dj.id} />
 
       <div className="flex flex-col gap-3 text-sm">
-        {dj.vetting_status === "pending" || dj.vetting_status === "rejected" ? (
+        {access.state === "DJ_APPLICATION_NOT_STARTED" ||
+        access.state === "DJ_APPLICATION_PENDING" ||
+        access.state === "DJ_APPLICATION_REJECTED" ? (
           <Link
             href="/dj/apply"
             className="inline-flex min-h-11 items-center justify-center rounded-md bg-zinc-900 px-4 font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
           >
-            {dj.vetting_status === "rejected"
+            {access.state === "DJ_APPLICATION_REJECTED"
               ? "Update application"
               : hasApplication
                 ? "Edit application"
                 : "Complete application"}
           </Link>
         ) : null}
-        {dj.vetting_status === "approved" ? (
+        {access.state === "DJ_APPROVED" ? (
           <Link href="/dj/feed" className="text-zinc-700 underline underline-offset-4 dark:text-zinc-300">
             Go to Discover →
           </Link>
