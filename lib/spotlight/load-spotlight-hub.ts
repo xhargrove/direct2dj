@@ -81,6 +81,11 @@ export const SPOTLIGHT_SECTION_LABELS: Record<SpotlightSectionId, string> = {
 /** Minimum items before showing algorithmic sections (plan: hide empty trending until ≥3). */
 export const SPOTLIGHT_MIN_ALGORITHMIC = 3;
 
+/** Target card count for algorithmic rows after cross-section dedupe. */
+export const SPOTLIGHT_ALGORITHMIC_DISPLAY_LIMIT: Partial<Record<SpotlightSectionId, number>> = {
+  most_downloaded: 4,
+};
+
 type RawRow = {
   section: string;
   editorial_id: string | null;
@@ -141,11 +146,14 @@ export function dedupeSpotlightSections(sections: SpotlightSection[]): Spotlight
   return SPOTLIGHT_SECTION_ORDER.map((id) => {
     const sec = sections.find((s) => s.id === id);
     if (!sec) return { id, items: [] };
-    const items = sec.items.filter((item) => {
-      if (seen.has(item.trackId)) return false;
+    const maxItems = SPOTLIGHT_ALGORITHMIC_DISPLAY_LIMIT[id];
+    const items: SpotlightItem[] = [];
+    for (const item of sec.items) {
+      if (seen.has(item.trackId)) continue;
       seen.add(item.trackId);
-      return true;
-    });
+      items.push(item);
+      if (maxItems != null && items.length >= maxItems) break;
+    }
     return { id, items };
   });
 }
@@ -167,7 +175,7 @@ export async function loadSpotlightHub(options?: {
   filterEmpty?: boolean;
   dedupe?: boolean;
 }): Promise<{ sections: SpotlightSection[]; error: string | null }> {
-  const limit = options?.limitPerSection ?? 8;
+  const limit = options?.limitPerSection ?? 12;
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("public_spotlight_hub", {
     p_limit_per_section: limit,

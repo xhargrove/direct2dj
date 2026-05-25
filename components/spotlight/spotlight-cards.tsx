@@ -223,11 +223,13 @@ function spotlightGridClass(count: number, density: SpotlightDensity = "default"
   }
   if (density === "compact") {
     if (count <= 1) return "grid grid-cols-1 gap-2";
+    if (count === 4) return "grid grid-cols-2 gap-2 sm:grid-cols-4";
     return "grid grid-cols-2 gap-2";
   }
   if (count <= 1) return "grid grid-cols-1 gap-3";
   if (count === 2) return "grid grid-cols-1 gap-3 sm:grid-cols-2";
   if (count === 3) return "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3";
+  if (count === 4) return "grid grid-cols-2 gap-3 sm:grid-cols-4";
   return "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 }
 

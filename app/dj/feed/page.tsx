@@ -58,7 +58,7 @@ async function catalogExcludeIds(
 ): Promise<string[]> {
   if (search.page !== 1) return [];
 
-  const hub = await loadSpotlightHub({ limitPerSection: 8 });
+  const hub = await loadSpotlightHub({ limitPerSection: 12 });
   const hubTrackIds = spotlightTrackIds(hub.sections);
 
   const { data: newestPool } = await supabase.rpc("dj_catalog_feed", {
@@ -91,7 +91,7 @@ async function FeedSpotlight({
 
   if (search.page !== 1) return null;
 
-  const hub = await loadSpotlightHub({ limitPerSection: 8 });
+  const hub = await loadSpotlightHub({ limitPerSection: 12 });
   const hubTrackIds = spotlightTrackIds(hub.sections);
 
   const { data: newestPool } = await supabase.rpc("dj_catalog_feed", {

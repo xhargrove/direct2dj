@@ -12,7 +12,7 @@ export async function SpotlightHub({
   showSponsoredCta?: boolean;
   limitPerSection?: number;
 }) {
-  const limit = limitPerSection ?? (variant === "home" ? 6 : 8);
+  const limit = limitPerSection ?? (variant === "home" ? 8 : 12);
   const { sections, error } = await loadSpotlightHub({ limitPerSection: limit });
 
   return (
