@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { DjFeedFiltersBar } from "@/components/dj/feed-filters-bar";
+import { DjFeedFiltersSidebar } from "@/components/dj/feed-filters-bar";
 import { DjTrackCard } from "@/components/dj/track-card";
 import { SpotlightHubContent } from "@/components/spotlight/spotlight-hub-content";
 import { signCoverPaths } from "@/lib/dj/cover-sign";
@@ -268,29 +268,33 @@ export default function DjFeedPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Discover</h1>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          Spotlight picks first, then filter and browse the catalog.{" "}
-          <Link href="#discover-filters" className="font-medium underline underline-offset-4">
-            Jump to filters
-          </Link>
-          {" "}— they stay pinned as you scroll.
+          Spotlight picks and catalog browse. Use the filter sidebar to search, sort, and narrow by genre and BPM.
         </p>
       </div>
 
-      <Suspense fallback={<div className="h-32 animate-pulse rounded-lg bg-zinc-100 dark:bg-zinc-900" />}>
-        <FeedSpotlight searchParams={searchParams} />
-      </Suspense>
+      <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+        <Suspense
+          fallback={
+            <div className="h-64 w-full animate-pulse rounded-lg bg-zinc-100 dark:bg-zinc-900 lg:w-56 lg:shrink-0" />
+          }
+        >
+          <DjFeedFiltersSidebar />
+        </Suspense>
 
-      <Suspense fallback={<div className="h-24 animate-pulse rounded-lg bg-zinc-100 dark:bg-zinc-900" />}>
-        <DjFeedFiltersBar />
-      </Suspense>
+        <div className="flex min-w-0 flex-1 flex-col gap-8">
+          <Suspense fallback={<div className="h-32 animate-pulse rounded-lg bg-zinc-100 dark:bg-zinc-900" />}>
+            <FeedSpotlight searchParams={searchParams} />
+          </Suspense>
 
-      <Suspense fallback={<p className="text-sm text-zinc-500">Loading catalog…</p>}>
-        <FeedCatalog searchParams={searchParams} />
-      </Suspense>
+          <Suspense fallback={<p className="text-sm text-zinc-500">Loading catalog…</p>}>
+            <FeedCatalog searchParams={searchParams} />
+          </Suspense>
+        </div>
+      </div>
     </div>
   );
 }

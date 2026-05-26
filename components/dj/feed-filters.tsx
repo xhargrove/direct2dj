@@ -12,7 +12,7 @@ const sortOptions = [
 
 type SortValue = (typeof sortOptions)[number]["value"];
 
-export function DjFeedFilters({ genreOptions }: { genreOptions: string[] }) {
+export function DjFeedFilters({ genreOptions, layout = "bar" }: { genreOptions: string[]; layout?: "bar" | "sidebar" }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [pending, startTransition] = useTransition();
@@ -39,9 +39,11 @@ export function DjFeedFilters({ genreOptions }: { genreOptions: string[] }) {
   const explicit = searchParams.get("explicit") ?? "";
   const sort = (searchParams.get("sort") ?? "newest") as SortValue;
 
+  const fieldGrid = layout === "sidebar" ? "flex flex-col gap-3" : "grid gap-3 sm:grid-cols-2";
+
   return (
     <div className="flex flex-col gap-3 rounded-lg border-0 bg-transparent p-0 dark:border-0">
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className={fieldGrid}>
         <label className="flex flex-col gap-1 text-xs font-medium text-zinc-600 dark:text-zinc-400">
           Search (press Enter)
           <input
