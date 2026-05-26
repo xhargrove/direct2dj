@@ -96,7 +96,9 @@ Requires `npm run dev` and (on device) same Wi‑Fi / LAN IP instead of `127.0.0
 - [ ] `server.cleartext` is `false`
 - [ ] App icon & launch screen assets in `ios/App/App/Assets.xcassets`
 - [ ] `ITSAppUsesNonExemptEncryption` = false in `Info.plist` (already set)
-- [ ] Privacy policy URL and App Store metadata prepared (Apple requirement)
+- [ ] Privacy policy URL: **https://digitalservicepack.com/privacy** (in App Store Connect)
+- [ ] Support URL: **https://digitalservicepack.com/support**
+- [ ] TestFlight smoke test: [TESTFLIGHT_SMOKE_TEST.md](./TESTFLIGHT_SMOKE_TEST.md) (~10 min on device)
 - [ ] Test on **physical device**: cold launch, login, DJ feed, Stripe checkout (opens in-app browser), sign-out
 
 ### Known benign Xcode console noise
@@ -114,7 +116,7 @@ Requires `npm run dev` and (on device) same Wi‑Fi / LAN IP instead of `127.0.0
 npm run verify:app-store
 ```
 
-Checks production health URL and that Capacitor config files target HTTPS with cleartext off.
+Checks production health URL, `/login`, `/privacy`, and that Capacitor config files target HTTPS with cleartext off.
 
 ---
 

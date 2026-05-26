@@ -10,6 +10,13 @@ export default function SupportPage() {
           include the email address on your account.
         </p>
       </div>
+      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        Privacy: see our{" "}
+        <Link href="/privacy" className="underline underline-offset-4">
+          Privacy Policy
+        </Link>
+        .
+      </p>
       <div className="flex flex-wrap gap-3 text-sm">
         <Link
           href="/login"

@@ -68,6 +68,14 @@ async function main() {
     fail(`/login fetch failed — ${e.message}`);
   }
 
+  try {
+    const res = await fetch(`${siteUrl}/privacy`, { redirect: "follow" });
+    if (res.ok) ok(`/privacy → ${res.status}`);
+    else fail(`/privacy → ${res.status}`);
+  } catch (e) {
+    fail(`/privacy fetch failed — ${e.message}`);
+  }
+
   console.log(failed ? `\n${failed} check(s) failed.\n` : "\nAll checks passed.\n");
   process.exit(failed ? 1 : 0);
 }
