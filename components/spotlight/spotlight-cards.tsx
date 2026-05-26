@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SafeCoverImage } from "@/components/ui/safe-cover-image";
 import {
   SPOTLIGHT_SECTION_LABELS,
   type SpotlightItem,
@@ -86,12 +87,7 @@ export function SpotlightTrackCard({
               : "relative aspect-square w-full overflow-hidden rounded-md bg-zinc-800"
           }
         >
-          {item.coverSignedUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={item.coverSignedUrl} alt="" className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full items-center justify-center text-xs text-zinc-500">♪</div>
-          )}
+          <SafeCoverImage src={item.coverSignedUrl} className="h-full w-full object-cover" />
         </div>
         <div className="min-w-0">
           <p className={`truncate font-medium ${compact ? "text-sm text-zinc-900 dark:text-zinc-100" : "font-semibold text-zinc-50"}`}>
@@ -114,12 +110,7 @@ export function SpotlightTrackCard({
   return (
     <Link href={trackHref(item.trackId, linkMode)} className={shell}>
       <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-md bg-zinc-100 sm:h-24 sm:w-24 dark:bg-zinc-800">
-        {item.coverSignedUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.coverSignedUrl} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full items-center justify-center text-xs text-zinc-500">♪</div>
-        )}
+        <SafeCoverImage src={item.coverSignedUrl} className="h-full w-full object-cover" />
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center gap-1">
         <div className="flex flex-wrap items-center gap-2">
@@ -183,12 +174,11 @@ export function SpotlightHero({
               : "relative h-40 w-40 shrink-0 overflow-hidden rounded-xl ring-2 ring-white/20 sm:h-48 sm:w-48"
           }
         >
-          {item.coverSignedUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={item.coverSignedUrl} alt="" className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full items-center justify-center text-xl text-white/40">♪</div>
-          )}
+          <SafeCoverImage
+            src={item.coverSignedUrl}
+            className="h-full w-full object-cover"
+            placeholderClassName="flex h-full items-center justify-center text-xl text-white/40"
+          />
         </div>
         <div className="min-w-0 flex-1">
           <h2 className={`font-semibold tracking-tight ${compact ? "text-lg" : "text-2xl sm:text-3xl"}`}>{item.title}</h2>

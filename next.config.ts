@@ -17,6 +17,21 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/marketing/hero-badge.png",
+        destination: "/marketing/hero-badge.jpg",
+        permanent: true,
+      },
+      {
+        source: "/marketing/hero-mock.png",
+        destination: "/marketing/hero-mock.jpg",
+        permanent: true,
+      },
+      {
+        source: "/marketing/hero-reference.png",
+        destination: "/marketing/hero-reference.jpg",
+        permanent: true,
+      },
+      {
         source: "/dj/status",
         destination: "/dj/application-status",
         permanent: false,

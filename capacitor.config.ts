@@ -1,17 +1,26 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
-/** Production web app — Next.js stays on Vercel; the native shell loads this URL. */
-const DEFAULT_SERVER_URL = "https://digitalservicepack.com";
+/** Canonical production host for the native shell and Stripe redirects. */
+export const PRODUCTION_SITE_URL = "https://digitalservicepack.com";
 
 function resolveServerUrl(): string {
   const fromEnv = process.env.CAPACITOR_SERVER_URL?.trim();
   if (fromEnv) {
     return fromEnv.replace(/\/$/, "");
   }
-  return DEFAULT_SERVER_URL;
+  return PRODUCTION_SITE_URL;
 }
 
 const serverUrl = resolveServerUrl();
+const isHttps = serverUrl.startsWith("https://");
+const devHttpOverride = process.env.CAPACITOR_DEV === "1" && serverUrl.startsWith("http://");
+
+if (!isHttps && !devHttpOverride) {
+  throw new Error(
+    `Capacitor server URL must be HTTPS for App Store builds (got ${serverUrl}). ` +
+      "Use default production URL, or set CAPACITOR_DEV=1 only for local http:// debugging.",
+  );
+}
 
 const ALLOWED_EXTERNAL_HOSTS = [
   "digitalservicepack.com",
@@ -29,7 +38,8 @@ const config: CapacitorConfig = {
   webDir: "capacitor-web",
   server: {
     url: serverUrl,
-    cleartext: serverUrl.startsWith("http://"),
+    /** App Store: always false. Local http:// only when CAPACITOR_DEV=1. */
+    cleartext: devHttpOverride,
     androidScheme: "https",
     allowNavigation: ALLOWED_EXTERNAL_HOSTS,
   },

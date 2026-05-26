@@ -43,3 +43,7 @@ Use this before pointing a production domain at Digital Service Pack.
 
 - [ ] Tag release in git; keep previous deployment promotable.
 - [ ] DB migrations: prefer forward fixes; document destructive changes separately.
+
+## iOS App Store
+
+- [ ] Complete [docs/APP_STORE_READINESS.md](./docs/APP_STORE_READINESS.md) (web deploy + `npm run cap:sync:prod` + TestFlight).

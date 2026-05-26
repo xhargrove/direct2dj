@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SafeCoverImage } from "@/components/ui/safe-cover-image";
 
 type CardVariant = "default" | "featured";
 
@@ -69,9 +70,7 @@ export function DjTrackCard({
     <Link href={to} className={variantShell[v]}>
       <div className={variantCover[v]}>
         {coverUrl ? (
-          // Signed Supabase URL — not next/image remotePatterns
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={coverUrl} alt="" className="h-full w-full object-cover" />
+          <SafeCoverImage src={coverUrl} className="h-full w-full object-cover" />
         ) : (
           <div
             className={

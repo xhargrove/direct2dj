@@ -9,6 +9,7 @@ import {
   submitRating,
   type DjRatingInput,
 } from "@/app/dj/actions";
+import { SafeCoverImage } from "@/components/ui/safe-cover-image";
 import { triggerPackZipDownload } from "@/lib/dj/trigger-pack-downloads";
 import { isNativeAppShell } from "@/lib/capacitor/navigation";
 import {
@@ -165,8 +166,7 @@ export function TrackDetailPanel({
       <div className="flex flex-col gap-4 sm:flex-row">
         <div className="relative mx-auto aspect-square w-full max-w-xs overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 sm:mx-0">
           {coverSignedUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={coverSignedUrl} alt="" className="h-full w-full object-cover" />
+            <SafeCoverImage src={coverSignedUrl} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full items-center justify-center text-4xl font-semibold text-zinc-400">
               {title.slice(0, 2)}
