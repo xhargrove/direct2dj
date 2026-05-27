@@ -22,7 +22,7 @@ export function describeLoginFailure(error: {
     lower.includes("wrong password") ||
     code === "invalid_credentials"
   ) {
-    return `${raw} Reset the password in Supabase → Authentication → Users, or use Sign up with a new account.`;
+    return `${raw} Use Forgot password on the sign-in page, or create a new account if you have not registered yet.`;
   }
 
   if (

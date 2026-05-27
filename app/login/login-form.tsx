@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { FormEvent } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { describeLoginFailure } from "@/lib/auth/supabase-auth-error";
@@ -279,7 +280,17 @@ export function LoginForm({
         </label>
 
         <label className="block space-y-2">
-          <span className="text-sm font-medium">Password</span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm font-medium">Password</span>
+            {mode === "signin" ? (
+              <Link
+                href="/login/forgot-password"
+                className="text-xs font-medium text-zinc-500 underline underline-offset-4 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200"
+              >
+                Forgot password?
+              </Link>
+            ) : null}
+          </div>
           <input
             name="password"
             type="password"

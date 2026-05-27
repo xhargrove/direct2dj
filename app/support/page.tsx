@@ -7,7 +7,11 @@ export default function SupportPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Support</h1>
         <p className="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
           Need help with your Digital Service Pack account, DJ application, or workspace access? Contact our team and
-          include the email address on your account.
+          include the email address on your account. Locked out? Use{" "}
+          <Link href="/login/forgot-password" className="underline underline-offset-4">
+            Forgot password
+          </Link>{" "}
+          on the sign-in page first.
         </p>
       </div>
       <p className="text-sm text-zinc-600 dark:text-zinc-400">

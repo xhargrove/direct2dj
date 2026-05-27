@@ -29,7 +29,9 @@ export async function GET(request: Request) {
       }
       const fallback = dashboardPathForRole(role);
       const next = safeAppPath(nextRaw, fallback);
-      return NextResponse.redirect(`${origin}${next}`);
+      const destination =
+        next === "/login/reset-password" ? `${next}?recovery=1` : next;
+      return NextResponse.redirect(`${origin}${destination}`);
     }
   }
 
