@@ -3,8 +3,8 @@ import { getUnreadNotificationCount } from "@/app/notifications/actions";
 import { requireRoles } from "@/lib/auth/require-role";
 import { getAdminWorkspaceTestBannerState } from "@/lib/auth/admin-workspace-test-banner-state";
 import { AdminWorkspaceTestBanner } from "@/components/admin/admin-workspace-test-banner";
-import { NotificationBell } from "@/components/notifications/notification-bell";
-import { AppTopNav } from "@/components/shell/app-top-nav";
+import { WorkspaceChrome } from "@/components/shell/workspace-chrome";
+import { ARTIST_MOBILE_TABS } from "@/lib/platform/mobile-tabs";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ArtistLayout({
@@ -47,23 +47,18 @@ export default async function ArtistLayout({
     </>
   );
 
-  const trailing = (
-    <>
-      <NotificationBell initialUnread={unread} />
-      <form action="/auth/sign-out" method="post">
-        <button type="submit" className="dj-nav-link min-h-10 rounded-md px-3 text-sm font-medium hover:underline">
-          Sign out
-        </button>
-      </form>
-    </>
-  );
-
   return (
     <div className="flex min-h-full flex-col">
       {workspaceBanner.show ? <AdminWorkspaceTestBanner role={workspaceBanner.role} /> : null}
-      <AppTopNav kicker="Artist booth" nav={nav} trailing={trailing} />
-      <main className="flex flex-1 flex-col px-4 py-6">{children}</main>
-      <footer className="dj-footer px-4 py-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
+      <WorkspaceChrome
+        kicker="Artist booth"
+        nav={nav}
+        mobileTabs={ARTIST_MOBILE_TABS}
+        initialUnread={unread}
+        showNotifications
+      />
+      <main className="mobile-shell-main flex flex-1 flex-col px-4 py-6">{children}</main>
+      <footer className="shell-desktop dj-footer px-4 py-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
         <Link href="/" className="dj-nav-link underline underline-offset-4 hover:underline">
           Home
         </Link>

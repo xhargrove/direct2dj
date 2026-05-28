@@ -9,8 +9,8 @@ import { dashboardPathForRole } from "@/lib/auth/paths";
 import { resolveDjWorkspaceAccess } from "@/lib/auth/resolve-dj-workspace-access";
 import { AdminWorkspaceTestBanner } from "@/components/admin/admin-workspace-test-banner";
 import { DjWorkspaceGateBanner } from "@/components/dj/dj-workspace-gate-banner";
-import { NotificationBell } from "@/components/notifications/notification-bell";
-import { AppTopNav } from "@/components/shell/app-top-nav";
+import { WorkspaceChrome } from "@/components/shell/workspace-chrome";
+import { DJ_MOBILE_TABS_APPROVED, DJ_MOBILE_TABS_LIMITED } from "@/lib/platform/mobile-tabs";
 import { isUserRole } from "@/lib/types/roles";
 
 const promoNav = [
@@ -81,30 +81,33 @@ export default async function DjLayout({
     </>
   );
 
-  const trailing = (
-    <>
-      {!shellBlocked ? <NotificationBell initialUnread={unread} /> : null}
-      <form action="/auth/sign-out" method="post">
-        <button type="submit" className="dj-nav-link min-h-10 rounded-md px-3 text-sm font-medium hover:underline">
-          Sign out
-        </button>
-      </form>
-    </>
+  const chrome = (
+    <WorkspaceChrome
+      kicker="DJ deck"
+      nav={nav}
+      mobileTabs={
+        shellBlocked
+          ? []
+          : access.state === "DJ_APPROVED"
+            ? DJ_MOBILE_TABS_APPROVED
+            : DJ_MOBILE_TABS_LIMITED
+      }
+      initialUnread={unread}
+      showNotifications={!shellBlocked}
+    />
   );
 
   return (
     <div className="flex min-h-full flex-col">
       {workspaceBanner.show ? <AdminWorkspaceTestBanner role={workspaceBanner.role} /> : null}
-      <AppTopNav kicker="DJ deck" nav={nav} trailing={trailing} />
+      {chrome}
       {gateBanner}
-      <main className="flex flex-1 flex-col px-4 py-6">
-        {shellBlocked ? (
+      <main className="mobile-shell-main flex flex-1 flex-col px-4 py-6">{shellBlocked ? (
           <AccountAccessGate state={access.state} message={access.message} />
         ) : (
           children
-        )}
-      </main>
-      <footer className="dj-footer px-4 py-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
+        )}</main>
+      <footer className="shell-desktop dj-footer px-4 py-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
         <Link href="/" className="dj-nav-link underline underline-offset-4 hover:underline">
           Home
         </Link>

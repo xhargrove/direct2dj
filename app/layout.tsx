@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Syne } from "next/font/google";
 import { NativeNavigationGuard } from "@/components/capacitor/native-navigation-guard";
+import { ShellModeScript } from "@/components/platform/shell-mode-script";
 import { getMetadataBaseUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -60,6 +61,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
   themeColor: [{ media: "(prefers-color-scheme: dark)", color: "#000000" }, { color: "#000000" }],
 };
 
@@ -74,6 +76,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${syne.variable} dark dsp-scrollbar h-full antialiased`}
     >
       <body className="relative min-h-full">
+        <ShellModeScript />
         <div className="dj-atmosphere" aria-hidden>
           <div className="dj-atmosphere__mesh" />
           <div className="dj-atmosphere__orb dj-atmosphere__orb--cyan" />

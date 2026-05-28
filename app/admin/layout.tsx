@@ -8,6 +8,7 @@ import { AdminSidebarNavMobile } from "@/components/admin/admin-sidebar-nav-mobi
 import { AdminWorkspaceTestMenu } from "@/components/admin/admin-workspace-test-menu";
 import { getUnreadNotificationCount } from "@/app/notifications/actions";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { SignOutButton } from "@/components/shell/sign-out-button";
 import { coAdminNav, fullAdminNav } from "@/lib/admin/nav";
 import { createClient } from "@/lib/supabase/server";
 
@@ -55,22 +56,25 @@ export default async function AdminLayout({
               <span className="truncate text-xs text-zinc-400">{kicker}</span>
             </div>
           </Link>
-          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 lg:hidden">{trailing}</div>
+          <div className="shell-desktop flex shrink-0 flex-wrap items-center justify-end gap-2 lg:hidden">{trailing}</div>
         </div>
         <div className="hidden lg:block lg:flex-1 lg:overflow-y-auto">
           <AdminSidebarNav items={nav} />
         </div>
         <AdminSidebarNavMobile items={nav} />
-        <div className="hidden border-t border-white/7 px-3 py-3 lg:block">
+        <div className="shell-desktop hidden border-t border-white/7 px-3 py-3 lg:block">
           <div className="flex flex-col gap-2">{trailing}</div>
         </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
-        <main className="flex flex-1 flex-col px-4 py-6">{children}</main>
-        <footer className="dj-footer px-4 py-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
+        <main className="mobile-shell-main flex flex-1 flex-col px-4 py-6">{children}</main>
+        <footer className="shell-desktop dj-footer px-4 py-4 text-center text-xs text-zinc-500 dark:text-zinc-400">
           <Link href="/" className="dj-nav-link underline underline-offset-4 hover:underline">
             Home
           </Link>
+        </footer>
+        <footer className="shell-mobile border-t border-white/10 px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <SignOutButton className="dj-btn-ghost min-h-11 w-full rounded-lg border px-4 text-sm font-medium" />
         </footer>
       </div>
     </div>

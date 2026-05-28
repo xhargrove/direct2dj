@@ -861,3 +861,24 @@ body {
     transform: none;
   }
 }
+
+/* Native Capacitor shell — swap desktop chrome for mobile app chrome (see ShellModeScript). */
+.shell-mobile {
+  display: none;
+}
+
+html[data-shell="native"] .shell-desktop {
+  display: none !important;
+}
+
+html[data-shell="native"] .shell-mobile {
+  display: block;
+}
+
+html[data-shell="native"] .mobile-shell-main {
+  padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+}
+
+html[data-shell="native"] .mobile-shell-tabs {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}

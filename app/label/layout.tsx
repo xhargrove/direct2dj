@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { requireRoles } from "@/lib/auth/require-role";
-import { AppTopNav } from "@/components/shell/app-top-nav";
+import { WorkspaceChrome } from "@/components/shell/workspace-chrome";
+import { LABEL_MOBILE_TABS } from "@/lib/platform/mobile-tabs";
 
 export default async function LabelLayout({ children }: { children: ReactNode }) {
   await requireRoles(["label_rep"]);
@@ -20,18 +21,16 @@ export default async function LabelLayout({ children }: { children: ReactNode })
     </>
   );
 
-  const trailing = (
-    <form action="/auth/sign-out" method="post">
-      <button type="submit" className="dj-nav-link min-h-10 rounded-md px-3 text-sm font-medium hover:underline">
-        Sign out
-      </button>
-    </form>
-  );
-
   return (
     <div className="mx-auto flex min-h-full max-w-3xl flex-col px-4 py-8">
-      <AppTopNav kicker="Label desk" nav={nav} trailing={trailing} />
-      <div className="mt-6">{children}</div>
+      <WorkspaceChrome
+        kicker="Label desk"
+        nav={nav}
+        mobileTabs={LABEL_MOBILE_TABS}
+        initialUnread={0}
+        showNotifications={false}
+      />
+      <div className="mobile-shell-main mt-6">{children}</div>
     </div>
   );
 }

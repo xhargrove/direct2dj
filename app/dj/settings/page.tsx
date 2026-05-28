@@ -1,5 +1,6 @@
 import { AllowContactForm } from "@/components/dj/allow-contact-form";
 import { DjCityForm } from "@/components/dj/dj-city-form";
+import { SignOutButton } from "@/components/shell/sign-out-button";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function DjSettingsPage() {
@@ -31,6 +32,9 @@ export default async function DjSettingsPage() {
       </div>
       <AllowContactForm initial={allow} />
       <DjCityForm initial={city} />
+      <div className="shell-mobile border-t border-white/10 pt-6">
+        <SignOutButton className="dj-btn-ghost min-h-11 w-full rounded-lg border px-4 text-sm font-medium" />
+      </div>
     </div>
   );
 }
