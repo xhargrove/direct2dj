@@ -4,6 +4,7 @@ import { ensureArtistRowForUser } from "@/lib/artists/ensure-artist-row";
 import { ARTIST_CHECKOUT_UNAVAILABLE } from "@/lib/billing/stripe-user-copy";
 import { getStripe } from "@/lib/stripe/server";
 import { submissionStripeDescription } from "@/lib/billing/submission-tier-copy";
+import { getStripeModeFromEnv } from "@/lib/billing/stripe-mode";
 import { getSiteUrl } from "@/lib/billing/site-url";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { createClient } from "@/lib/supabase/server";
@@ -85,6 +86,12 @@ export async function createSubmissionCheckoutSession(input: {
 
   const base = getSiteUrl();
   const description = submissionStripeDescription(plan.slug);
+
+  console.info("[billing] submission checkout session", {
+    stripeMode: getStripeModeFromEnv(),
+    siteUrl: base,
+    planSlug: plan.slug,
+  });
 
   let session;
   try {

@@ -14,7 +14,7 @@ function statusLabel(status: HealthCheck["status"]) {
 }
 
 export default async function AdminSystemPage() {
-  const { checks, siteUrl } = await loadSystemHealthReport();
+  const { checks, siteUrl, stripeMode } = await loadSystemHealthReport();
   const failCount = checks.filter((c) => c.status === "fail").length;
   const warnCount = checks.filter((c) => c.status === "warn").length;
 
@@ -25,6 +25,8 @@ export default async function AdminSystemPage() {
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
           Production readiness for billing, webhooks, and migrations. Canonical URL in use:{" "}
           <span className="font-mono text-xs">{siteUrl}</span>
+          {" · "}
+          Stripe: <span className="font-mono text-xs">{stripeMode}</span>
         </p>
         <p className="mt-2 text-sm text-zinc-500">
           See repo docs <code className="text-xs">docs/ENV_DEPLOYMENT_CHECKLIST.md</code> and{" "}

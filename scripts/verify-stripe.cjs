@@ -108,6 +108,26 @@ async function main() {
     }
   }
 
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "").trim();
+  const siteIsLocal = /localhost|127\.0\.0\.1|0\.0\.0\.0/i.test(siteUrl);
+  const allowLive = ["1", "true", "yes"].includes(
+    (process.env.LAUNCH_ALLOW_LIVE_STRIPE_LOCAL || "").trim().toLowerCase(),
+  );
+  if (modeSecret(secret) === "live" && (!siteUrl || siteIsLocal)) {
+    if (allowLive) {
+      console.log("⚠ Live Stripe + localhost with LAUNCH_ALLOW_LIVE_STRIPE_LOCAL — REAL charges possible.");
+    } else {
+      console.log(
+        "✗ LOCAL SAFETY: Live Stripe keys with localhost — use sk_test_/pk_test_, or set LAUNCH_ALLOW_LIVE_STRIPE_LOCAL=1 if intentional.",
+      );
+      ok = false;
+    }
+  } else if (modeSecret(secret) === "live") {
+    console.log("⚠ Live Stripe keys detected — checkout creates REAL charges.");
+  } else if (modeSecret(secret) === "test") {
+    console.log("✓ Test Stripe keys — safe for local smoke (card 4242…)");
+  }
+
   const bodySk = stripeKeyBody(secret ?? "");
   const bodyPk = stripeKeyBody(pub ?? "");
   if (bodySk && bodyPk && !publishableSecretSameStripePair(bodySk, bodyPk)) {

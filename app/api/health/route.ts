@@ -1,6 +1,20 @@
 import { NextResponse } from "next/server";
+import { getStripeModeFromEnv } from "@/lib/billing/stripe-mode";
+import { getSiteUrl } from "@/lib/billing/site-url";
 
-/** Minimal liveness check — no secrets, no DB. Safe for production. */
+/** Liveness + safe runtime labels (no secrets, no DB). */
 export async function GET() {
-  return NextResponse.json({ ok: true });
+  const siteUrl = getSiteUrl();
+  let siteHost = "unknown";
+  try {
+    siteHost = new URL(siteUrl).host;
+  } catch {
+    siteHost = siteUrl.replace(/^https?:\/\//, "").split("/")[0] ?? "unknown";
+  }
+
+  return NextResponse.json({
+    ok: true,
+    stripeMode: getStripeModeFromEnv(),
+    siteHost,
+  });
 }

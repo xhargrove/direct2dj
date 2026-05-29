@@ -17,6 +17,9 @@ let failed = 0;
 function ok(msg) {
   console.log(`  ✓ ${msg}`);
 }
+function warn(msg) {
+  console.warn(`  ⚠ ${msg}`);
+}
 function fail(msg) {
   console.error(`  ✗ ${msg}`);
   failed += 1;
@@ -54,8 +57,11 @@ async function main() {
   try {
     const res = await fetch(`${siteUrl}/api/health`, { redirect: "follow" });
     const text = await res.text();
-    if (res.ok && text.includes('"ok"')) ok(`/api/health → ${res.status}`);
-    else fail(`/api/health → ${res.status} ${text.slice(0, 80)}`);
+    if (res.ok && text.includes('"ok"')) {
+      ok(`/api/health → ${res.status}`);
+      if (text.includes('"stripeMode"')) ok(`/api/health exposes stripeMode (no secrets)`);
+      else warn(`/api/health missing stripeMode — deploy latest main for launch env visibility`);
+    } else fail(`/api/health → ${res.status} ${text.slice(0, 80)}`);
   } catch (e) {
     fail(`/api/health fetch failed — ${e.message}`);
   }

@@ -22,6 +22,8 @@
     "verify:stripe-webhooks": "node scripts/verify-stripe-webhooks.cjs",
     "verify:launch": "npm run lint && npm run typecheck && npm test && npm run build",
     "verify:app-store": "node scripts/verify-app-store-readiness.cjs",
+    "verify:launch-env": "node scripts/verify-launch-env.cjs",
+    "verify": "npm run verify:launch-env && npm run verify:stripe && npm run verify:stripe-webhooks && npm run verify:app-store",
     "cap:sync": "npx cap sync ios",
     "cap:sync:prod": "npx cap sync ios",
     "cap:copy": "npx cap copy ios",

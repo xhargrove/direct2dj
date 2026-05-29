@@ -1,5 +1,6 @@
 import "server-only";
 
+import { getStripeModeFromEnv, stripeEnvModeMismatch } from "@/lib/billing/stripe-mode";
 import { isEmailProviderConfigured } from "@/lib/notifications/email";
 import { getSiteUrl } from "@/lib/billing/site-url";
 import { createServiceRoleClientOrNull } from "@/lib/supabase/service-role";
@@ -14,13 +15,8 @@ export type HealthCheck = {
 export type SystemHealthReport = {
   checks: HealthCheck[];
   siteUrl: string;
+  stripeMode: ReturnType<typeof getStripeModeFromEnv>;
 };
-
-function stripeModeFromSecret(k: string): "test" | "live" | "unknown" {
-  if (k.startsWith("sk_test_") || k.startsWith("rk_test_")) return "test";
-  if (k.startsWith("sk_live_") || k.startsWith("rk_live_")) return "live";
-  return "unknown";
-}
 
 export async function loadSystemHealthReport(): Promise<SystemHealthReport> {
   const checks: HealthCheck[] = [];
@@ -59,14 +55,40 @@ export async function loadSystemHealthReport(): Promise<SystemHealthReport> {
   });
 
   const stripeSecret = process.env.STRIPE_SECRET_KEY?.trim() ?? "";
+  const stripeMode = getStripeModeFromEnv();
   checks.push({
     id: "stripe_secret",
     label: "STRIPE_SECRET_KEY",
     status: stripeSecret.startsWith("sk_") || stripeSecret.startsWith("rk_") ? "ok" : "fail",
-    detail: stripeSecret
-      ? `${stripeModeFromSecret(stripeSecret)} mode`
-      : "Missing",
+    detail: stripeSecret ? `${stripeMode} mode` : "Missing",
   });
+
+  if (stripeEnvModeMismatch()) {
+    checks.push({
+      id: "stripe_mode_pair",
+      label: "Stripe key pair",
+      status: "fail",
+      detail: "Secret and publishable keys are different modes (test vs live).",
+    });
+  }
+
+  const siteIsLocal =
+    siteUrl.includes("localhost") || siteUrl.includes("127.0.0.1") || siteUrl.includes("0.0.0.0");
+  if (stripeMode === "live" && siteIsLocal) {
+    checks.push({
+      id: "stripe_live_localhost",
+      label: "Stripe + site URL",
+      status: "fail",
+      detail: "Live Stripe keys with a localhost site URL — checkout return URLs will be wrong.",
+    });
+  } else if (stripeMode === "live" && process.env.NODE_ENV !== "production") {
+    checks.push({
+      id: "stripe_live_non_prod",
+      label: "Stripe live mode",
+      status: "warn",
+      detail: "Live Stripe keys on a non-production Node env — real charges possible during local smoke.",
+    });
+  }
 
   checks.push({
     id: "email",
@@ -115,5 +137,5 @@ export async function loadSystemHealthReport(): Promise<SystemHealthReport> {
     }
   }
 
-  return { checks, siteUrl };
+  return { checks, siteUrl, stripeMode };
 }

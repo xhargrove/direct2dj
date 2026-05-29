@@ -1,7 +1,7 @@
 # Launch verified
 
 **Repo gate:** automated checks in this document must pass before every production deploy.  
-**Production gate:** complete [PRODUCTION_SMOKE_TEST_PLAN.md](./PRODUCTION_SMOKE_TEST_PLAN.md) on the live environment after deploy.
+**Production gate:** complete [LAUNCH_VERIFICATION.md](./LAUNCH_VERIFICATION.md) and [PRODUCTION_SMOKE_TEST_PLAN.md](./PRODUCTION_SMOKE_TEST_PLAN.md) on the live environment after deploy.
 
 Last verified in repo: **2026-06-02** (commit on `main` after spotlight hub, DJ ZIP download, rating gate, editorial cover policy).
 
