@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ShellLink } from "@/components/capacitor/shell-link";
 import type { ShellTab } from "@/lib/platform/shell-mode";
 import { isTabActive } from "@/lib/platform/shell-mode";
 
@@ -19,7 +19,7 @@ export function MobileBottomTabs({ tabs }: { tabs: readonly ShellTab[] }) {
         {tabs.map((tab) => {
           const active = isTabActive(pathname, tab);
           return (
-            <Link
+            <ShellLink
               key={tab.href}
               href={tab.href}
               className={`flex min-h-[3.25rem] flex-1 flex-col items-center justify-center gap-0.5 px-1 text-[11px] font-medium leading-none transition-colors ${
@@ -28,7 +28,7 @@ export function MobileBottomTabs({ tabs }: { tabs: readonly ShellTab[] }) {
               aria-current={active ? "page" : undefined}
             >
               <span className="truncate">{tab.label}</span>
-            </Link>
+            </ShellLink>
           );
         })}
       </div>

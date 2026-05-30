@@ -2,12 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { hardNavigate, isNativeAppShell } from "@/lib/capacitor/navigation";
-
-function isLoadFailedError(error: Error): boolean {
-  const msg = error.message?.toLowerCase() ?? "";
-  return msg.includes("load failed") || msg.includes("failed to fetch") || msg.includes("networkerror");
-}
+import { hardNavigate, isLoadFailedMessage, isNativeAppShell } from "@/lib/capacitor/navigation";
 
 export default function AppError({
   error,
@@ -17,7 +12,7 @@ export default function AppError({
   reset: () => void;
 }) {
   const native = typeof window !== "undefined" && isNativeAppShell();
-  const loadFailed = isLoadFailedError(error);
+  const loadFailed = isLoadFailedMessage(error.message ?? "");
 
   useEffect(() => {
     console.error("[app error]", error.digest, error.message);
