@@ -38,3 +38,32 @@ export function resolveSameOriginUrl(path: string): string {
   if (typeof window === "undefined") return path;
   return `${window.location.origin}${path.startsWith("/") ? path : `/${path}`}`;
 }
+
+/** iPhone/iPad Safari in the mobile browser (not Capacitor). */
+export function isIosMobileBrowser(
+  userAgent = typeof navigator !== "undefined" ? navigator.userAgent : "",
+  platform = typeof navigator !== "undefined" ? navigator.platform : "",
+  maxTouchPoints = typeof navigator !== "undefined" ? navigator.maxTouchPoints : 0,
+): boolean {
+  if (!userAgent) return false;
+  if (/iPad|iPhone|iPod/.test(userAgent)) return true;
+  return platform === "MacIntel" && maxTouchPoints > 1;
+}
+
+/** Desktop or mobile Safari (not Chrome/Firefox wrappers). */
+export function isSafariBrowser(userAgent = typeof navigator !== "undefined" ? navigator.userAgent : ""): boolean {
+  if (!userAgent) return false;
+  return (
+    /Safari/i.test(userAgent) &&
+    !/Chrome|CriOS|Chromium|Edg|OPR|Firefox|FxiOS|DuckDuckGo/i.test(userAgent)
+  );
+}
+
+/** Safari blocks programmatic downloads after async server work — show a real link tap. */
+export function prefersManualPackDownloadLink(
+  userAgent = typeof navigator !== "undefined" ? navigator.userAgent : "",
+  platform = typeof navigator !== "undefined" ? navigator.platform : "",
+  maxTouchPoints = typeof navigator !== "undefined" ? navigator.maxTouchPoints : 0,
+): boolean {
+  return isSafariBrowser(userAgent) || isIosMobileBrowser(userAgent, platform, maxTouchPoints);
+}

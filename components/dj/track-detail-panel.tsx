@@ -10,8 +10,8 @@ import {
   type DjRatingInput,
 } from "@/app/dj/actions";
 import { SafeCoverImage } from "@/components/ui/safe-cover-image";
-import { triggerPackZipDownload } from "@/lib/dj/trigger-pack-downloads";
 import { isNativeAppShell } from "@/lib/capacitor/navigation";
+import { shouldOfferManualPackDownloadLink, triggerPackZipDownload } from "@/lib/dj/trigger-pack-downloads";
 import {
   feedbackQualifiesForDownload,
   packDownloadQualifies,
@@ -88,7 +88,9 @@ export function TrackDetailPanel({
   const [editingFeedback, setEditingFeedback] = useState(() => !feedbackQualifiesForDownload(initialFeedbackBody));
   const [moderationStatus, setModerationStatus] = useState(feedbackModerationStatus);
   const [downloadReady, setDownloadReady] = useState(downloadAllowed);
-  const [pendingPack, startPackTransition] = useTransition();
+  const [pendingPack, setPendingPack] = useState(false);
+  const [packDownloadUrl, setPackDownloadUrl] = useState<string | null>(null);
+  const [packFileCount, setPackFileCount] = useState(0);
   const [pendingFeedback, startFeedbackTransition] = useTransition();
 
   const [score, setScore] = useState<number | null>(initialRating.score);
@@ -124,6 +126,59 @@ export function TrackDetailPanel({
         rating: currentRatingSnapshot(),
       }),
     );
+  }
+
+  async function handlePackDownload() {
+    if (pendingPack || !downloadReady) return;
+
+    setPendingPack(true);
+    setPackErr(null);
+    setPackSuccessMsg(null);
+    setPackDownloadUrl(null);
+
+    try {
+      const r = await prepareDjPackDownload(trackId);
+      if ("error" in r && r.error) {
+        setPackErr(r.error);
+        return;
+      }
+      if (!("zipUrl" in r) || !r.zipUrl) return;
+
+      setPackFileCount(r.fileCount);
+      setPackDownloadUrl(r.zipUrl);
+
+      if (shouldOfferManualPackDownloadLink()) {
+        setPackSuccessMsg(
+          `${r.fileCount} file${r.fileCount === 1 ? "" : "s"} ready — tap Save ZIP below. On iPhone, choose Share → Save to Files if Safari asks.`,
+        );
+        return;
+      }
+
+      setPackSuccessMsg("Preparing pack…");
+      const dl = await triggerPackZipDownload(r.zipUrl);
+      if (dl.error) {
+        setPackErr(dl.error);
+        setPackSuccessMsg(null);
+        setPackDownloadUrl(null);
+        return;
+      }
+      if (dl.manualLink) {
+        setPackSuccessMsg(
+          `${r.fileCount} file${r.fileCount === 1 ? "" : "s"} ready — tap Save ZIP below.`,
+        );
+        return;
+      }
+
+      setPackSuccessMsg(
+        dl.nativeShare
+          ? `${r.fileCount} file${r.fileCount === 1 ? "" : "s"} ready — tap Save to Files in the share sheet.`
+          : dl.directDownload
+            ? "Pack download started — tap Save ZIP below if nothing appeared."
+            : `${r.fileCount} file${r.fileCount === 1 ? "" : "s"} in your ZIP — check your Downloads folder.`,
+      );
+    } finally {
+      setPendingPack(false);
+    }
   }
 
   useEffect(() => {
@@ -459,40 +514,30 @@ export function TrackDetailPanel({
                 : "Finish the requirements above — then the download button unlocks."}
           </p>
         ) : null}
-        <button
-          type="button"
-          disabled={pendingPack || !downloadReady}
-          className="min-h-11 max-w-xs rounded-md bg-zinc-900 px-4 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
-          onClick={() =>
-            startPackTransition(async () => {
-              setPackErr(null);
-              setPackSuccessMsg(null);
-              const r = await prepareDjPackDownload(trackId);
-              if ("error" in r && r.error) {
-                setPackErr(r.error);
-                return;
-              }
-              if ("zipUrl" in r && r.zipUrl) {
-                setPackSuccessMsg("Preparing pack…");
-                const dl = await triggerPackZipDownload(r.zipUrl);
-                if (dl.error) {
-                  setPackErr(dl.error);
-                  setPackSuccessMsg(null);
-                  return;
-                }
-                setPackSuccessMsg(
-                  dl.nativeShare
-                    ? `${r.fileCount} file${r.fileCount === 1 ? "" : "s"} ready — tap Save to Files in the share sheet.`
-                    : dl.directDownload
-                      ? "Opening pack download… if prompted, save the ZIP to Files, then use the back gesture to return."
-                      : `${r.fileCount} file${r.fileCount === 1 ? "" : "s"} in your ZIP — check your downloads folder.`,
-                );
-              }
-            })
-          }
-        >
-          {pendingPack ? "Preparing…" : "Download DJ pack"}
-        </button>
+        {packDownloadUrl ? (
+          <a
+            href={packDownloadUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 max-w-xs items-center justify-center rounded-md bg-zinc-900 px-4 text-sm font-medium text-white dark:bg-zinc-100 dark:text-zinc-900"
+          >
+            Save ZIP ({packFileCount} file{packFileCount === 1 ? "" : "s"})
+          </a>
+        ) : (
+          <button
+            type="button"
+            disabled={pendingPack || !downloadReady}
+            className="min-h-11 max-w-xs rounded-md bg-zinc-900 px-4 text-sm font-medium text-white disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
+            onClick={() => void handlePackDownload()}
+          >
+            {pendingPack ? "Preparing…" : "Download DJ pack"}
+          </button>
+        )}
+        {packDownloadUrl && shouldOfferManualPackDownloadLink() ? (
+          <p className="text-xs text-zinc-500">
+            Safari requires a direct tap to save files. You can tap Save ZIP again anytime to re-download this pack.
+          </p>
+        ) : null}
         {packErr ? <p className="text-sm text-red-600">{packErr}</p> : null}
         {packSuccessMsg && !packErr ? (
           <p className="text-sm text-emerald-700 dark:text-emerald-400">{packSuccessMsg}</p>
