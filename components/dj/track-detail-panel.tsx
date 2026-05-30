@@ -473,10 +473,17 @@ export function TrackDetailPanel({
                 return;
               }
               if ("zipUrl" in r && r.zipUrl) {
-                setPackSuccessMsg("Downloading pack…");
-                triggerPackZipDownload(r.zipUrl);
+                setPackSuccessMsg("Preparing pack…");
+                const dl = await triggerPackZipDownload(r.zipUrl);
+                if (dl.error) {
+                  setPackErr(dl.error);
+                  setPackSuccessMsg(null);
+                  return;
+                }
                 setPackSuccessMsg(
-                  `${r.fileCount} file${r.fileCount === 1 ? "" : "s"} in your ZIP — check your downloads folder.`,
+                  dl.nativeShare
+                    ? `${r.fileCount} file${r.fileCount === 1 ? "" : "s"} ready — tap Save to Files in the share sheet.`
+                    : `${r.fileCount} file${r.fileCount === 1 ? "" : "s"} in your ZIP — check your downloads folder.`,
                 );
               }
             })

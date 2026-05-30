@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { hardNavigate, isLoadFailedMessage, isNativeAppShell } from "@/lib/capacitor/navigation";
+import { forceHardReloadPage, hardNavigate, hardReloadPage, isChunkLoadError, isLoadFailedMessage, isNativeAppShell, tryNativeShellRecovery } from "@/lib/capacitor/navigation";
 
 export default function AppError({
   error,
@@ -12,15 +12,21 @@ export default function AppError({
   reset: () => void;
 }) {
   const native = typeof window !== "undefined" && isNativeAppShell();
-  const loadFailed = isLoadFailedMessage(error.message ?? "");
+  const message = error.message ?? "";
+  const chunkStale = isChunkLoadError(message, error.name);
+  const loadFailed = isLoadFailedMessage(message);
 
   useEffect(() => {
     console.error("[app error]", error.digest, error.message);
-  }, [error]);
+    if (!native) return;
+    if (chunkStale || loadFailed) {
+      tryNativeShellRecovery(error);
+    }
+  }, [error, native, chunkStale, loadFailed]);
 
   function reloadApp() {
     if (native) {
-      hardNavigate(window.location.pathname + window.location.search);
+      forceHardReloadPage();
       return;
     }
     reset();
@@ -29,7 +35,11 @@ export default function AppError({
   return (
     <div className="mx-auto flex min-h-[50vh] max-w-md flex-col justify-center gap-4 px-4 py-16 text-center">
       <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Something went wrong</h1>
-      {native && loadFailed ? (
+      {native && chunkStale ? (
+        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          The app was updated while you were browsing. Reloading to fetch the latest version…
+        </p>
+      ) : native && loadFailed ? (
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
           The app lost connection while loading a page — common in the mobile shell. Reload to continue.
         </p>
@@ -45,7 +55,7 @@ export default function AppError({
           run pending Supabase migrations.
         </p>
       )}
-      {error.message && !loadFailed ? (
+      {error.message && !loadFailed && !chunkStale ? (
         <p className="font-mono text-xs text-zinc-500">{error.message}</p>
       ) : null}
       {error.digest ? (

@@ -4,11 +4,14 @@ import { useEffect } from "react";
 import {
   clearNativeLoadFailedRecoveryFlag,
   hardNavigate,
+  hardReloadPage,
+  isChunkLoadError,
   isLoadFailedMessage,
   isNativeAppShell,
+  isRecoverableNativeShellError,
   markNativeNavigationComplete,
   NATIVE_LINK_ATTR,
-  tryNativeLoadFailedRecovery,
+  tryNativeShellRecovery,
 } from "@/lib/capacitor/navigation";
 
 /**
@@ -29,17 +32,26 @@ export function NativeNavigationGuard() {
 
     let recoveryTimer: number | undefined;
     const onRejection = (event: PromiseRejectionEvent) => {
-      const reason = event.reason;
-      const message =
-        reason instanceof Error ? reason.message : typeof reason === "string" ? reason : "";
-      if (!isLoadFailedMessage(message)) return;
+      if (!isRecoverableNativeShellError(event.reason)) return;
 
       window.clearTimeout(recoveryTimer);
       recoveryTimer = window.setTimeout(() => {
-        tryNativeLoadFailedRecovery();
+        tryNativeShellRecovery(event.reason);
       }, 400);
     };
     window.addEventListener("unhandledrejection", onRejection);
+
+    const onError = (event: ErrorEvent) => {
+      const message = event.message ?? "";
+      const name = event.error instanceof Error ? event.error.name : "";
+      if (!isRecoverableNativeShellError({ message, name })) return;
+
+      window.clearTimeout(recoveryTimer);
+      recoveryTimer = window.setTimeout(() => {
+        tryNativeShellRecovery({ message, name });
+      }, 400);
+    };
+    window.addEventListener("error", onError);
 
     const onClick = (event: MouseEvent) => {
       if (event.defaultPrevented || event.button !== 0) return;
@@ -72,6 +84,7 @@ export function NativeNavigationGuard() {
       window.clearTimeout(recoveryTimer);
       window.removeEventListener("load", onLoad);
       window.removeEventListener("unhandledrejection", onRejection);
+      window.removeEventListener("error", onError);
       document.removeEventListener("click", onClick, true);
     };
   }, []);

@@ -21,7 +21,34 @@ export function isLoadFailedMessage(message: string): boolean {
 
 /** Benign WKWebView log when a new navigation cancels an in-flight load. */
 export function isInterruptedNavigationMessage(message: string): boolean {
-  return message.toLowerCase().includes("frame load interrupted");
+  const msg = message.toLowerCase();
+  return msg.includes("frame load interrupted") || msg.includes("nsurlerrordomain error -999");
+}
+
+export function isChunkLoadError(message: string, name = ""): boolean {
+  if (name === "ChunkLoadError") return true;
+  const msg = message.toLowerCase();
+  return msg.includes("failed to load chunk") || msg.includes("loading chunk") || msg.includes("chunkloaderror");
+}
+
+export function isRecoverableNativeShellError(reason: unknown): boolean {
+  const { message, name } = errorReasonParts(reason);
+  if (isInterruptedNavigationMessage(message)) return false;
+  if (isChunkLoadError(message, name)) return true;
+  return isLoadFailedMessage(message);
+}
+
+function errorReasonParts(reason: unknown): { message: string; name: string } {
+  if (reason instanceof Error) return { message: reason.message, name: reason.name };
+  if (typeof reason === "string") return { message: reason, name: "" };
+  if (reason && typeof reason === "object") {
+    const record = reason as { message?: unknown; name?: unknown };
+    return {
+      message: typeof record.message === "string" ? record.message : "",
+      name: typeof record.name === "string" ? record.name : "",
+    };
+  }
+  return { message: "", name: "" };
 }
 
 const nativeReloadKey = (path: string) => `dsp:native-reload:${path}`;
@@ -69,6 +96,52 @@ export function hardNavigate(path: string): void {
   window.location.assign(target);
 }
 
+/** Force a full document reload (needed when Next.js chunks mismatch after deploy). */
+export function hardReloadPage(options?: { force?: boolean }): boolean {
+  if (typeof window === "undefined" || !isNativeAppShell()) return false;
+
+  const path = window.location.pathname + window.location.search;
+  const key = nativeReloadKey(path);
+  if (!options?.force && sessionStorage.getItem(key) === "1") return false;
+
+  sessionStorage.setItem(key, "1");
+  navigateInFlight = true;
+  window.location.reload();
+  return true;
+}
+
+/** User-initiated reload — bypass throttle and bust stale WKWebView cache when needed. */
+export function forceHardReloadPage(): void {
+  if (typeof window === "undefined") return;
+
+  clearNativeLoadFailedRecoveryFlag();
+  navigateInFlight = true;
+
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set("_dsp_reload", String(Date.now()));
+    window.location.replace(`${url.pathname}${url.search}${url.hash}`);
+    return;
+  } catch {
+    window.location.reload();
+  }
+}
+
+/** One automatic recovery per path when WKWebView fetch/chunk loading fails. */
+export function tryNativeShellRecovery(reason?: unknown): boolean {
+  if (typeof window === "undefined" || !isNativeAppShell()) return false;
+  if (navigateInFlight) return false;
+
+  const { message, name } = errorReasonParts(reason);
+  if (reason !== undefined && !isRecoverableNativeShellError(reason)) return false;
+
+  if (isChunkLoadError(message, name)) {
+    return hardReloadPage();
+  }
+
+  return tryNativeLoadFailedRecovery();
+}
+
 /** One automatic full reload per path when WKWebView RSC fetch fails. */
 export function tryNativeLoadFailedRecovery(): boolean {
   if (typeof window === "undefined" || !isNativeAppShell()) return false;
@@ -79,7 +152,7 @@ export function tryNativeLoadFailedRecovery(): boolean {
   if (sessionStorage.getItem(key) === "1") return false;
 
   sessionStorage.setItem(key, "1");
-  hardNavigate(path);
+  hardReloadPage();
   return true;
 }
 
