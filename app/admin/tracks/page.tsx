@@ -1,9 +1,16 @@
 import Link from "next/link";
 import { AdminDeleteTrackButton } from "@/components/admin/admin-delete-track-button";
+import { AdminTracksSearchForm } from "@/components/admin/admin-tracks-search-form";
 import { primaryReleaseArtistLabel, workspaceArtistNote } from "@/lib/admin/track-artist-labels";
+import {
+  buildAdminTracksSearchOrFilter,
+  loadArtistIdsForTrackSearch,
+} from "@/lib/admin/tracks-list-search";
 import { isCoAdminRole } from "@/lib/auth/backstage-access";
 import { requireRoles } from "@/lib/auth/require-role";
 import { createClient } from "@/lib/supabase/server";
+
+type Props = { searchParams: Promise<{ q?: string }> };
 
 type Row = {
   id: string;
@@ -27,13 +34,18 @@ type RollupRow = {
   downloads_during_featured: number | null;
 };
 
-export default async function AdminTracksPage() {
+export default async function AdminTracksPage({ searchParams }: Props) {
   const { profile } = await requireRoles(["admin", "co_admin"]);
   const uploadOnly = isCoAdminRole(profile.role);
+  const sp = await searchParams;
+  const q = typeof sp.q === "string" ? sp.q.trim() : "";
 
   const supabase = await createClient();
 
-  const { data: rows, error } = await supabase
+  const artistIds = q ? await loadArtistIdsForTrackSearch(supabase, q) : [];
+  const searchFilter = q ? buildAdminTracksSearchOrFilter(q, artistIds) : null;
+
+  let tracksQuery = supabase
     .from("tracks")
     .select(
       `
@@ -48,6 +60,12 @@ export default async function AdminTracksPage() {
     `,
     )
     .order("updated_at", { ascending: false });
+
+  if (searchFilter) {
+    tracksQuery = tracksQuery.or(searchFilter);
+  }
+
+  const { data: rows, error } = await tracksQuery;
 
   const rollupRes = uploadOnly
     ? { data: null, error: null }
@@ -91,6 +109,20 @@ export default async function AdminTracksPage() {
             20260530120000_admin_track_analytics_access
           </code>{" "}
           or refresh after deploy.
+        </p>
+      ) : null}
+
+      <AdminTracksSearchForm q={q} />
+
+      {q ? (
+        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          {list.length === 0 ? (
+            <>No tracks match &ldquo;{q}&rdquo;.</>
+          ) : (
+            <>
+              {list.length} {list.length === 1 ? "track" : "tracks"} matching &ldquo;{q}&rdquo;.
+            </>
+          )}
         </p>
       ) : null}
 
@@ -169,7 +201,7 @@ export default async function AdminTracksPage() {
           </tbody>
         </table>
       </div>
-      {list.length === 0 ? <p className="text-sm text-zinc-500">No tracks.</p> : null}
+      {list.length === 0 && !q ? <p className="text-sm text-zinc-500">No tracks.</p> : null}
     </div>
   );
 }
