@@ -33,7 +33,7 @@ const ALLOWED_EXTERNAL_HOSTS = [
 ];
 
 const config: CapacitorConfig = {
-  appId: "com.digitalservicepack.app",
+  appId: "com.digitalservicepack.ios",
   appName: "Digital Service Pack",
   webDir: "capacitor-web",
   server: {
