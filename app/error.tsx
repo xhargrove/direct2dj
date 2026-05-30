@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { forceHardReloadPage, hardNavigate, hardReloadPage, isChunkLoadError, isLoadFailedMessage, isNativeAppShell, tryNativeShellRecovery } from "@/lib/capacitor/navigation";
+import { forceHardReloadPage, hardNavigate, isChunkLoadError, isLoadFailedMessage, isNativeAppShell, tryNativeShellRecovery } from "@/lib/capacitor/navigation";
+import { isNextRedirectError, redirectTargetFromDigest } from "@/lib/next/redirect-error";
+
+function isSupabaseConfigError(message: string): boolean {
+  return /missing next_public_supabase/i.test(message);
+}
 
 export default function AppError({
   error,
@@ -15,16 +20,36 @@ export default function AppError({
   const message = error.message ?? "";
   const chunkStale = isChunkLoadError(message, error.name);
   const loadFailed = isLoadFailedMessage(message);
+  const redirectError = isNextRedirectError(error);
+  const supabaseConfig = isSupabaseConfigError(message);
 
   useEffect(() => {
     console.error("[app error]", error.digest, error.message);
-    if (!native) return;
-    if (chunkStale || loadFailed) {
-      tryNativeShellRecovery(error);
+
+    if (redirectError && error.digest) {
+      const target = redirectTargetFromDigest(error.digest);
+      if (target) {
+        window.location.assign(target);
+        return;
+      }
+      window.location.reload();
+      return;
     }
-  }, [error, native, chunkStale, loadFailed]);
+
+    if (chunkStale || loadFailed) {
+      if (native) {
+        tryNativeShellRecovery(error);
+        return;
+      }
+      forceHardReloadPage();
+    }
+  }, [error, native, chunkStale, loadFailed, redirectError]);
 
   function reloadApp() {
+    if (redirectError || chunkStale || loadFailed) {
+      forceHardReloadPage();
+      return;
+    }
     if (native) {
       forceHardReloadPage();
       return;
@@ -35,13 +60,26 @@ export default function AppError({
   return (
     <div className="mx-auto flex min-h-[50vh] max-w-md flex-col justify-center gap-4 px-4 py-16 text-center">
       <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Something went wrong</h1>
-      {native && chunkStale ? (
+      {redirectError ? (
+        <p className="text-sm text-zinc-600 dark:text-zinc-400">Redirecting…</p>
+      ) : chunkStale ? (
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          The app was updated while you were browsing. Reloading to fetch the latest version…
+          {native
+            ? "The app was updated while you were browsing. Reloading to fetch the latest version…"
+            : "This site was updated while you had it open. Reload to fetch the latest version."}
         </p>
-      ) : native && loadFailed ? (
+      ) : loadFailed ? (
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          The app lost connection while loading a page — common in the mobile shell. Reload to continue.
+          {native
+            ? "The app lost connection while loading a page — common in the mobile shell. Reload to continue."
+            : "The page lost connection while loading. Reload or try again in a moment."}
+        </p>
+      ) : supabaseConfig ? (
+        <p className="text-sm text-zinc-600 dark:text-zinc-400">
+          Server configuration is missing Supabase keys. Confirm Vercel env includes{" "}
+          <code className="rounded bg-zinc-100 px-1 text-xs dark:bg-zinc-800">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
+          <code className="rounded bg-zinc-100 px-1 text-xs dark:bg-zinc-800">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, then
+          redeploy.
         </p>
       ) : native ? (
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
@@ -49,13 +87,11 @@ export default function AppError({
         </p>
       ) : (
         <p className="text-sm text-zinc-600 dark:text-zinc-400">
-          Try again. If this keeps happening, confirm Vercel env includes{" "}
-          <code className="rounded bg-zinc-100 px-1 text-xs dark:bg-zinc-800">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
-          <code className="rounded bg-zinc-100 px-1 text-xs dark:bg-zinc-800">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, and
-          run pending Supabase migrations.
+          Try a hard refresh in Safari (tap and hold Reload, then Reload Without Content Blockers). If you were signing
+          in, open <Link href="/login" className="underline">/login</Link> directly.
         </p>
       )}
-      {error.message && !loadFailed && !chunkStale ? (
+      {error.message && !redirectError ? (
         <p className="font-mono text-xs text-zinc-500">{error.message}</p>
       ) : null}
       {error.digest ? (
