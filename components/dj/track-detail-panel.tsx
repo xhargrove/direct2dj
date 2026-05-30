@@ -483,7 +483,9 @@ export function TrackDetailPanel({
                 setPackSuccessMsg(
                   dl.nativeShare
                     ? `${r.fileCount} file${r.fileCount === 1 ? "" : "s"} ready — tap Save to Files in the share sheet.`
-                    : `${r.fileCount} file${r.fileCount === 1 ? "" : "s"} in your ZIP — check your downloads folder.`,
+                    : dl.directDownload
+                      ? "Opening pack download… if prompted, save the ZIP to Files, then use the back gesture to return."
+                      : `${r.fileCount} file${r.fileCount === 1 ? "" : "s"} in your ZIP — check your downloads folder.`,
                 );
               }
             })
