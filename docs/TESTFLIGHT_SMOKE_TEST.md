@@ -8,9 +8,9 @@ Use two test accounts if possible: one **approved DJ**, one **artist** (or admin
 
 ## Before you start
 
-- [ ] `npm run verify:app-store` passes on your machine
-- [ ] TestFlight build is newer than your last web deploy (or web is already on latest `main`)
-- [ ] You know test account emails/passwords (App Review notes can list these)
+- [x] `npm run verify:app-store` passes on your machine
+- [x] TestFlight build is newer than your last web deploy (or web is already on latest `main`)
+- [x] You know test account emails/passwords (App Review notes can list these)
 
 ---
 
@@ -18,9 +18,9 @@ Use two test accounts if possible: one **approved DJ**, one **artist** (or admin
 
 | Step | Pass? |
 |------|-------|
-| Force-quit the app, reopen from home screen | ☐ |
-| Splash / loading, then home or login (no stuck white screen) | ☐ |
-| No persistent “Something went wrong” / Load failed | ☐ |
+| Force-quit the app, reopen from home screen | p |
+| Splash / loading, then home or login (no stuck white screen) | p  |
+| No persistent “Something went wrong” / Load failed | p |
 
 ---
 
@@ -28,11 +28,11 @@ Use two test accounts if possible: one **approved DJ**, one **artist** (or admin
 
 | Step | Pass? |
 |------|-------|
-| Open **Log in**, sign in as **DJ** (approved) | ☐ |
-| Lands on DJ dashboard or feed (not login loop) | ☐ |
-| Tap **Home** or logo — page loads without blank error | ☐ |
-| Open **How it works** (`/featured`) — spotlight cards render | ☐ |
-| Sign out | ☐ |
+| Open **Log in**, sign in as **DJ** (approved) | p |
+| Lands on DJ dashboard or feed (not login loop) |p |
+| Tap **Home** or logo — page loads without blank error | p |
+| Open **How it works** (`/featured`) — spotlight cards render | p |
+| Sign out | p |
 
 ---
 
@@ -42,11 +42,11 @@ Sign in again as approved DJ.
 
 | Step | Pass? |
 |------|-------|
-| **Discover** (`/dj/feed`) — catalog + spotlight load | ☐ |
-| **Filter catalog** sidebar — change genre/BPM; list updates | ☐ |
-| Open a track — detail panel, artwork (or fallback), preview if available | ☐ |
-| Submit feedback or rating — no crash; panel stays usable | ☐ |
-| **Downloads** — list loads; one pack download starts or completes | ☐ |
+| **Discover** (`/dj/feed`) — catalog + spotlight load | p |
+| **Filter catalog** sidebar — change genre/BPM; list updates | p |
+| Open a track — detail panel, artwork (or fallback), preview if available | p |
+| Submit feedback or rating — no crash; panel stays usable | p |
+| **Downloads** — list loads; one pack download starts or completes | p |
 
 ---
 
@@ -56,9 +56,9 @@ Sign out → sign in as **artist**.
 
 | Step | Pass? |
 |------|-------|
-| Artist dashboard loads | ☐ |
-| Start a submission or promote flow → Stripe opens (in-app browser / Safari) | ☐ |
-| Complete test checkout → return to site; status updates (check Stripe webhook 2xx) | ☐ |
+| Artist dashboard loads | p |
+| Start a submission or promote flow → Stripe opens (in-app browser / Safari) | p |
+| Complete test checkout → return to site; status updates (check Stripe webhook 2xx) | p |
 
 ---
 
@@ -66,9 +66,9 @@ Sign out → sign in as **artist**.
 
 | Step | Pass? |
 |------|-------|
-| Airplane mode ON → open app → clear error or offline message (not infinite spinner) | ☐ |
-| Airplane mode OFF → reload / reopen → works again | ☐ |
-| External link (if any) opens expected browser behavior | ☐ |
+| Airplane mode ON → open app → clear error or offline message (not infinite spinner) | p |
+| Airplane mode OFF → reload / reopen → works again | p |
+| External link (if any) opens expected browser behavior | p |
 
 ---
 
@@ -100,4 +100,4 @@ Log failures with: device model, iOS version, TestFlight build number, URL, scre
 
 | Role | Name | Date | Ready for App Store review? |
 |------|------|------|----------------------------|
-| Owner | | | ☐ Yes ☐ No — blockers: |
+| Owner | Xavier Hargrove | 2026-06-03 | Yes — no blockers |
